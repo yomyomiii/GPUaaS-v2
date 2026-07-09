@@ -1,0 +1,179 @@
+import { useState } from "react";
+import { GNB, UserLNB, AdminLNB, type UserScreen, type AdminScreen } from "./components/ConsoleLayout";
+import { UserDashboard } from "./components/UserDashboard";
+import { WorkspacePage } from "./components/WorkspacePage";
+import { GalleryPage } from "./components/GalleryPage";
+import { ServerPage } from "./components/ServerPage";
+import { StoragePage } from "./components/StoragePage";
+import {
+  AdminDashboard,
+  AdminUserManagement,
+  AdminWorkspaceManagement,
+  AdminWorkspaceDetail,
+  AdminServerManagement,
+  AdminGPUTypeManagement,
+  AdminGPUPricing,
+  AdminImageManagement,
+  AdminCreditManagement,
+  AdminStorageManagement,
+  AdminPaymentHistory,
+  AdminNotificationManagement,
+  AdminSystemSettings,
+} from "./components/AdminConsole";
+import "../styles/fonts.css";
+
+export default function App() {
+  const [mode, setMode] = useState<"user" | "admin">("user");
+
+  // ─── User Console State ────────────────────────────────────────────────────
+  const [userScreen, setUserScreen] = useState<UserScreen>("dashboard");
+  const [workspaceTab, setWorkspaceTab] = useState("Overview");
+  const [storageTab, setStorageTab] = useState("Overview");
+
+  // ─── Admin Console State ───────────────────────────────────────────────────
+  const [adminScreen, setAdminScreen] = useState<AdminScreen>("admin-dashboard");
+  const [adminWsDetailVisible, setAdminWsDetailVisible] = useState(false);
+
+  // ─── User nav mapper ───────────────────────────────────────────────────────
+  const handleUserNav = (screen: UserScreen) => {
+    if (screen.startsWith("workspace")) {
+      const tabMap: Record<string, string> = {
+        "workspace-overview": "Overview",
+        "workspace-members": "Members",
+        "workspace-wallet": "Wallet",
+        "workspace-notifications": "Notifications",
+      };
+      setWorkspaceTab(tabMap[screen] ?? "Overview");
+    }
+    if (screen.startsWith("storage")) {
+      const tabMap: Record<string, string> = {
+        "storage-overview": "Overview",
+        "storage-temp": "Temporary Storage",
+        "storage-local": "Local Storage",
+        "storage-shared": "Shared Storage",
+      };
+      setStorageTab(tabMap[screen] ?? "Overview");
+    }
+    setUserScreen(screen);
+  };
+
+  // ─── Admin nav mapper ──────────────────────────────────────────────────────
+  const handleAdminNav = (screen: AdminScreen) => {
+    setAdminWsDetailVisible(false);
+    setAdminScreen(screen);
+  };
+
+  // Resolve active LNB item for workspace/storage sub-screens
+  const lnbActive: UserScreen = userScreen;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", fontFamily: "Pretendard Variable, Pretendard, -apple-system, sans-serif" }}>
+      <GNB
+        isAdmin={mode === "admin"}
+        onSwitchMode={() => setMode(m => m === "user" ? "admin" : "user")}
+      />
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        {mode === "user" ? (
+          <>
+            <UserLNB active={lnbActive} onNav={handleUserNav} />
+            <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
+              {userScreen === "dashboard" && (
+                <UserDashboard
+                  onNavigate={(screen) => handleUserNav(screen as UserScreen)}
+                />
+              )}
+              {userScreen.startsWith("workspace") && (
+                <WorkspacePage
+                  initialTab={workspaceTab}
+                  onTabChange={(tab) => {
+                    const reverseMap: Record<string, UserScreen> = {
+                      "Overview": "workspace-overview",
+                      "Members": "workspace-members",
+                      "Wallet": "workspace-wallet",
+                      "Notifications": "workspace-notifications",
+                    };
+                    const screen = reverseMap[tab];
+                    if (screen) setUserScreen(screen);
+                  }}
+                />
+              )}
+              {userScreen === "gallery" && <GalleryPage onServerCreate={() => handleUserNav("server-list")} />}
+              {(userScreen === "server-list" || userScreen === "server-create" || userScreen === "server-detail") && (
+                <ServerPage />
+              )}
+              {userScreen.startsWith("storage") && (
+                <StoragePage
+                  initialTab={storageTab}
+                  onTabChange={(tab) => {
+                    const reverseMap: Record<string, UserScreen> = {
+                      "Overview": "storage-overview",
+                      "Temporary Storage": "storage-temp",
+                      "Local Storage": "storage-local",
+                      "Shared Storage": "storage-shared",
+                    };
+                    const screen = reverseMap[tab];
+                    if (screen) setUserScreen(screen);
+                  }}
+                />
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <AdminLNB active={adminScreen} onNav={handleAdminNav} />
+            <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
+              {adminScreen === "admin-dashboard" && <AdminDashboard />}
+              {adminScreen === "admin-users" && <AdminUserManagement />}
+              {adminScreen === "admin-workspaces" && (
+                adminWsDetailVisible
+                  ? <AdminWorkspaceDetail onBack={() => setAdminWsDetailVisible(false)} />
+                  : <AdminWorkspaceManagement onDetail={() => setAdminWsDetailVisible(true)} />
+              )}
+              {adminScreen === "admin-servers" && <AdminServerManagement />}
+              {(adminScreen === "admin-storage" || adminScreen === "admin-storage-pricing") && (
+                <AdminStorageManagement
+                  initialTab={adminScreen === "admin-storage-pricing" ? "Pricing Policy" : "All Storages"}
+                />
+              )}
+              {(adminScreen === "admin-images" || adminScreen === "admin-categories" || adminScreen === "admin-templates" || adminScreen === "admin-tiers") && (
+                <AdminImageManagement
+                  initialTab={
+                    adminScreen === "admin-categories" ? "카테고리"
+                    : adminScreen === "admin-templates" ? "Server Templates"
+                    : adminScreen === "admin-tiers" ? "Tier 관리"
+                    : "Server Images"
+                  }
+                />
+              )}
+              {adminScreen === "admin-gpu-types" && <AdminGPUTypeManagement />}
+              {adminScreen === "admin-gpu-pricing" && <AdminGPUPricing />}
+              {(adminScreen === "admin-credits" || adminScreen === "admin-credit-products") && (
+                <AdminCreditManagement
+                  initialTab={adminScreen === "admin-credit-products" ? "크레딧 상품" : "크레딧 지급/회수"}
+                />
+              )}
+              {(adminScreen === "admin-payments" || adminScreen === "admin-refunds") && (
+                <AdminPaymentHistory
+                  initialTab={adminScreen === "admin-refunds" ? "환불 관리" : "결제 내역"}
+                />
+              )}
+              {(adminScreen === "admin-notif-templates" || adminScreen === "admin-notif-thresholds" || adminScreen === "admin-notif-email") && (
+                <AdminNotificationManagement
+                  initialTab={
+                    adminScreen === "admin-notif-thresholds" ? "임계치 설정"
+                      : adminScreen === "admin-notif-email" ? "이메일 발신 설정"
+                        : "알림 템플릿"
+                  }
+                />
+              )}
+              {(adminScreen === "admin-settings-auth" || adminScreen === "admin-settings-terms" || adminScreen === "admin-settings-storage-integration") && (
+                <AdminSystemSettings />
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
