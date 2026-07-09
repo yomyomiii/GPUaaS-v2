@@ -2,6 +2,7 @@ import { useState } from "react";
 import { GNB, UserLNB, AdminLNB, type UserScreen, type AdminScreen } from "./components/ConsoleLayout";
 import { UserDashboard } from "./components/UserDashboard";
 import { WorkspacePage } from "./components/WorkspacePage";
+import { NotificationsPage } from "./components/NotificationsPage";
 import { GalleryPage } from "./components/GalleryPage";
 import { ServerPage } from "./components/ServerPage";
 import { StoragePage } from "./components/StoragePage";
@@ -41,7 +42,7 @@ export default function App() {
         "workspace-overview": "Overview",
         "workspace-members": "Members",
         "workspace-wallet": "Wallet",
-        "workspace-notifications": "Notifications",
+        "workspace-settings": "Settings",
       };
       setWorkspaceTab(tabMap[screen] ?? "Overview");
     }
@@ -75,7 +76,7 @@ export default function App() {
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {mode === "user" ? (
           <>
-            <UserLNB active={lnbActive} onNav={handleUserNav} />
+            <UserLNB active={lnbActive} onNav={handleUserNav} unreadCount={2} onSwitchMode={() => setMode("admin")} />
             <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
               {userScreen === "dashboard" && (
                 <UserDashboard
@@ -90,13 +91,14 @@ export default function App() {
                       "Overview": "workspace-overview",
                       "Members": "workspace-members",
                       "Wallet": "workspace-wallet",
-                      "Notifications": "workspace-notifications",
+                      "Settings": "workspace-settings",
                     };
                     const screen = reverseMap[tab];
                     if (screen) setUserScreen(screen);
                   }}
                 />
               )}
+              {userScreen === "notifications" && <NotificationsPage />}
               {userScreen === "gallery" && <GalleryPage onServerCreate={() => handleUserNav("server-list")} />}
               {(userScreen === "server-list" || userScreen === "server-create" || userScreen === "server-detail") && (
                 <ServerPage />

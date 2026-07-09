@@ -7,9 +7,12 @@ import {
   Terminal, Cpu, Database, Zap, Clock, CreditCard, LayoutGrid, List, Search, Star, Layers,
 } from "lucide-react";
 import {
-  PRIMARY, PRIMARY_10, PRIMARY_80, GRAY_5, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
-  RED, GREEN, BLUE, YELLOW, Badge, StatusDot, Card, PrimaryBtn, TabBar, PageContainer,
+  PRIMARY, PRIMARY_10, PRIMARY_80, GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
+  RED, GREEN, BLUE, YELLOW, Badge, StatusDot, Card, PrimaryBtn, TabBar, PageContainer, SectionCard, ListCard,
 } from "./ConsoleLayout";
+
+const PURPLE = "rgb(124, 58, 237)";
+const PURPLE_10 = "rgb(237, 233, 254)";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const servers = [
@@ -344,22 +347,30 @@ function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => voi
 
   return (
     <Card hover style={{ padding: 0, overflow: "hidden" }}>
-      <div style={{ height: 3, backgroundColor: isRunning ? (isHigh ? RED : GREEN) : s.status === "creating" ? BLUE : GRAY_30 }} />
-      <div style={{ padding: "18px 20px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
+
+      <div style={{ padding: "20px 24px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: isRunning ? GREEN : s.status === "creating" ? BLUE : GRAY_40 }} />
-              {isRunning && (
-                <div style={{ position: "absolute", inset: -2, borderRadius: "50%", border: `2px solid ${isHigh ? RED : GREEN}`, animation: "pulse 2s infinite", opacity: 0.5 }} />
+              <div style={{
+                width: 10, height: 10, borderRadius: "50%",
+                backgroundColor: isRunning ? (isHigh ? RED : GREEN) : s.status === "creating" ? PURPLE : GRAY_30,
+                boxShadow: isHigh ? `0 0 0 3px ${RED}25, 0 0 10px 3px ${RED}45` : "none",
+              }} />
+              {isHigh && (
+                <div style={{ position: "absolute", inset: -3, borderRadius: "50%", border: `2px solid ${RED}`, animation: "pulse 2s infinite", opacity: 0.8 }} />
               )}
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: "Roboto Mono, monospace", fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 2 }}>{s.name}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                <span style={{ fontFamily: "Roboto Mono, monospace", fontSize: 14, fontWeight: 700, color: GRAY_90 }}>{s.name}</span>
+                {isHigh && <Badge color="danger">⚠ 고부하</Badge>}
+                {s.status === "creating" && (
+                  <span style={{ fontSize: 11, fontWeight: 600, color: PURPLE, backgroundColor: PURPLE_10, borderRadius: 9999, padding: "2px 8px" }}>생성 중...</span>
+                )}
+              </div>
               <div style={{ fontSize: 12, color: GRAY_60 }}>{s.image} &nbsp;·&nbsp; {s.gpu} × {s.gpuCnt} &nbsp;·&nbsp; VRAM {s.vram}</div>
             </div>
-            {isHigh && <Badge color="danger">⚠ 고부하</Badge>}
-            {s.status === "creating" && <Badge color="info">생성 중...</Badge>}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginLeft: 12 }}>
             <AccessBtn label="JupyterLab" icon={<Terminal size={12} />} url={s.jupyterUrl} enabled={isRunning} />
@@ -383,27 +394,27 @@ function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => voi
         </div>
 
         {isRunning && (
-          <div style={{ display: "flex", alignItems: "stretch", gap: 0, marginBottom: 12, padding: "10px 12px", backgroundColor: GRAY_5, borderRadius: 10 }}>
+          <div style={{ display: "flex", alignItems: "stretch", gap: 0, marginBottom: 16, padding: "12px 0" }}>
             {s.gpuUtil.map((u, i) => {
               const uColor = u > 90 ? RED : u > 75 ? YELLOW : PRIMARY;
               const vramPct = Math.min(100, Math.max(0, s.vramUsedPct + (i % 2 === 0 ? 2 : -2)));
               const vColor = vramPct > 90 ? RED : vramPct > 75 ? YELLOW : BLUE;
               return (
                 <div key={i} style={{ display: "flex", alignItems: "stretch", flex: 1, minWidth: 0 }}>
-                  {i > 0 && <div style={{ width: 1, backgroundColor: GRAY_30, margin: "0 10px", flexShrink: 0 }} />}
+                  {i > 0 && <div style={{ width: 32, flexShrink: 0 }} />}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: GRAY_60, marginBottom: 6, letterSpacing: "0.02em" }}>GPU {i}</div>
-                    <div style={{ marginBottom: 5 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: GRAY_60, marginBottom: 3 }}>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: GRAY_60, marginBottom: 8, letterSpacing: "0.04em" }}>GPU {i}</div>
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
                         <span>점유율</span><span style={{ fontWeight: 700, color: uColor }}>{u}%</span>
                       </div>
-                      <UtilBar pct={u} color={uColor} height={6} />
+                      <UtilBar pct={u} color={uColor} height={7} />
                     </div>
                     <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: GRAY_60, marginBottom: 3 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
                         <span>VRAM</span><span style={{ fontWeight: 700, color: vColor }}>{vramPct}%</span>
                       </div>
-                      <UtilBar pct={vramPct} color={vColor} height={5} />
+                      <UtilBar pct={vramPct} color={vColor} height={7} />
                     </div>
                   </div>
                 </div>
@@ -412,18 +423,21 @@ function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => voi
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 20, fontSize: 12 }}>
+        <div style={{ display: "flex", gap: 28, fontSize: 12 }}>
           {isRunning ? (
             <>
               <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Clock size={12} color={GRAY_60} /><span>Uptime <strong style={{ color: GRAY_90 }}>{s.uptime}</strong></span></div>
               <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={12} color={PRIMARY} /><span>소비 속도 <strong style={{ color: PRIMARY }}>{s.rate} cr/h</strong></span></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><CreditCard size={12} color={GREEN} /><span>예상 잔여 <strong style={{ color: GREEN }}>{s.remaining.toLocaleString()}h</strong></span></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={12} color={GRAY_60} /><span>임시 {s.tmpUsed}GB / {s.tmpStorage}</span></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={12} color={GRAY_60} /><span>임시 <strong>{s.tmpUsed}GB</strong> / {s.tmpStorage}</span></div>
+              {s.localStorage !== "none" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={12} color={BLUE} /><span>로컬 <strong>{s.localUsed}GB</strong> / {s.localStorage}</span></div>
+              )}
+              {s.sharedStorage !== "none" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={12} color={GREEN} /><span>공유 · <strong>{s.sharedStorage}</strong></span></div>
+              )}
             </>
-          ) : s.status === "stopped" ? (
-            <div style={{ fontSize: 12, color: GRAY_60 }}>서버가 정지되어 있습니다. GPU 요금은 발생하지 않습니다.{s.localStorage !== "none" ? " · 로컬 스토리지 요금은 발생합니다." : ""}</div>
-          ) : s.status === "creating" ? (
-            <div style={{ fontSize: 12, color: BLUE }}>서버를 준비하고 있습니다. 약 2~5분 소요됩니다...</div>
+          ) : s.status === "stopped" ? null : s.status === "creating" ? (
+            <div style={{ fontSize: 12, color: PURPLE }}>서버를 준비하고 있습니다. 약 2~5분 소요됩니다...</div>
           ) : null}
         </div>
       </div>
@@ -500,8 +514,7 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
         {tab === "Overview" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <Card style={{ padding: "20px 24px" }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 14 }}>GPU 실시간 사용률</div>
+              <SectionCard title="GPU 실시간 사용률">
                 <div style={{ display: "flex", alignItems: "stretch", gap: 0, padding: "12px 14px", backgroundColor: GRAY_5, borderRadius: 10 }}>
                   {server.gpuUtil.map((u, i) => {
                     const uColor = u > 90 ? RED : u > 75 ? YELLOW : PRIMARY;
@@ -535,10 +548,8 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
                     );
                   })}
                 </div>
-              </Card>
-              <Card style={{ padding: "20px 24px" }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>GPU 사용률 추이 (30분)</div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 14 }}>GPU 점유율 / VRAM 점유율</div>
+              </SectionCard>
+              <SectionCard title="GPU 사용률 추이 (30분)" subtitle="GPU 점유율 / VRAM 점유율">
                 <ResponsiveContainer width="100%" height={160}>
                   <ComposedChart data={gpuHistory} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" />
@@ -549,10 +560,9 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
                     <Area type="monotone" dataKey="mem" stroke={BLUE} strokeWidth={1.5} fill={`${BLUE}10`} strokeDasharray="4 2" />
                   </ComposedChart>
                 </ResponsiveContainer>
-              </Card>
+              </SectionCard>
             </div>
-            <Card style={{ padding: "20px 24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 16 }}>서버 정보</div>
+            <SectionCard title="서버 정보">
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                 {[
                   { label: "이미지", value: server.image },
@@ -568,38 +578,21 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
                   </div>
                 ))}
               </div>
-            </Card>
+            </SectionCard>
           </div>
         )}
 
         {tab === "Storage" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <Card style={{ padding: "20px 24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>임시 스토리지</div>
-                  <div style={{ fontSize: 12, color: GRAY_60, marginTop: 2 }}>Ephemeral · 서버 중지 시 데이터 소멸 · 관리 불가</div>
-                </div>
-                <Badge color="neutral">모니터링 전용</Badge>
-              </div>
+            <SectionCard title="임시 스토리지" subtitle="Ephemeral · 서버 중지 시 데이터 소멸 · 관리 불가" action={<Badge color="neutral">모니터링 전용</Badge>}>
               <UtilBar pct={server.tmpUsed / parseInt(server.tmpStorage) * 100} color={BLUE} height={10} />
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: GRAY_70 }}>
                 <span>{server.tmpUsed}GB 사용 중 / {server.tmpStorage}</span>
                 <Badge color="success">Healthy</Badge>
               </div>
-            </Card>
+            </SectionCard>
             {server.localStorage !== "none" && (
-              <Card style={{ padding: "20px 24px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>로컬 스토리지</div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 2 }}>Persistent PVC · /local_storage · 정지 중도 과금</div>
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <PrimaryBtn size="xsmall" variant="secondary" onClick={() => setUpgradeLocal(!upgradeLocal)}>용량 상향</PrimaryBtn>
-                    <PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /></PrimaryBtn>
-                  </div>
-                </div>
+              <SectionCard title="로컬 스토리지" subtitle="Persistent PVC · /local_storage · 정지 중도 과금" action={<div style={{ display: "flex", gap: 8 }}><PrimaryBtn size="xsmall" variant="secondary" onClick={() => setUpgradeLocal(!upgradeLocal)}>용량 상향</PrimaryBtn><PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /></PrimaryBtn></div>}>
                 <div style={{ padding: "8px 12px", backgroundColor: "rgb(255,251,235)", borderRadius: 8, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <AlertTriangle size={13} color={YELLOW} />
                   <span style={{ fontSize: 12, color: GRAY_70 }}>서버 정지 중에도 로컬 스토리지 요금이 발생합니다. (0.1 cr/GB/h)</span>
@@ -626,23 +619,16 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
                     </div>
                   </div>
                 )}
-              </Card>
+              </SectionCard>
             )}
             {server.sharedStorage !== "none" && (
-              <Card style={{ padding: "20px 24px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>공유 스토리지 — {server.sharedStorage}</div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 2 }}>Persistent PVC · Ceph RWX · 워크스페이스 공유</div>
-                  </div>
-                  <Badge color="info">공유됨</Badge>
-                </div>
+              <SectionCard title={`공유 스토리지 — ${server.sharedStorage}`} subtitle="Persistent PVC · Ceph RWX · 워크스페이스 공유" action={<Badge color="info">공유됨</Badge>}>
                 <UtilBar pct={57} color={BLUE} height={10} />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: GRAY_70 }}>
                   <span>287GB / 500GB 사용 중</span>
                   <Badge color="success">Normal</Badge>
                 </div>
-              </Card>
+              </SectionCard>
             )}
           </div>
         )}
@@ -1088,7 +1074,7 @@ function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
       <button onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← 서버 목록</button>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, marginBottom: 24 }}>새 서버 생성 <span style={{ fontSize: 13, fontWeight: 400, color: GRAY_60, marginLeft: 8 }}>원페이지 생성</span></h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, marginBottom: 24 }}>서버 생성</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20, alignItems: "start" }}>
         {/* Left: all sections */}
@@ -1211,36 +1197,11 @@ export function ServerPage() {
       title="Server"
       subtitle="GPU 서버를 생성·관리하고 JupyterLab / VS Code에 바로 접속하세요."
       actions={
-        <div style={{ display: "flex", gap: 8 }}>
-          <PrimaryBtn size="small" variant="secondary" onClick={() => setView("create-step")}>
-            <LayoutGrid size={13} /> 단계별 생성
-          </PrimaryBtn>
-          <PrimaryBtn size="small" onClick={() => setView("create-onepage")}>
-            <Plus size={14} /> 원페이지 생성
-          </PrimaryBtn>
-        </div>
+        <PrimaryBtn size="small" onClick={() => setView("create-onepage")}>
+          <Plus size={14} /> 서버 생성
+        </PrimaryBtn>
       }
     >
-      {/* Status summary */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
-        {[
-          { label: "실행 중", value: running.length, color: GREEN, sub: `${totalRate} cr/h 소비 중` },
-          { label: "정지됨", value: servers.filter(s => s.status === "stopped").length, color: GRAY_40, sub: "GPU 비용 없음" },
-          { label: "생성 중", value: servers.filter(s => s.status === "creating").length, color: BLUE, sub: "잠시 기다려 주세요" },
-          { label: "전체 서버", value: servers.length, color: GRAY_90, sub: "이 워크스페이스" },
-        ].map(({ label, value, color, sub }) => (
-          <Card key={label} style={{ padding: "14px 18px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color }}>{value}</div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{label}</div>
-                <div style={{ fontSize: 11, color: GRAY_60 }}>{sub}</div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
       {/* Server cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {servers.map(s => (

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus, AlertTriangle, Database, ChevronUp, Trash2, Info, Server, Zap, TrendingUp } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, GRAY_5, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90, RED, GREEN, BLUE, YELLOW,
-  Badge, Card, PrimaryBtn, Table, PageContainer, TabBar,
+  Badge, Card, PrimaryBtn, Table, PageContainer, TabBar, SectionCard, ListCard,
 } from "./ConsoleLayout";
 
 const tempStorages = [
@@ -18,9 +18,9 @@ const localStorages = [
 ];
 
 const sharedStorages = [
-  { name: "team-shared-01", capacity: 500, used: 287, mounts: 2, status: "Normal" as const, creator: "박선욱", cost: 75.0 },
-  { name: "dataset-archive", capacity: 1000, used: 435, mounts: 0, status: "Normal" as const, creator: "이지현", cost: 150.0 },
-  { name: "model-checkpoint", capacity: 200, used: 198, mounts: 1, status: "Full" as const, creator: "박선욱", cost: 30.0 },
+  { name: "team-shared-01", capacity: 500, used: 287, mounts: 2, mountedServers: ["llm-finetuning", "data-preprocess"], status: "Normal" as const, creator: "박선욱", cost: 75.0 },
+  { name: "dataset-archive", capacity: 1000, used: 435, mounts: 0, mountedServers: [] as string[], status: "Normal" as const, creator: "이지현", cost: 150.0 },
+  { name: "model-checkpoint", capacity: 200, used: 198, mounts: 1, mountedServers: ["stable-diffusion"], status: "Full" as const, creator: "박선욱", cost: 30.0 },
 ];
 
 // ─── Ring Chart (pure SVG — no recharts clipping issues) ─────────────────────
@@ -70,6 +70,30 @@ function StorageGauge({ used, total, color = PRIMARY, showText = true }: { used:
   );
 }
 
+// ─── Mount Badge with hover tooltip ──────────────────────────────────────────
+function MountBadge({ servers }: { servers: string[] }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, cursor: "default" }}
+      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <Server size={11} color={servers.length > 0 ? GRAY_70 : GRAY_40} />
+      <span style={{ fontSize: 12, color: servers.length > 0 ? GRAY_70 : GRAY_40 }}>
+        {servers.length}개 서버 마운트
+      </span>
+      {show && servers.length > 0 && (
+        <div style={{ position: "absolute", bottom: "calc(100% + 6px)", left: 0, backgroundColor: GRAY_90, color: "white", fontSize: 11, padding: "7px 11px", borderRadius: 8, zIndex: 200, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", pointerEvents: "none", minWidth: 140, whiteSpace: "nowrap" }}>
+          {servers.map((s, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, lineHeight: 1.8 }}>
+              <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 10 }}>▸</span>
+              <span style={{ fontFamily: "Roboto Mono, monospace" }}>{s}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Status badges ────────────────────────────────────────────────────────────
 function statusColor(s: string): "success" | "danger" | "warning" {
   if (s === "Normal" || s === "Healthy") return "success";
@@ -84,7 +108,11 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
 
   useEffect(() => { setTab(initialTab); }, [initialTab]);
 
-  const handleTabChange = (t: string) => { setTab(t); onTabChange?.(t); };
+  const handleTabChange = (t: string) => {
+    const base = t.replace(/ \(\d+\)$/, "");
+    setTab(base);
+    onTabChange?.(base);
+  };
 
   const totalTemp = tempStorages.reduce((s, t) => s + t.total, 0);
   const usedTemp = tempStorages.reduce((s, t) => s + t.used, 0);
@@ -100,9 +128,12 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
     <PageContainer
       title="Storage"
       subtitle="워크스페이스의 스토리지 3종을 통합 관리합니다."
-      actions={<PrimaryBtn size="small" onClick={() => handleTabChange("Shared Storage")}><Plus size={14} /> 공유 스토리지 생성</PrimaryBtn>}
     >
-      <TabBar tabs={["Overview", "Temporary Storage", "Local Storage", "Shared Storage"]} active={tab} onChange={handleTabChange} />
+      <TabBar
+        tabs={["Overview", `Temporary Storage (${tempStorages.length})`, `Local Storage (${localStorages.length})`, `Shared Storage (${sharedStorages.length})`]}
+        active={tab === "Overview" ? "Overview" : `${tab} (${tab === "Temporary Storage" ? tempStorages.length : tab === "Local Storage" ? localStorages.length : sharedStorages.length})`}
+        onChange={handleTabChange}
+      />
 
       {tab === "Overview" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -126,7 +157,10 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                     <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 8 }}>{tempStorages.length}개 서버</div>
                     <StorageGauge used={usedTemp} total={totalTemp} color={BLUE} showText={false} />
                   </div>
-                  <div style={{ marginTop: 10, fontSize: 12, color: GRAY_60 }}>무료 · 서버 중지 시 소멸</div>
+                  {usedTemp / totalTemp > 0.8
+                    ? <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: YELLOW }}><AlertTriangle size={11} /> 임시 스토리지 {Math.round(usedTemp / totalTemp * 100)}% 사용 중</div>
+                    : <div style={{ marginTop: 10, fontSize: 11, color: GRAY_60 }}>무료 · 서버 중지 시 소멸</div>
+                  }
                 </div>
                 <RingChart used={usedTemp} total={totalTemp} color={BLUE} size={84} />
               </div>
@@ -147,7 +181,7 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                   </div>
                   <div style={{ marginTop: 14 }}>
                     <div style={{ fontSize: 22, fontWeight: 800, color: GRAY_90 }}>{usedLocal.toFixed(1)} <span style={{ fontSize: 12, fontWeight: 400, color: GRAY_60 }}>/ {totalLocal} GB</span></div>
-                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 8 }}>{localStorages.length}개 볼륨 · {localStorages.filter(l => l.stopped).length}개 정지</div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 8 }}>{localStorages.length}개 볼륨 · {localStorages.filter(l => !l.stopped).length}개 마운트</div>
                     <StorageGauge used={usedLocal} total={totalLocal} color={PRIMARY} showText={false} />
                   </div>
                   {stoppedLocalCost > 0 && (
@@ -178,7 +212,10 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                     <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 8 }}>{sharedStorages.length}개 볼륨 · {sharedStorages.reduce((s, sh) => s + sh.mounts, 0)}개 마운트</div>
                     <StorageGauge used={usedShared} total={totalShared} color={GREEN} showText={false} />
                   </div>
-                  <div style={{ marginTop: 10, fontSize: 11, color: GRAY_60 }}>Full 볼륨: {sharedStorages.filter(s => s.status === "Full").length}개</div>
+                  {sharedStorages.some(s => s.status === "Full")
+                    ? <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: RED }}><AlertTriangle size={11} /> Full 볼륨 {sharedStorages.filter(s => s.status === "Full").length}개 용량 초과</div>
+                    : <div style={{ marginTop: 10, fontSize: 11, color: GRAY_60 }}>용량 여유 있음</div>
+                  }
                 </div>
                 <RingChart used={usedShared} total={totalShared} color={GREEN} size={84} />
               </div>
@@ -198,11 +235,7 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
 
           {/* Cost overview */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <Card style={{ padding: "20px 24px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <Zap size={15} color={PRIMARY} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>실시간 과금 현황</span>
-              </div>
+            <SectionCard title="실시간 과금 현황">
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
                   { label: "임시 스토리지", rate: "0.05 cr/GB/h", hourly: 2.9, color: BLUE, note: "서버 실행 시만" },
@@ -225,39 +258,41 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                   <span style={{ fontSize: 16, fontWeight: 800, color: PRIMARY }}>271.9 <span style={{ fontSize: 12, fontWeight: 400, color: GRAY_60 }}>cr/h</span></span>
                 </div>
               </div>
-            </Card>
+            </SectionCard>
 
-            <Card style={{ padding: "20px 24px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <TrendingUp size={15} color={PRIMARY} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>이번 달 누계</span>
+            <SectionCard title="이번 달 누계">
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 12 }}>
+                <span style={{ fontSize: 28, fontWeight: 800, color: GRAY_90 }}>1,560</span>
+                <span style={{ fontSize: 13, color: GRAY_60 }}>cr</span>
+                <span style={{ fontSize: 11, color: GRAY_60, marginLeft: 4 }}>/ 2,100 cr 예상</span>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ height: 6, borderRadius: 3, marginBottom: 14, overflow: "hidden", display: "flex", backgroundColor: GRAY_5 }}>
+                <div style={{ width: `${320/2100*100}%`, backgroundColor: BLUE }} />
+                <div style={{ width: `${780/2100*100}%`, backgroundColor: PRIMARY }} />
+                <div style={{ width: `${460/2100*100}%`, backgroundColor: GREEN }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {[
                   { label: "임시 스토리지", amount: 320, color: BLUE },
                   { label: "로컬 스토리지 (정지 포함)", amount: 780, color: PRIMARY },
                   { label: "공유 스토리지", amount: 460, color: GREEN },
                 ].map(({ label, amount, color }) => (
-                  <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "7px 0", borderBottom: `1px solid ${GRAY_5}` }}>
-                    <span style={{ color: GRAY_70 }}>{label}</span>
-                    <span style={{ color, fontWeight: 700 }}>{amount.toLocaleString()} cr</span>
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", backgroundColor: GRAY_5, borderRadius: 10 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
+                    <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: GRAY_90 }}>{label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color }}>{amount.toLocaleString()} <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>cr</span></span>
                   </div>
                 ))}
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, paddingTop: 8 }}>
-                  <span style={{ fontWeight: 700, color: GRAY_90 }}>총계</span>
-                  <span style={{ fontWeight: 800, color: GRAY_90 }}>1,560 cr</span>
-                </div>
-                <div style={{ padding: "10px 14px", backgroundColor: "rgb(255,251,235)", borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
-                  <AlertTriangle size={12} color={YELLOW} />
-                  <span style={{ fontSize: 11, color: GRAY_70 }}>이달 말 예상: <strong style={{ color: YELLOW }}>약 2,100 cr</strong> (현재 페이스 기준)</span>
-                </div>
               </div>
-            </Card>
+              <div style={{ marginTop: 10, padding: "10px 14px", backgroundColor: "rgb(255,251,235)", borderRadius: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                <AlertTriangle size={12} color={YELLOW} />
+                <span style={{ fontSize: 11, color: GRAY_70 }}>이달 말 예상: <strong style={{ color: YELLOW }}>약 2,100 cr</strong> (현재 페이스 기준)</span>
+              </div>
+            </SectionCard>
           </div>
 
           {/* Volume summary */}
-          <Card style={{ padding: "20px 24px" }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90, marginBottom: 14 }}>볼륨 요약</div>
+          <SectionCard title="볼륨 요약">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
               {[
                 { label: "임시 볼륨", value: tempStorages.length, icon: <Database size={14} color={BLUE} />, sub: "서버에 귀속" },
@@ -275,7 +310,7 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                 </div>
               ))}
             </div>
-          </Card>
+          </SectionCard>
         </div>
       )}
 
@@ -296,19 +331,12 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                     </div>
                     <div>
                       <div style={{ fontFamily: "Roboto Mono, monospace", fontSize: 14, fontWeight: 700, color: GRAY_90 }}>{t.server}</div>
-                      <div style={{ fontSize: 12, color: GRAY_60, marginTop: 2 }}>생성자: {t.creator} · 총 {t.total}GB</div>
                     </div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <Badge color={t.running ? "success" : "neutral"}>{t.running ? "Running" : "Stopped"}</Badge>
-                    <Badge color={statusColor(t.status)}>{t.status}</Badge>
                   </div>
                 </div>
                 <StorageGauge used={t.used} total={t.total} color={BLUE} />
-                <div style={{ display: "flex", gap: 16, marginTop: 10, fontSize: 12, color: GRAY_60 }}>
-                  <span>{t.used.toFixed(1)} GB 사용 중</span>
-                  <span style={{ color: pct > 70 ? YELLOW : GRAY_60 }}>{Math.round(pct)}% 점유</span>
-                  {!t.running && <span style={{ color: YELLOW, display: "flex", alignItems: "center", gap: 4 }}><AlertTriangle size={11} /> 서버 정지 시 데이터 유지 안 됨</span>}
+                <div style={{ marginTop: 8 }}>
+                  <MountBadge servers={[t.server]} />
                 </div>
               </Card>
             );
@@ -337,24 +365,25 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <RingChart used={l.used} total={l.capacity} color={PRIMARY} size={56} />
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, fontFamily: "Roboto Mono, monospace", marginBottom: 3 }}>{l.name}</div>
-                    <div style={{ fontSize: 12, color: GRAY_60 }}>서버: {l.server} · 생성자: {l.creator}</div>
-                    <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
-                      <Badge color={statusColor(l.status)}>{l.status}</Badge>
-                      <div style={{ fontSize: 11, color: PRIMARY }}>0.1 cr/GB/h = {l.cost} cr/h</div>
-                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, fontFamily: "Roboto Mono, monospace" }}>{l.name}</div>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <PrimaryBtn size="xsmall" variant="secondary" onClick={() => setExpandUpgrade(expandUpgrade === l.name ? null : l.name)}>
-                    <ChevronUp size={12} /> 용량 상향
-                  </PrimaryBtn>
-                  <PrimaryBtn size="xsmall" variant="danger">
-                    <Trash2 size={12} /> 삭제
-                  </PrimaryBtn>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 11, color: PRIMARY, whiteSpace: "nowrap" }}>0.1 cr/GB/h = {l.cost} cr/h</span>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <PrimaryBtn size="xsmall" variant="secondary" onClick={() => setExpandUpgrade(expandUpgrade === l.name ? null : l.name)}>
+                      <ChevronUp size={12} /> 용량 상향
+                    </PrimaryBtn>
+                    <PrimaryBtn size="xsmall" variant="danger">
+                      <Trash2 size={12} /> 삭제
+                    </PrimaryBtn>
+                  </div>
                 </div>
               </div>
               <StorageGauge used={l.used} total={l.capacity} color={PRIMARY} />
+              <div style={{ marginTop: 8 }}>
+                <MountBadge servers={l.stopped ? [] : [l.server]} />
+              </div>
 
               {expandUpgrade === l.name && (
                 <div style={{ marginTop: 16, padding: "16px", backgroundColor: GRAY_5, borderRadius: 10, border: `1px solid ${GRAY_30}` }}>
@@ -380,12 +409,9 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
 
       {tab === "Shared Storage" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", backgroundColor: PRIMARY_10, borderRadius: 8, fontSize: 12, color: GRAY_70 }}>
-              <Info size={13} color={PRIMARY} />
-              워크스페이스 Owner/Admin만 공유 스토리지를 생성·관리할 수 있습니다. (워크스페이스당 최대 10개)
-            </div>
-            <PrimaryBtn size="small"><Plus size={13} /> 공유 스토리지 생성</PrimaryBtn>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", backgroundColor: PRIMARY_10, borderRadius: 8, fontSize: 12, color: GRAY_70 }}>
+            <Info size={13} color={PRIMARY} />
+            워크스페이스 Owner/Admin만 공유 스토리지를 생성·관리할 수 있습니다. (워크스페이스당 최대 10개)
           </div>
 
           {sharedStorages.map(s => (
@@ -394,32 +420,26 @@ export function StoragePage({ initialTab = "Overview", onTabChange }: { initialT
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", backgroundColor: "rgb(255,242,242)", borderRadius: 8, marginBottom: 14 }}>
                   <AlertTriangle size={13} color={RED} />
                   <span style={{ fontSize: 12, color: GRAY_70 }}>스토리지가 거의 가득 찼습니다. 용량 상향 또는 파일 정리를 권장합니다.</span>
-                  <PrimaryBtn size="xsmall" style={{ marginLeft: "auto" }}>용량 상향</PrimaryBtn>
                 </div>
               )}
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <RingChart used={s.used} total={s.capacity} color={GREEN} size={60} />
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, fontFamily: "Roboto Mono, monospace", marginBottom: 3 }}>{s.name}</div>
-                    <div style={{ fontSize: 12, color: GRAY_60 }}>생성자: {s.creator} · Ceph RWX · {s.mounts}개 서버 마운트</div>
-                    <div style={{ display: "flex", gap: 8, marginTop: 5 }}>
-                      <Badge color={statusColor(s.status)}>{s.status}</Badge>
-                      <div style={{ fontSize: 11, color: GREEN }}>0.15 cr/GB/h = {s.cost} cr/h</div>
-                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, fontFamily: "Roboto Mono, monospace" }}>{s.name}</div>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <PrimaryBtn size="xsmall" variant="secondary"><ChevronUp size={12} /> 용량 상향</PrimaryBtn>
-                  <PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /> 삭제</PrimaryBtn>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 11, color: GREEN, whiteSpace: "nowrap" }}>0.15 cr/GB/h = {s.cost} cr/h</span>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <PrimaryBtn size="xsmall" variant="secondary"><ChevronUp size={12} /> 용량 상향</PrimaryBtn>
+                    <PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /> 삭제</PrimaryBtn>
+                  </div>
                 </div>
               </div>
               <StorageGauge used={s.used} total={s.capacity} color={GREEN} />
-              <div style={{ display: "flex", gap: 20, marginTop: 10, fontSize: 12, color: GRAY_60 }}>
-                <span>{s.used} GB / {s.capacity} GB 사용</span>
-                <span>서버당 1개 마운트 가능</span>
-                <span>최대 마운트: 무제한</span>
-                {s.mounts === 0 && <span style={{ color: YELLOW }}>⚠ 마운트된 서버 없음</span>}
+              <div style={{ marginTop: 8 }}>
+                <MountBadge servers={s.mountedServers} />
               </div>
             </Card>
           ))}

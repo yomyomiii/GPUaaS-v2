@@ -10,6 +10,7 @@ import {
 import {
   PRIMARY, PRIMARY_10, GRAY_5, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
   RED, GREEN, BLUE, YELLOW, Badge, StatusDot, Card, PrimaryBtn, Table, PageContainer, MetricCard, TabBar,
+  SectionCard, ListCard, StatCard,
   type AdminScreen,
 } from "./ConsoleLayout";
 
@@ -146,9 +147,7 @@ export function AdminDashboard() {
       {/* ── Row 1: 서버 추이 + 매출 추이 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         {/* 서버 수 추이 */}
-        <Card style={{ padding: "20px 24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 2 }}>서버 수 추이</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 14 }}>최근 7일 활성/정지 서버 현황</div>
+        <SectionCard title="서버 수 추이" subtitle="최근 7일 활성/정지 서버 현황">
           <ResponsiveContainer width="100%" height={170}>
             <AreaChart data={serverTrend} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <defs>
@@ -165,12 +164,10 @@ export function AdminDashboard() {
               <Area type="monotone" dataKey="stopped" stroke={GRAY_40} strokeWidth={1.5} fill="none" strokeDasharray="4 2" name="정지" />
             </AreaChart>
           </ResponsiveContainer>
-        </Card>
+        </SectionCard>
 
         {/* 매출 추이 */}
-        <Card style={{ padding: "20px 24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 2 }}>일별 매출 추이</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 14 }}>최근 7일 결제 매출 및 환불</div>
+        <SectionCard title="일별 매출 추이" subtitle="최근 7일 결제 매출 및 환불">
           <ResponsiveContainer width="100%" height={170}>
             <BarChart data={revenueTrend} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" vertical={false} />
@@ -181,15 +178,13 @@ export function AdminDashboard() {
               <Bar dataKey="refund" fill={RED} radius={[4, 4, 0, 0]} opacity={0.7} name="환불" />
             </BarChart>
           </ResponsiveContainer>
-        </Card>
+        </SectionCard>
       </div>
 
       {/* ── Row 2: GPU 점유율 (가로 바) + 사용자 성장 추이 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         {/* GPU 점유율 */}
-        <Card style={{ padding: "20px 24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 2 }}>GPU 유형별 점유율</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 18 }}>전체 가용 GPU 144개</div>
+        <SectionCard title="GPU 유형별 점유율" subtitle="전체 가용 GPU 144개">
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {gpuOccupancy.map(gpu => {
               const pct = Math.round(gpu.occupied / gpu.total * 100);
@@ -220,12 +215,10 @@ export function AdminDashboard() {
               );
             })}
           </div>
-        </Card>
+        </SectionCard>
 
         {/* 사용자 & 워크스페이스 성장 */}
-        <Card style={{ padding: "20px 24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 2 }}>사용자 · 워크스페이스 성장</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 8 }}>최근 6개월 누적 기준</div>
+        <SectionCard title="사용자 · 워크스페이스 성장" subtitle="최근 6개월 누적 기준">
           <div style={{ display: "flex", gap: 16, fontSize: 12, marginBottom: 12 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: PRIMARY, display: "inline-block" }} />사용자</span>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: GREEN, display: "inline-block" }} />워크스페이스</span>
@@ -240,17 +233,13 @@ export function AdminDashboard() {
               <Line type="monotone" dataKey="ws" stroke={GREEN} strokeWidth={2} dot={{ r: 3, fill: GREEN }} activeDot={{ r: 5 }} strokeDasharray="4 2" />
             </LineChart>
           </ResponsiveContainer>
-        </Card>
+        </SectionCard>
       </div>
 
       {/* ── Row 3: 알림 + 스토리지 분포 + 결제 현황 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 14 }}>
         {/* 알림 피드 */}
-        <Card style={{ overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", borderBottom: `1px solid rgb(242,242,242)`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>최근 어드민 알림</div>
-            <Badge color="danger">2 긴급</Badge>
-          </div>
+        <ListCard title="최근 어드민 알림" action={<Badge color="danger">2 긴급</Badge>}>
           {adminAlerts.map((a, i) => (
             <div key={i} style={{
               padding: "12px 20px", display: "flex", gap: 12, cursor: "pointer",
@@ -269,12 +258,10 @@ export function AdminDashboard() {
               </div>
             </div>
           ))}
-        </Card>
+        </ListCard>
 
         {/* 스토리지 분포 */}
-        <Card style={{ padding: "20px 24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 2 }}>스토리지 분포</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 12 }}>총 {(totalStorage / 1000).toFixed(1)} TB</div>
+        <SectionCard title="스토리지 분포" subtitle={`총 ${(totalStorage / 1000).toFixed(1)} TB`}>
           {/* SVG donut — no recharts clipping */}
           <StorageDonut data={storageDist} total={totalStorage} size={110} />
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
@@ -288,11 +275,10 @@ export function AdminDashboard() {
               </div>
             ))}
           </div>
-        </Card>
+        </SectionCard>
 
         {/* 오늘 결제 현황 */}
-        <Card style={{ padding: "20px 24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 16 }}>오늘 결제 현황</div>
+        <SectionCard title="오늘 결제 현황">
           {[
             { label: "결제 성공", value: "28건", amount: "8,400만원", color: GREEN, icon: "✓" },
             { label: "결제 실패", value: "2건", amount: "420만원", color: RED, icon: "✗" },
@@ -313,7 +299,7 @@ export function AdminDashboard() {
             <div style={{ fontSize: 11, color: GRAY_60 }}>이번 달 누적 매출</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: PRIMARY, marginTop: 2 }}>1억 2,450만원</div>
           </div>
-        </Card>
+        </SectionCard>
       </div>
     </PageContainer>
   );
@@ -529,7 +515,7 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
         )}
 
         {tab === "Members" && (
-          <Card style={{ overflow: "hidden" }}>
+          <ListCard>
             <Table
               headers={["멤버", "역할", "이메일"]}
               rows={[
@@ -542,39 +528,33 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
                 <span style={{ fontSize: 12, color: GRAY_60 }}>{email}</span>,
               ])}
             />
-          </Card>
+          </ListCard>
         )}
 
         {tab === "Wallet" && (
-          <Card style={{ padding: "24px" }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>지갑 정보 (조회 전용)</div>
-            <div style={{ fontSize: 12, color: YELLOW, marginBottom: 16 }}>카드번호는 마스킹 처리됩니다</div>
+          <SectionCard title="지갑 정보 (조회 전용)" subtitle="카드번호는 마스킹 처리됩니다">
             {[["크레딧 잔액", "45,230 cr"], ["등록 카드", "**** **** **** 4521 (VISA)"], ["이번 달 결제", "724,500원"]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid rgb(242,242,242)`, fontSize: 13 }}>
                 <span style={{ color: GRAY_60 }}>{k}</span><span style={{ fontWeight: 600, color: GRAY_90 }}>{v}</span>
               </div>
             ))}
-          </Card>
+          </SectionCard>
         )}
 
         {tab === "Actions" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <Card style={{ padding: "24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 6 }}>Force Owner Change</div>
-              <div style={{ fontSize: 13, color: GRAY_70, marginBottom: 16 }}>Owner를 강제 변경합니다. 기존/신규 Owner 모두에게 이메일 알림이 발송됩니다.</div>
+            <SectionCard title="Force Owner Change" subtitle="Owner를 강제 변경합니다. 기존/신규 Owner 모두에게 이메일 알림이 발송됩니다.">
               <div style={{ display: "flex", gap: 10 }}>
                 <input type="text" placeholder="새 Owner 이메일 입력" style={{ flex: 1, height: 40, padding: "0 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13 }} />
                 <PrimaryBtn size="small" variant="danger">변경 실행</PrimaryBtn>
               </div>
-            </Card>
-            <Card style={{ padding: "24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 6 }}>Force Deactivate</div>
-              <div style={{ fontSize: 13, color: GRAY_70, marginBottom: 16 }}>워크스페이스를 강제 비활성화합니다. 모든 서버가 정지되며 Owner에게 이메일이 발송됩니다.</div>
+            </SectionCard>
+            <SectionCard title="Force Deactivate" subtitle="워크스페이스를 강제 비활성화합니다. 모든 서버가 정지되며 Owner에게 이메일이 발송됩니다.">
               <div style={{ display: "flex", gap: 10 }}>
                 <input type="text" placeholder="비활성화 사유 입력 (필수)" style={{ flex: 1, height: 40, padding: "0 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13 }} />
                 <PrimaryBtn size="small" variant="danger">강제 비활성화</PrimaryBtn>
               </div>
-            </Card>
+            </SectionCard>
           </div>
         )}
       </div>
@@ -1168,7 +1148,7 @@ export function AdminImageManagement({ initialTab = "Server Images" }: { initial
   return (
     <PageContainer
       title="Image Management"
-      subtitle="서버 이미지·카테고리·서버 템플릿·Tier를 등록·편집·관리합니다."
+      subtitle="서버 이미지·카테고리·서버 템플릿을 등록·편집·관리합니다."
       actions={
         tab === "Server Images" ? <PrimaryBtn size="small" onClick={() => openCreate("image")}><Plus size={14} /> 이미지 등록</PrimaryBtn>
         : tab === "카테고리" ? <PrimaryBtn size="small" onClick={() => openCreate("category")}><Plus size={14} /> 카테고리 생성</PrimaryBtn>
@@ -1176,7 +1156,7 @@ export function AdminImageManagement({ initialTab = "Server Images" }: { initial
         : null
       }
     >
-      <TabBar tabs={["Server Images", "카테고리", "Server Templates", "Tier 관리"]} active={tab} onChange={setTab} />
+      <TabBar tabs={["Server Images", "카테고리", "Server Templates"]} active={tab} onChange={setTab} />
 
       {/* ── Server Images ── */}
       {tab === "Server Images" && (
@@ -1304,98 +1284,6 @@ export function AdminImageManagement({ initialTab = "Server Images" }: { initial
         </div>
       )}
 
-      {/* ── Tier 관리 ── */}
-      {tab === "Tier 관리" && (
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", backgroundColor: "rgb(218,235,255)", borderRadius: 10, marginBottom: 16 }}>
-            <AlertTriangle size={14} color={BLUE} />
-            <span style={{ fontSize: 13, color: GRAY_90 }}>Tier는 이미지 신뢰도 수준을 나타냅니다. 이미지 등록 시 적용 Tier를 선택할 수 있습니다.</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-            {tiers.map(tier => (
-              <Card key={tier.id} style={{ padding: "20px 24px" }}>
-                {editingTier === tier.id ? (
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: tierDraft.color }} />
-                      <span style={{ fontSize: 14, fontWeight: 700, color: GRAY_90 }}>{tier.name}</span>
-                      <Badge color="warning">편집 중</Badge>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
-                      <div>
-                        <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 5 }}>Tier 이름</div>
-                        <input style={fldStyle} value={tierDraft.name} onChange={e => setTierDraft(d => ({ ...d, name: e.target.value }))} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 5 }}>설명</div>
-                        <input style={fldStyle} value={tierDraft.desc} onChange={e => setTierDraft(d => ({ ...d, desc: e.target.value }))} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 8 }}>배지 색상</div>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          {PRESET_COLORS.map(c => (
-                            <button key={c} onClick={() => setTierDraft(d => ({ ...d, color: c }))} style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: c, border: tierDraft.color === c ? `3px solid ${GRAY_90}` : "3px solid transparent", cursor: "pointer" }} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <PrimaryBtn size="small" onClick={() => { setTiers(ts => ts.map(t => t.id === tier.id ? { ...t, name: tierDraft.name, desc: tierDraft.desc, color: tierDraft.color } : t)); setEditingTier(null); }}>저장</PrimaryBtn>
-                      <PrimaryBtn size="small" variant="ghost" onClick={() => setEditingTier(null)}>취소</PrimaryBtn>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                        <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: tier.color }} />
-                        <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{tier.name}</span>
-                        <span style={{ fontSize: 12, padding: "2px 10px", borderRadius: 20, backgroundColor: `${tier.color}20`, color: tier.color, fontWeight: 600 }}>{tier.name}</span>
-                      </div>
-                      <div style={{ fontSize: 13, color: GRAY_60, marginBottom: 6 }}>{tier.desc}</div>
-                      <div style={{ fontSize: 12, color: GRAY_70 }}>이 Tier 이미지 <strong style={{ color: GRAY_90 }}>{tier.imgCnt}개</strong></div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <PrimaryBtn size="xsmall" variant="secondary" onClick={() => { setTierDraft({ name: tier.name, desc: tier.desc, color: tier.color }); setEditingTier(tier.id); }}><Edit size={12} /> 편집</PrimaryBtn>
-                      <PrimaryBtn size="xsmall" variant="danger" onClick={() => setTiers(ts => ts.filter(t => t.id !== tier.id))}><Trash2 size={12} /></PrimaryBtn>
-                    </div>
-                  </div>
-                )}
-              </Card>
-            ))}
-          </div>
-
-          {/* New Tier creation */}
-          <Card style={{ padding: "20px 24px" }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90, marginBottom: 14 }}>새 Tier 추가</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-              <div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 5 }}>Tier 이름</div>
-                <input style={fldStyle} placeholder="예: Community" value={newTier.name} onChange={e => setNewTier(d => ({ ...d, name: e.target.value }))} />
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 5 }}>설명</div>
-                <input style={fldStyle} placeholder="Tier 설명" value={newTier.desc} onChange={e => setNewTier(d => ({ ...d, desc: e.target.value }))} />
-              </div>
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 8 }}>배지 색상</div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {PRESET_COLORS.map(c => (
-                  <button key={c} onClick={() => setNewTier(d => ({ ...d, color: c }))} style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: c, border: newTier.color === c ? `3px solid ${GRAY_90}` : "3px solid transparent", cursor: "pointer" }} />
-                ))}
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: GRAY_60 }}>미리보기:</div>
-              <span style={{ fontSize: 12, padding: "3px 12px", borderRadius: 20, backgroundColor: `${newTier.color}20`, color: newTier.color, fontWeight: 600 }}>{newTier.name || "Tier 이름"}</span>
-            </div>
-            <PrimaryBtn size="small" disabled={!newTier.name} onClick={() => { setTiers(ts => [...ts, { id: `tier-${Date.now()}`, ...newTier, imgCnt: 0 }]); setNewTier({ name: "", desc: "", color: PRIMARY }); }}>
-              <Plus size={14} /> Tier 추가
-            </PrimaryBtn>
-          </Card>
-        </div>
-      )}
     </PageContainer>
   );
 }

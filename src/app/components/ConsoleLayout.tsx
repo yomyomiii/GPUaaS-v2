@@ -3,28 +3,29 @@ import {
   Bell, HelpCircle, ChevronDown, LayoutDashboard, Server, FolderOpen,
   Database, Layers, Users, CreditCard, Settings, Activity, Image,
   Cpu, LogOut, User, Globe, ChevronRight, Wallet, BellRing, Package,
-  ReceiptText, ShieldCheck, Mail, BarChart3
+  ReceiptText, ShieldCheck, Mail, BarChart3, ArrowLeftRight
 } from "lucide-react";
+import {
+  PRIMARY, PRIMARY_10, PRIMARY_80,
+  GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
+  RED, GREEN, BLUE, YELLOW,
+  RADIUS_CARD, RADIUS_LG, RADIUS_XL, RADIUS_MD, RADIUS_SM, RADIUS_FULL,
+  SHADOW_CARD, SHADOW_CARD_HOVER, SHADOW_DROPDOWN,
+  TRANSITION_FAST, TRANSITION_NORMAL,
+  GNB_HEIGHT, LNB_WIDTH, PAGE_MAX_WIDTH, PAGE_PADDING,
+  BTN_SIZES, Z_GNB, Z_DROPDOWN,
+} from "../../styles/tokens";
 
-const PRIMARY = "#635ADC";
-const PRIMARY_10 = "rgb(243,242,255)";
-const PRIMARY_80 = "rgb(62,57,160)";
-const GRAY_5 = "rgb(249,249,249)";
-const GRAY_30 = "rgb(221,221,221)";
-const GRAY_40 = "rgb(204,204,204)";
-const GRAY_60 = "rgb(119,119,119)";
-const GRAY_70 = "rgb(80,80,80)";
-const GRAY_90 = "rgb(42,42,42)";
-const RED = "rgb(239,68,68)";
-const GREEN = "rgb(34,197,94)";
-const BLUE = "rgb(36,142,213)";
-const YELLOW = "rgb(255,177,68)";
+export {
+  PRIMARY, PRIMARY_10, PRIMARY_80,
+  GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
+  RED, GREEN, BLUE, YELLOW,
+};
 
-export { PRIMARY, PRIMARY_10, PRIMARY_80, GRAY_5, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90, RED, GREEN, BLUE, YELLOW };
-
-// ─── Badge ────────────────────────────────────────────────────────────────────
+// ─── Badge ───────────────────────────────────────────────────────────────────
+type BadgeColor = "primary" | "success" | "danger" | "warning" | "info" | "neutral";
 interface BadgeProps {
-  color?: "primary" | "success" | "danger" | "warning" | "info" | "neutral";
+  color?: BadgeColor;
   variant?: "filled" | "outline";
   children: React.ReactNode;
 }
@@ -32,9 +33,9 @@ export function Badge({ color = "neutral", variant = "filled", children }: Badge
   const colorMap = {
     primary: { bg: PRIMARY_10, text: PRIMARY, border: PRIMARY },
     success: { bg: "rgb(240,253,244)", text: GREEN, border: GREEN },
-    danger: { bg: "rgb(254,242,242)", text: RED, border: RED },
+    danger:  { bg: "rgb(254,242,242)", text: RED, border: RED },
     warning: { bg: "rgb(255,251,235)", text: YELLOW, border: YELLOW },
-    info: { bg: "rgb(211,232,247)", text: BLUE, border: BLUE },
+    info:    { bg: "rgb(211,232,247)", text: BLUE, border: BLUE },
     neutral: { bg: "rgb(249,249,249)", text: GRAY_70, border: GRAY_40 },
   };
   const c = colorMap[color];
@@ -74,8 +75,8 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
 
   return (
     <div style={{
-      height: 40, backgroundColor: PRIMARY, display: "flex", alignItems: "center",
-      padding: "0 20px", gap: 16, flexShrink: 0, position: "sticky", top: 0, zIndex: 100,
+      height: GNB_HEIGHT, backgroundColor: PRIMARY, display: "flex", alignItems: "center",
+      padding: "0 20px", gap: 16, flexShrink: 0, position: "sticky", top: 0, zIndex: Z_GNB,
     }}>
       {/* Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 8 }}>
@@ -91,19 +92,6 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
           <ShieldCheck size={12} color="white" />
           <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, fontWeight: 500 }}>Admin Console</span>
         </div>
-      )}
-
-      {/* Workspace switcher (user only) */}
-      {!isAdmin && (
-        <button style={{
-          display: "flex", alignItems: "center", gap: 6,
-          backgroundColor: "rgba(255,255,255,0.12)", border: "none", borderRadius: 6,
-          padding: "4px 10px", cursor: "pointer", color: "white",
-        }}>
-          <Layers size={14} color="rgba(255,255,255,0.8)" />
-          <span style={{ fontSize: 13, fontWeight: 500 }}>{workspace}</span>
-          <ChevronDown size={13} color="rgba(255,255,255,0.7)" />
-        </button>
       )}
 
       <div style={{ flex: 1 }} />
@@ -154,11 +142,11 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
         </button>
         {showUserMenu && (
           <div style={{
-            position: "absolute", right: 0, top: 34, backgroundColor: "white", borderRadius: 10,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.14)", minWidth: 180, zIndex: 200, overflow: "hidden",
-            border: "1px solid rgb(242,242,242)",
+            position: "absolute", right: 0, top: 34, backgroundColor: "white", borderRadius: RADIUS_LG,
+            boxShadow: SHADOW_DROPDOWN, minWidth: 180, zIndex: Z_DROPDOWN, overflow: "hidden",
+            border: `1px solid ${GRAY_10}`,
           }}>
-            <div style={{ padding: "10px 14px", borderBottom: "1px solid rgb(242,242,242)" }}>
+            <div style={{ padding: "10px 14px", borderBottom: `1px solid ${GRAY_10}` }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>박선욱</div>
               <div style={{ fontSize: 12, color: GRAY_60 }}>admin@sdt.inc</div>
             </div>
@@ -182,7 +170,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
               <button onClick={onSwitchMode} style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 14px",
                 background: "none", border: "none", cursor: "pointer", fontSize: 13, color: PRIMARY,
-                borderTop: "1px solid rgb(242,242,242)",
+                borderTop: `1px solid ${GRAY_10}`,
               }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = PRIMARY_10)}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
@@ -194,7 +182,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
             <button style={{
               display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer", fontSize: 13, color: RED,
-              borderTop: "1px solid rgb(242,242,242)",
+              borderTop: `1px solid ${GRAY_10}`,
             }}
               onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgb(254,242,242)")}
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
@@ -211,14 +199,17 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
 
 // ─── User LNB ─────────────────────────────────────────────────────────────────
 type UserScreen = "dashboard" | "workspace-overview" | "workspace-members" | "workspace-wallet"
-  | "workspace-notifications" | "gallery" | "server-list" | "server-detail"
-  | "storage-overview" | "storage-temp" | "storage-local" | "storage-shared";
+  | "workspace-settings" | "gallery" | "server-list" | "server-detail"
+  | "storage-overview" | "storage-temp" | "storage-local" | "storage-shared"
+  | "notifications";
 
 interface UserLNBProps {
   active: UserScreen;
   onNav: (screen: UserScreen) => void;
+  unreadCount?: number;
+  onSwitchMode?: () => void;
 }
-export function UserLNB({ active, onNav }: UserLNBProps) {
+export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLNBProps) {
   const [wsExpanded, setWsExpanded] = useState(true);
   const [storageExpanded, setStorageExpanded] = useState(true);
 
@@ -233,7 +224,7 @@ export function UserLNB({ active, onNav }: UserLNBProps) {
     { id: "workspace-overview" as UserScreen, label: "Overview" },
     { id: "workspace-members" as UserScreen, label: "Members" },
     { id: "workspace-wallet" as UserScreen, label: "Wallet" },
-    { id: "workspace-notifications" as UserScreen, label: "Notifications" },
+    { id: "workspace-settings" as UserScreen, label: "Settings" },
   ];
 
   const storageSubs = [
@@ -261,10 +252,32 @@ export function UserLNB({ active, onNav }: UserLNBProps) {
 
   return (
     <div style={{
-      width: 220, backgroundColor: "white", borderRight: `1px solid rgb(242,242,242)`,
+      width: LNB_WIDTH, backgroundColor: "white", borderRight: `1px solid ${GRAY_10}`,
       display: "flex", flexDirection: "column", padding: "12px 8px", gap: 2, flexShrink: 0,
       overflowY: "auto",
     }}>
+      {/* 워크스페이스 전환 */}
+      <button style={{
+        display: "flex", alignItems: "center", gap: 10, width: "100%",
+        padding: "12px 12px", borderRadius: 10, marginBottom: 10,
+        border: `1px solid ${GRAY_10}`, backgroundColor: GRAY_5,
+        cursor: "pointer", textAlign: "left", transition: "all 0.15s",
+      }}
+        onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; e.currentTarget.style.borderColor = PRIMARY; }}
+        onMouseLeave={e => { e.currentTarget.style.backgroundColor = GRAY_5; e.currentTarget.style.borderColor = GRAY_10; }}>
+        <div style={{
+          width: 34, height: 34, borderRadius: 8, backgroundColor: PRIMARY_10,
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <Layers size={16} color={PRIMARY} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 10, color: GRAY_60, fontWeight: 500, marginBottom: 2 }}>현재 워크스페이스</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>My Workspace</div>
+        </div>
+        <ChevronDown size={14} color={GRAY_60} />
+      </button>
+
       {topItems.map(item => (
         <button key={item.id} onClick={() => onNav(item.id)} style={navItemStyle(active === item.id)}
           onMouseEnter={e => { if (active !== item.id) e.currentTarget.style.backgroundColor = GRAY_5; }}
@@ -329,6 +342,47 @@ export function UserLNB({ active, onNav }: UserLNBProps) {
           {sub.label}
         </button>
       ))}
+
+      {/* Notifications */}
+      <button onClick={() => onNav("notifications")} style={navItemStyle(active === "notifications")}
+        onMouseEnter={e => { if (active !== "notifications") e.currentTarget.style.backgroundColor = GRAY_5; }}
+        onMouseLeave={e => { if (active !== "notifications") e.currentTarget.style.backgroundColor = "transparent"; }}>
+        <span style={{ color: active === "notifications" ? PRIMARY : GRAY_60 }}><BellRing size={16} /></span>
+        <span style={{ flex: 1 }}>Notifications</span>
+        {unreadCount > 0 && (
+          <span style={{
+            backgroundColor: "rgb(220,38,38)", color: "white", fontSize: 10, fontWeight: 700,
+            borderRadius: 999, padding: "1px 6px", lineHeight: "16px", minWidth: 18, textAlign: "center",
+          }}>
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* 하단 프로필 + 콘솔 전환 */}
+      <div style={{ marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${GRAY_10}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px", marginBottom: 4 }}>
+          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: PRIMARY_10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <User size={13} color={PRIMARY} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>이지연</div>
+            <div style={{ fontSize: 11, color: GRAY_60, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>sjlee@sdt.inc</div>
+          </div>
+        </div>
+        {onSwitchMode && (
+          <button onClick={onSwitchMode} style={{
+            display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 10px",
+            borderRadius: 8, border: "none", backgroundColor: "transparent",
+            cursor: "pointer", fontSize: 12, fontWeight: 500, color: GRAY_60, transition: "all 0.1s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; e.currentTarget.style.color = GRAY_90; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = GRAY_60; }}>
+            <ArrowLeftRight size={13} />
+            <span>Admin Console로 전환</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -404,7 +458,7 @@ export function AdminLNB({ active, onNav }: AdminLNBProps) {
 
   return (
     <div style={{
-      width: 220, backgroundColor: "white", borderRight: `1px solid rgb(242,242,242)`,
+      width: LNB_WIDTH, backgroundColor: "white", borderRight: `1px solid ${GRAY_10}`,
       display: "flex", flexDirection: "column", padding: "12px 8px", gap: 1, flexShrink: 0,
       overflowY: "auto",
     }}>
@@ -488,8 +542,8 @@ export function PageContainer({ title, subtitle, actions, children }: {
   title: string; subtitle?: string; actions?: React.ReactNode; children: React.ReactNode;
 }) {
   return (
-    <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
-      <div style={{ maxWidth: 1200 }}>
+    <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: PAGE_PADDING }}>
+      <div style={{ maxWidth: PAGE_MAX_WIDTH }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 600, color: GRAY_90, margin: 0, lineHeight: 1.4 }}>{title}</h1>
@@ -504,7 +558,10 @@ export function PageContainer({ title, subtitle, actions, children }: {
 }
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
-export function Card({ children, style, onClick, hover }: { children: React.ReactNode; style?: React.CSSProperties; onClick?: () => void; hover?: boolean }) {
+export function Card({ children, style, onClick, hover }: {
+  children: React.ReactNode; style?: React.CSSProperties;
+  onClick?: () => void; hover?: boolean;
+}) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
@@ -512,10 +569,10 @@ export function Card({ children, style, onClick, hover }: { children: React.Reac
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        backgroundColor: "white", borderRadius: 14,
-        boxShadow: hovered && hover ? "0 4px 16px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)" : "0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)",
+        backgroundColor: "white", borderRadius: RADIUS_CARD,
+        boxShadow: hovered && hover ? SHADOW_CARD_HOVER : SHADOW_CARD,
         cursor: onClick ? "pointer" : "default",
-        transition: "box-shadow 0.15s ease",
+        transition: `box-shadow ${TRANSITION_NORMAL}`,
         ...style,
       }}>
       {children}
@@ -531,17 +588,13 @@ export function PrimaryBtn({ children, onClick, size = "medium", variant = "prim
   style?: React.CSSProperties;
 }) {
   const [hovered, setHovered] = useState(false);
-  const sizeMap = {
-    medium: { height: 44, padding: "0 20px", fontSize: 14, radius: 12, fontWeight: 600 },
-    small: { height: 36, padding: "0 16px", fontSize: 13, radius: 10, fontWeight: 600 },
-    xsmall: { height: 28, padding: "0 12px", fontSize: 12, radius: 8, fontWeight: 500 },
-  };
+  const sizeMap = BTN_SIZES;
   const s = sizeMap[size];
   const variantMap = {
-    primary: { bg: hovered ? PRIMARY_80 : PRIMARY, color: "white", border: "none" },
+    primary:   { bg: hovered ? PRIMARY_80 : PRIMARY, color: "white", border: "none" },
     secondary: { bg: hovered ? "rgb(242,242,242)" : "white", color: GRAY_90, border: `1px solid ${GRAY_30}` },
-    ghost: { bg: hovered ? GRAY_5 : "transparent", color: GRAY_70, border: "none" },
-    danger: { bg: hovered ? "rgb(220,38,38)" : RED, color: "white", border: "none" },
+    ghost:     { bg: hovered ? GRAY_5 : "transparent", color: GRAY_70, border: "none" },
+    danger:    { bg: hovered ? "rgb(220,38,38)" : RED, color: "white", border: "none" },
   };
   const v = variantMap[variant];
   return (
@@ -553,7 +606,7 @@ export function PrimaryBtn({ children, onClick, size = "medium", variant = "prim
         height: s.height, padding: s.padding, fontSize: s.fontSize, fontWeight: s.fontWeight,
         borderRadius: s.radius, backgroundColor: v.bg, color: v.color, border: v.border,
         cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6,
-        transition: "background 0.1s ease", fontFamily: "inherit", whiteSpace: "nowrap",
+        transition: `background ${TRANSITION_FAST}`, fontFamily: "inherit", whiteSpace: "nowrap",
         ...extraStyle,
       }}>
       {children}
@@ -561,7 +614,7 @@ export function PrimaryBtn({ children, onClick, size = "medium", variant = "prim
   );
 }
 
-// ─── Metric Card ─────────────────────────────────────────────────────────────
+// ─── Metric Card ──────────────────────────────────────────────────────────────
 export function MetricCard({ label, value, sub, icon, color = PRIMARY, trend }: {
   label: string; value: string | number; sub?: string; icon: React.ReactNode;
   color?: string; trend?: { up: boolean; text: string };
@@ -587,7 +640,7 @@ export function MetricCard({ label, value, sub, icon, color = PRIMARY, trend }: 
   );
 }
 
-// ─── Table ─────────────────────────────────────────────────────────────────────
+// ─── Table ────────────────────────────────────────────────────────────────────
 export function Table({ headers, rows, onRowClick }: {
   headers: string[];
   rows: React.ReactNode[][];
@@ -600,7 +653,7 @@ export function Table({ headers, rows, onRowClick }: {
         <thead>
           <tr style={{ backgroundColor: GRAY_5 }}>
             {headers.map((h, i) => (
-              <th key={i} style={{ padding: "10px 16px", fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", borderBottom: `1px solid rgb(242,242,242)`, whiteSpace: "nowrap" }}>
+              <th key={i} style={{ padding: "10px 16px", fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", borderBottom: `1px solid ${GRAY_10}`, whiteSpace: "nowrap" }}>
                 {h}
               </th>
             ))}
@@ -618,7 +671,7 @@ export function Table({ headers, rows, onRowClick }: {
                 transition: "background 0.1s",
               }}>
               {row.map((cell, j) => (
-                <td key={j} style={{ padding: "12px 16px", fontSize: 13, color: GRAY_90, borderBottom: `1px solid rgb(242,242,242)` }}>
+                <td key={j} style={{ padding: "12px 16px", fontSize: 13, color: GRAY_90, borderBottom: `1px solid ${GRAY_10}` }}>
                   {cell}
                 </td>
               ))}
@@ -630,12 +683,73 @@ export function Table({ headers, rows, onRowClick }: {
   );
 }
 
+// ─── Card Variants ────────────────────────────────────────────────────────────
+// SectionCard: titled card with header separator + padded body
+export function SectionCard({ title, subtitle, action, children, style }: {
+  title?: string; subtitle?: string; action?: React.ReactNode;
+  children: React.ReactNode; style?: React.CSSProperties;
+}) {
+  return (
+    <Card style={{ display: "flex", flexDirection: "column", height: "100%", ...style }}>
+      {title && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 20px", borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0,
+        }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90 }}>{title}</div>
+            {subtitle && <div style={{ fontSize: 12, color: GRAY_60, marginTop: 2 }}>{subtitle}</div>}
+          </div>
+          {action && <div>{action}</div>}
+        </div>
+      )}
+      <div style={{ padding: "20px 24px", flex: 1 }}>{children}</div>
+    </Card>
+  );
+}
+
+// ListCard: table/feed card — header only, children fill full width (no body padding)
+export function ListCard({ title, action, children, style }: {
+  title?: string; action?: React.ReactNode;
+  children: React.ReactNode; style?: React.CSSProperties;
+}) {
+  return (
+    <Card style={{ overflow: "hidden", ...style }}>
+      {title && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "14px 20px", borderBottom: `1px solid ${GRAY_10}`,
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90 }}>{title}</div>
+          {action && <div>{action}</div>}
+        </div>
+      )}
+      {children}
+    </Card>
+  );
+}
+
+// StatCard: compact KPI/number card
+export function StatCard({ label, value, sub, color, icon, style }: {
+  label: string; value: string | number; sub?: string;
+  color?: string; icon?: React.ReactNode; style?: React.CSSProperties;
+}) {
+  return (
+    <Card style={{ padding: "16px 20px", ...style }}>
+      {icon && <div style={{ marginBottom: 8 }}>{icon}</div>}
+      <div style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, lineHeight: 1.1 }}>{value}</div>
+      <div style={{ fontSize: 12, color: GRAY_60, marginTop: 4 }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: color ?? PRIMARY, marginTop: 3, fontWeight: 500 }}>{sub}</div>}
+    </Card>
+  );
+}
+
 // ─── Tab Bar ──────────────────────────────────────────────────────────────────
 export function TabBar({ tabs, active, onChange }: {
   tabs: string[]; active: string; onChange: (tab: string) => void;
 }) {
   return (
-    <div style={{ display: "flex", gap: 4, borderBottom: `1px solid rgb(242,242,242)`, marginBottom: 24 }}>
+    <div style={{ display: "flex", gap: 4, borderBottom: `1px solid ${GRAY_10}`, marginBottom: 24 }}>
       {tabs.map(tab => {
         const isActive = tab === active;
         return (
@@ -643,7 +757,7 @@ export function TabBar({ tabs, active, onChange }: {
             padding: "10px 16px", fontSize: 14, fontWeight: isActive ? 600 : 400,
             color: isActive ? PRIMARY : GRAY_60, background: "none", border: "none",
             borderBottom: isActive ? `2px solid ${PRIMARY}` : "2px solid transparent",
-            cursor: "pointer", transition: "color 0.1s, border-color 0.1s", marginBottom: -1,
+            cursor: "pointer", transition: `color ${TRANSITION_FAST}, border-color ${TRANSITION_FAST}`, marginBottom: -1,
           }}>
             {tab}
           </button>

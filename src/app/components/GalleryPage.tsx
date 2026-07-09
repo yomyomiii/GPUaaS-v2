@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Search, Cpu, Flame, Star, ArrowRight, ExternalLink, ChevronRight, Zap, Users, TrendingUp } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, PRIMARY_80, GRAY_5, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90, GREEN, BLUE, YELLOW,
-  Badge, Card, PrimaryBtn, PageContainer,
+  Badge, Card, PrimaryBtn, PageContainer, SectionCard, ListCard,
 } from "./ConsoleLayout";
 
 const categories = ["전체", "ML/DL", "LLM", "CV", "NLP", "Data Science", "개발환경"];
@@ -22,7 +22,7 @@ const images = [
     id: "img2", name: "TensorFlow 2.15 + CUDA 12.1", tier: "Official" as const, category: "ML/DL",
     tags: ["TensorFlow", "Keras", "CUDA", "Python 3.11"],
     desc: "TensorFlow 2.15 및 Keras를 포함한 완전한 ML 개발 환경.",
-    gpuTypes: ["RTX A5000", "A100"], thumb: "🟡", templates: 0, used: 623,
+    gpuTypes: ["RTX A5000", "A100"], thumb: "🟡", templates: 1, used: 623,
     featured: false, trending: false, rating: 4.7, reviewCount: 89,
     recGpu: "RTX A5000", recTmp: 20, recLocal: 50,
     packages: ["tensorflow==2.15.0", "keras==2.15", "cuda==12.1", "jupyterlab==4.0"],
@@ -49,7 +49,7 @@ const images = [
     id: "img5", name: "NLP Toolkit (HuggingFace)", tier: "Verified" as const, category: "NLP",
     tags: ["HuggingFace", "Transformers", "BERT", "Tokenizers"],
     desc: "HuggingFace Transformers, Datasets, Tokenizers 포함.",
-    gpuTypes: ["RTX A5000", "A100"], thumb: "🟤", templates: 0, used: 278,
+    gpuTypes: ["RTX A5000", "A100"], thumb: "🟤", templates: 1, used: 278,
     featured: false, trending: false, rating: 4.5, reviewCount: 41,
     recGpu: "RTX A5000", recTmp: 20, recLocal: 50,
     packages: ["transformers==4.38", "datasets", "tokenizers", "evaluate", "accelerate"],
@@ -67,7 +67,7 @@ const images = [
     id: "img7", name: "OpenCV + YOLO v8", tier: "Verified" as const, category: "CV",
     tags: ["OpenCV", "YOLO", "Object Detection", "Ultralytics"],
     desc: "실시간 객체 탐지를 위한 YOLOv8 환경.",
-    gpuTypes: ["RTX 4090", "RTX A5000", "A100"], thumb: "🔴", templates: 0, used: 201,
+    gpuTypes: ["RTX 4090", "RTX A5000", "A100"], thumb: "🔴", templates: 1, used: 201,
     featured: false, trending: false, rating: 4.4, reviewCount: 32,
     recGpu: "RTX A5000", recTmp: 20, recLocal: 30,
     packages: ["ultralytics==8.0", "opencv-python==4.8", "torch", "pillow"],
@@ -76,19 +76,23 @@ const images = [
     id: "img8", name: "Python 개발 환경", tier: "Official" as const, category: "개발환경",
     tags: ["Python 3.11", "Poetry", "VS Code", "pre-commit"],
     desc: "범용 Python 개발 환경. VS Code Server, Poetry 패키지 관리 포함.",
-    gpuTypes: ["RTX A5000"], thumb: "⚪", templates: 0, used: 195,
+    gpuTypes: ["RTX A5000"], thumb: "⚪", templates: 1, used: 195,
     featured: false, trending: false, rating: 4.3, reviewCount: 27,
     recGpu: "RTX A5000", recTmp: 10, recLocal: 20,
     packages: ["python==3.11", "poetry", "pre-commit", "black", "ruff"],
   },
 ];
 
-// Template per image — 1:1 relationship
+// Template per image — 1:1 relationship (all images must have a template)
 const GALLERY_TEMPLATES: Record<string, { name: string; recVram: string; recTmp: number; localGB: number; hasShared: boolean; desc: string }> = {
   "img1": { name: "PyTorch LLM 학습 환경", recVram: "80GB+", recTmp: 30, localGB: 100, hasShared: false, desc: "LLM 학습에 최적화된 PyTorch 기반 사전 구성" },
+  "img2": { name: "TensorFlow ML 개발 환경", recVram: "24GB+", recTmp: 20, localGB: 50, hasShared: false, desc: "TensorFlow/Keras 기반 ML 개발 사전 구성" },
   "img3": { name: "LLaMA 파인튜닝 환경", recVram: "80GB+", recTmp: 50, localGB: 200, hasShared: false, desc: "H100 권장 LLM 파인튜닝 전용 사전 구성" },
   "img4": { name: "SD WebUI 이미지 생성", recVram: "24GB+", recTmp: 20, localGB: 50, hasShared: false, desc: "이미지 생성을 위한 SD WebUI 사전 구성" },
+  "img5": { name: "HuggingFace NLP 환경", recVram: "24GB+", recTmp: 20, localGB: 50, hasShared: false, desc: "Transformers 기반 NLP 개발 사전 구성" },
   "img6": { name: "팀 데이터 분석 환경", recVram: "24GB+", recTmp: 10, localGB: 20, hasShared: true, desc: "공유 스토리지 연결 팀용 데이터 분석 환경" },
+  "img7": { name: "YOLO 객체 탐지 환경", recVram: "24GB+", recTmp: 20, localGB: 30, hasShared: false, desc: "실시간 객체 탐지 YOLOv8 전용 사전 구성" },
+  "img8": { name: "Python 범용 개발 환경", recVram: "24GB+", recTmp: 10, localGB: 20, hasShared: false, desc: "VS Code Server + Poetry 기반 범용 Python 사전 구성" },
 };
 
 // ─── Star Rating ──────────────────────────────────────────────────────────────
@@ -537,15 +541,12 @@ function ImageDetail({ img, onBack, onUseTemplate }: { img: typeof images[0]; on
             </Card>
 
             {/* README description */}
-            <Card style={{ padding: "24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>📖 상세 설명</div>
-              <div style={{ fontSize: 13, color: GRAY_60, lineHeight: 1.7, marginBottom: 4 }}>{img.desc}</div>
+            <SectionCard title="📖 상세 설명" subtitle={img.desc}>
               <ReadmeContent img={img} />
-            </Card>
+            </SectionCard>
 
             {/* Packages */}
-            <Card style={{ padding: "24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 14 }}>사전 설치 패키지</div>
+            <SectionCard title="사전 설치 패키지">
               <div style={{ backgroundColor: "rgb(18,18,28)", borderRadius: 10, padding: "16px 20px" }}>
                 <pre style={{ margin: 0, fontFamily: "Roboto Mono, monospace", fontSize: 12, lineHeight: 1.8, color: "rgb(180,200,255)" }}>
                   {img.packages.map((p, i) => (
@@ -553,11 +554,10 @@ function ImageDetail({ img, onBack, onUseTemplate }: { img: typeof images[0]; on
                   ))}
                 </pre>
               </div>
-            </Card>
+            </SectionCard>
 
             {/* GPU support */}
-            <Card style={{ padding: "24px" }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 12 }}>지원 GPU</div>
+            <SectionCard title="지원 GPU">
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {img.gpuTypes.map(gpu => (
                   <div key={gpu} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", backgroundColor: GRAY_5, borderRadius: 10 }}>
@@ -567,7 +567,7 @@ function ImageDetail({ img, onBack, onUseTemplate }: { img: typeof images[0]; on
                   </div>
                 ))}
               </div>
-            </Card>
+            </SectionCard>
           </div>
 
           {/* Right */}
@@ -618,8 +618,7 @@ function ImageDetail({ img, onBack, onUseTemplate }: { img: typeof images[0]; on
             </Card>
 
             {/* Stats */}
-            <Card style={{ padding: "20px 22px" }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90, marginBottom: 12 }}>사용 통계</div>
+            <SectionCard title="사용 통계">
               {[
                 { label: "총 사용 횟수", value: `${img.used.toLocaleString()} 회` },
                 { label: "평균 평점", value: `${img.rating} / 5.0` },
@@ -631,7 +630,7 @@ function ImageDetail({ img, onBack, onUseTemplate }: { img: typeof images[0]; on
                   <span style={{ color: GRAY_90, fontWeight: 600 }}>{value}</span>
                 </div>
               ))}
-            </Card>
+            </SectionCard>
           </div>
         </div>
       </div>
@@ -645,6 +644,7 @@ export function GalleryPage({ onServerCreate }: { onServerCreate: () => void }) 
   const [selectedTier, setSelectedTier] = useState("전체");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedImage, setSelectedImage] = useState<typeof images[0] | null>(null);
+  const [templateFilter, setTemplateFilter] = useState(false);
 
   if (selectedImage) {
     return (
@@ -661,11 +661,12 @@ export function GalleryPage({ onServerCreate }: { onServerCreate: () => void }) 
   const filtered = images.filter(img => {
     const matchCategory = selectedCategory === "전체" || img.category === selectedCategory;
     const matchTier = selectedTier === "전체" || img.tier === selectedTier;
+    const matchTemplate = !templateFilter || Boolean(GALLERY_TEMPLATES[img.id]);
     const matchSearch = !searchQuery ||
       img.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       img.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
       img.desc.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCategory && matchTier && matchSearch;
+    return matchCategory && matchTier && matchTemplate && matchSearch;
   });
 
   const featuredImages = images.filter(i => i.featured);
@@ -699,7 +700,7 @@ export function GalleryPage({ onServerCreate }: { onServerCreate: () => void }) 
         </div>
 
         {/* Featured / Trending (shown when no search/filter) */}
-        {!searchQuery && selectedCategory === "전체" && selectedTier === "전체" && (
+        {!searchQuery && selectedCategory === "전체" && selectedTier === "전체" && !templateFilter && (
           <>
             <section style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
@@ -765,11 +766,19 @@ export function GalleryPage({ onServerCreate }: { onServerCreate: () => void }) 
               }}>{t}</button>
             ))}
           </div>
+          <button onClick={() => setTemplateFilter(!templateFilter)} style={{
+            padding: "5px 13px", borderRadius: 999, flexShrink: 0,
+            border: `1px solid ${templateFilter ? PRIMARY : GRAY_30}`,
+            backgroundColor: templateFilter ? PRIMARY_10 : "white",
+            color: templateFilter ? PRIMARY : GRAY_70,
+            fontSize: 12, fontWeight: templateFilter ? 700 : 400,
+            cursor: "pointer", transition: "all 0.1s",
+          }}>🚀 템플릿 있음</button>
         </div>
 
         {/* Grid */}
         <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 12 }}>
-          {searchQuery || selectedCategory !== "전체" || selectedTier !== "전체"
+          {searchQuery || selectedCategory !== "전체" || selectedTier !== "전체" || templateFilter
             ? `검색 결과 ${filtered.length}개`
             : `전체 ${images.length}개`}
         </div>
