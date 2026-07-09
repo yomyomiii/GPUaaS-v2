@@ -3,3 +3,8 @@ dist
 .DS_Store
 *.local
 src/imports/
+guidelines/
+src/app/components/figma/
+ATTRIBUTIONS.md
+postcss.config.mjs
+default_shadcn_theme.css
