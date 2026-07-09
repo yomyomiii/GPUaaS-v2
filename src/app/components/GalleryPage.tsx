@@ -154,7 +154,7 @@ function ImageCard({ img, onSelect, maxUsed }: { img: typeof images[0]; onSelect
       {/* Content */}
       <div style={{ padding: "14px 16px", flex: 1, display: "flex", flexDirection: "column" }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 4, lineHeight: 1.4 }}>{img.name}</div>
-        <div className="line-clamp-2" style={{ fontSize: 11, color: GRAY_60, marginBottom: 10, lineHeight: 1.5, flex: 1 }}>
+        <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 10, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden", flex: 1 }}>
           {img.desc}
         </div>
 
@@ -214,7 +214,7 @@ function FeaturedCard({ img, onSelect }: { img: typeof images[0]; onSelect: () =
           {img.trending && <Flame size={12} color="rgb(220,80,0)" />}
           <span style={{ fontSize: 12, fontWeight: 700, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{img.name}</span>
         </div>
-        <div className="line-clamp-2" style={{ fontSize: 11, color: GRAY_60, marginBottom: 8 }}>{img.desc}</div>
+        <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 8, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>{img.desc}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Stars rating={img.rating} />
           <span style={{ fontSize: 10, color: GRAY_60 }}>{img.used.toLocaleString()} uses</span>

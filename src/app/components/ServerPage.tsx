@@ -228,7 +228,7 @@ function ImageGalleryPicker({ images, selectedId, onSelect }: {
                     </div>
                   </div>
                 </div>
-                <div className="line-clamp-2" style={{ fontSize: 11, color: GRAY_60, lineHeight: 1.4, marginBottom: 6 }}>{img.desc}</div>
+                <div style={{ fontSize: 11, color: GRAY_60, lineHeight: 1.4, marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }}>{img.desc}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
                     {img.tags.slice(0, 2).map(t => (
