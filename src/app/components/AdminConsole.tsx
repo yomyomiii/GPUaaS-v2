@@ -309,7 +309,7 @@ export function AdminDashboard() {
 export function AdminUserManagement() {
   const [search, setSearch] = useState("");
   const users = [
-    { name: "박선욱", email: "sunwook.park@sdt.inc", joined: "2026-01-15", workspaces: 2, servers: 2, status: "active", lastLogin: "오늘 09:42", usedCr: 12450, totalCr: 45230, role: "owner" },
+    { name: "지염염", email: "yeomeyeom.ji@sdt.inc", joined: "2026-01-15", workspaces: 2, servers: 2, status: "active", lastLogin: "오늘 09:42", usedCr: 12450, totalCr: 45230, role: "owner" },
     { name: "이지현", email: "jihyun.lee@sdt.inc", joined: "2026-02-20", workspaces: 1, servers: 5, status: "active", lastLogin: "어제 18:30", usedCr: 28600, totalCr: 120500, role: "admin" },
     { name: "김태민", email: "taemin.kim@sdt.inc", joined: "2026-03-10", workspaces: 1, servers: 1, status: "active", lastLogin: "2일 전", usedCr: 4200, totalCr: 8200, role: "user" },
     { name: "최유진", email: "yujin.choi@sdt.inc", joined: "2026-04-05", workspaces: 1, servers: 0, status: "inactive", lastLogin: "14일 전", usedCr: 0, totalCr: 1000, role: "user" },
@@ -405,7 +405,7 @@ export function AdminUserManagement() {
 // ─── Workspace Management ─────────────────────────────────────────────────────
 export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void }) {
   const workspaces = [
-    { name: "My Workspace", owner: "박선욱", members: 5, servers: 4, credits: 45230, maxCredits: 80000, status: "active", rate: 120, plan: "Standard" },
+    { name: "My Workspace", owner: "지염염", members: 5, servers: 4, credits: 45230, maxCredits: 80000, status: "active", rate: 120, plan: "Standard" },
     { name: "Team Alpha", owner: "이지현", members: 8, servers: 12, credits: 120500, maxCredits: 200000, status: "active", rate: 480, plan: "Enterprise" },
     { name: "ML Research Lab", owner: "김태민", members: 3, servers: 2, credits: 8200, maxCredits: 50000, status: "active", rate: 48, plan: "Standard" },
     { name: "Old Project", owner: "최유진", members: 1, servers: 0, credits: 1000, maxCredits: 10000, status: "inactive", rate: 0, plan: "Standard" },
@@ -494,7 +494,7 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0 }}>My Workspace</h1>
-            <div style={{ fontSize: 12, color: GRAY_60, marginTop: 4 }}>owner: 박선욱 · 5명 · 활성</div>
+            <div style={{ fontSize: 12, color: GRAY_60, marginTop: 4 }}>owner: 지염염 · 5명 · 활성</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <PrimaryBtn size="small" variant="secondary">Owner 변경</PrimaryBtn>
@@ -519,7 +519,7 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
             <Table
               headers={["멤버", "역할", "이메일"]}
               rows={[
-                ["박선욱", "workspace.owner", "sunwook.park@sdt.inc"],
+                ["지염염", "workspace.owner", "yeomeyeom.ji@sdt.inc"],
                 ["이지현", "workspace.admin", "jihyun.lee@sdt.inc"],
                 ["김태민", "workspace.user", "taemin.kim@sdt.inc"],
               ].map(([name, role, email]) => [
@@ -565,10 +565,10 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
 // ─── Server Management ────────────────────────────────────────────────────────
 export function AdminServerManagement() {
   const servers = [
-    { name: "pytorch-dev-01", workspace: "My Workspace", owner: "박선욱", gpu: "RTX A5000 × 2", status: "running" as const, uptime: "5h 32m", gpuUtil: 75, rate: 24, flag: false },
+    { name: "pytorch-dev-01", workspace: "My Workspace", owner: "지염염", gpu: "RTX A5000 × 2", status: "running" as const, uptime: "5h 32m", gpuUtil: 75, rate: 24, flag: false },
     { name: "llm-finetuning", workspace: "Team Alpha", owner: "이지현", gpu: "H100 SXM5 × 4", status: "running" as const, uptime: "2h 15m", gpuUtil: 93, rate: 208, flag: false },
     { name: "abuse-server-01", workspace: "ML Research Lab", owner: "김태민", gpu: "A100 SXM4 × 8", status: "running" as const, uptime: "72h 11m", gpuUtil: 14, rate: 192, flag: true },
-    { name: "stable-diffusion", workspace: "My Workspace", owner: "박선욱", gpu: "RTX 4090 × 1", status: "stopped" as const, uptime: "—", gpuUtil: 0, rate: 0, flag: false },
+    { name: "stable-diffusion", workspace: "My Workspace", owner: "지염염", gpu: "RTX 4090 × 1", status: "stopped" as const, uptime: "—", gpuUtil: 0, rate: 0, flag: false },
     { name: "data-preprocess", workspace: "Team Alpha", owner: "장민준", gpu: "A100 SXM4 × 2", status: "creating" as const, uptime: "—", gpuUtil: 0, rate: 48, flag: false },
   ];
   const running = servers.filter(s => s.status === "running");
@@ -1293,7 +1293,7 @@ export function AdminCreditManagement({ initialTab = "크레딧 지급/회수" }
   const [tab, setTab] = useState(initialTab);
   useEffect(() => { setTab(initialTab); }, [initialTab]);
   const ledger = [
-    { date: "2026-07-08", workspace: "My Workspace", owner: "박선욱", type: "지급", amount: "+10,000 cr", reason: "서비스 장애 보상" },
+    { date: "2026-07-08", workspace: "My Workspace", owner: "지염염", type: "지급", amount: "+10,000 cr", reason: "서비스 장애 보상" },
     { date: "2026-07-07", workspace: "Team Alpha", owner: "이지현", type: "지급", amount: "+5,000 cr", reason: "신규 가입 프로모션" },
     { date: "2026-07-05", workspace: "ML Research Lab", owner: "김태민", type: "회수", amount: "-2,000 cr", reason: "어뷰징 확인" },
   ];
@@ -1314,7 +1314,7 @@ export function AdminCreditManagement({ initialTab = "크레딧 지급/회수" }
               <div>
                 <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>워크스페이스</div>
                 <select style={{ width: "100%", height: 40, padding: "0 12px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13 }}>
-                  <option>My Workspace (박선욱)</option>
+                  <option>My Workspace (지염염)</option>
                   <option>Team Alpha (이지현)</option>
                 </select>
               </div>
@@ -1384,11 +1384,11 @@ export function AdminStorageManagement({ initialTab = "All Storages" }: { initia
   const [tab, setTab] = useState(initialTab);
   useEffect(() => { setTab(initialTab); }, [initialTab]);
   const storages = [
-    { name: "pytorch-dev-01-local", type: "Local", workspace: "My Workspace", owner: "박선욱", capacity: 10, used: 6.8, status: "Normal" },
+    { name: "pytorch-dev-01-local", type: "Local", workspace: "My Workspace", owner: "지염염", capacity: 10, used: 6.8, status: "Normal" },
     { name: "llm-finetuning-local", type: "Local", workspace: "Team Alpha", owner: "이지현", capacity: 100, used: 67.3, status: "Normal" },
-    { name: "team-shared-01", type: "Shared", workspace: "My Workspace", owner: "박선욱", capacity: 500, used: 287, status: "Normal" },
+    { name: "team-shared-01", type: "Shared", workspace: "My Workspace", owner: "지염염", capacity: 500, used: 287, status: "Normal" },
     { name: "dataset-archive", type: "Shared", workspace: "Team Alpha", owner: "이지현", capacity: 1000, used: 435, status: "Normal" },
-    { name: "pytorch-dev-01-temp", type: "Temporary", workspace: "My Workspace", owner: "박선욱", capacity: 20, used: 14.2, status: "Healthy" },
+    { name: "pytorch-dev-01-temp", type: "Temporary", workspace: "My Workspace", owner: "지염염", capacity: 20, used: 14.2, status: "Healthy" },
   ];
   return (
     <PageContainer title="Storage Management" subtitle="전체 스토리지 목록을 조회하고 관리합니다.">
@@ -1423,7 +1423,7 @@ export function AdminPaymentHistory({ initialTab = "결제 내역" }: { initialT
   useEffect(() => { setTab(initialTab); }, [initialTab]);
   const payments = [
     { date: "2026-07-08 14:22", workspace: "Team Alpha", owner: "이지현", product: "프로 패키지 (100,000 cr)", amount: "900,000원", status: "성공" },
-    { date: "2026-07-08 11:05", workspace: "My Workspace", owner: "박선욱", product: "스타터 패키지 (50,000 cr)", amount: "480,000원", status: "성공" },
+    { date: "2026-07-08 11:05", workspace: "My Workspace", owner: "지염염", product: "스타터 패키지 (50,000 cr)", amount: "480,000원", status: "성공" },
     { date: "2026-07-07 18:30", workspace: "ML Research Lab", owner: "김태민", product: "기본 패키지 (10,000 cr)", amount: "100,000원", status: "실패" },
     { date: "2026-07-07 09:11", workspace: "Team Alpha", owner: "이지현", product: "스타터 패키지 (50,000 cr)", amount: "480,000원", status: "환불" },
   ];

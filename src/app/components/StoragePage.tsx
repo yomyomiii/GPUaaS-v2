@@ -6,21 +6,21 @@ import {
 } from "./ConsoleLayout";
 
 const tempStorages = [
-  { server: "pytorch-dev-01", status: "Healthy" as const, used: 14.2, total: 20, creator: "박선욱", running: true },
-  { server: "llm-finetuning", status: "Healthy" as const, used: 38.5, total: 50, creator: "박선욱", running: true },
+  { server: "pytorch-dev-01", status: "Healthy" as const, used: 14.2, total: 20, creator: "지염염", running: true },
+  { server: "llm-finetuning", status: "Healthy" as const, used: 38.5, total: 50, creator: "지염염", running: true },
   { server: "data-preprocess", status: "Healthy" as const, used: 5.1, total: 40, creator: "이지현", running: false },
 ];
 
 const localStorages = [
-  { name: "pytorch-dev-01-local", server: "pytorch-dev-01", creator: "박선욱", capacity: 10, used: 6.8, status: "Normal" as const, stopped: false, cost: 1.0 },
-  { name: "llm-finetuning-local", server: "llm-finetuning", creator: "박선욱", capacity: 100, used: 67.3, status: "Normal" as const, stopped: false, cost: 10.0 },
+  { name: "pytorch-dev-01-local", server: "pytorch-dev-01", creator: "지염염", capacity: 10, used: 6.8, status: "Normal" as const, stopped: false, cost: 1.0 },
+  { name: "llm-finetuning-local", server: "llm-finetuning", creator: "지염염", capacity: 100, used: 67.3, status: "Normal" as const, stopped: false, cost: 10.0 },
   { name: "old-experiment-local", server: "(정지됨)", creator: "이지현", capacity: 30, used: 29.5, status: "Full" as const, stopped: true, cost: 3.0 },
 ];
 
 const sharedStorages = [
-  { name: "team-shared-01", capacity: 500, used: 287, mounts: 2, mountedServers: ["llm-finetuning", "data-preprocess"], status: "Normal" as const, creator: "박선욱", cost: 75.0 },
+  { name: "team-shared-01", capacity: 500, used: 287, mounts: 2, mountedServers: ["llm-finetuning", "data-preprocess"], status: "Normal" as const, creator: "지염염", cost: 75.0 },
   { name: "dataset-archive", capacity: 1000, used: 435, mounts: 0, mountedServers: [] as string[], status: "Normal" as const, creator: "이지현", cost: 150.0 },
-  { name: "model-checkpoint", capacity: 200, used: 198, mounts: 1, mountedServers: ["stable-diffusion"], status: "Full" as const, creator: "박선욱", cost: 30.0 },
+  { name: "model-checkpoint", capacity: 200, used: 198, mounts: 1, mountedServers: ["stable-diffusion"], status: "Full" as const, creator: "지염염", cost: 30.0 },
 ];
 
 // ─── Ring Chart (pure SVG — no recharts clipping issues) ─────────────────────

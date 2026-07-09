@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Bell, HelpCircle, ChevronDown, LayoutDashboard, Server, FolderOpen,
   Database, Layers, Users, CreditCard, Settings, Activity, Image,
@@ -72,6 +72,18 @@ interface GNBProps {
 }
 export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230, onSwitchMode, notifCount = 3 }: GNBProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showUserMenu]);
 
   return (
     <div style={{
@@ -130,27 +142,28 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
       </button>
 
       {/* Avatar */}
-      <div style={{ position: "relative" }}>
+      <div ref={menuRef} style={{ position: "relative" }}>
         <button
           onClick={() => setShowUserMenu(!showUserMenu)}
           style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: "2px 4px", borderRadius: 6 }}>
           <div style={{ width: 26, height: 26, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <User size={14} color="white" />
           </div>
-          <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: 500 }}>admin@sdt.inc</span>
+          <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: 500 }}>yeomeyeom.ji@sdt.inc</span>
           <ChevronDown size={12} color="rgba(255,255,255,0.7)" />
         </button>
         {showUserMenu && (
           <div style={{
-            position: "absolute", right: 0, top: 34, backgroundColor: "white", borderRadius: RADIUS_LG,
-            boxShadow: SHADOW_DROPDOWN, minWidth: 180, zIndex: Z_DROPDOWN, overflow: "hidden",
+            position: "absolute", right: 0, top: "100%", marginTop: 6, backgroundColor: "white", borderRadius: RADIUS_LG,
+            boxShadow: SHADOW_DROPDOWN, minWidth: 200, zIndex: Z_DROPDOWN, overflow: "hidden",
             border: `1px solid ${GRAY_10}`,
           }}>
             <div style={{ padding: "10px 14px", borderBottom: `1px solid ${GRAY_10}` }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>박선욱</div>
-              <div style={{ fontSize: 12, color: GRAY_60 }}>admin@sdt.inc</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>지염염</div>
+              <div style={{ fontSize: 12, color: GRAY_60 }}>yeomeyeom.ji@sdt.inc</div>
             </div>
             {[
+              { icon: <User size={14} />, label: "내 정보" },
               { icon: <User size={14} />, label: "내 프로필" },
               { icon: <Layers size={14} />, label: "내 워크스페이스" },
               { icon: <BellRing size={14} />, label: "알림 설정" },
@@ -400,9 +413,10 @@ export type { UserScreen, AdminScreen };
 interface AdminLNBProps {
   active: AdminScreen;
   onNav: (screen: AdminScreen) => void;
+  onSwitchMode?: () => void;
 }
 
-export function AdminLNB({ active, onNav }: AdminLNBProps) {
+export function AdminLNB({ active, onNav, onSwitchMode }: AdminLNBProps) {
   const [storageExp, setStorageExp] = useState(true);
   const [imageExp, setImageExp] = useState(false);
   const [gpuExp, setGpuExp] = useState(false);
@@ -533,6 +547,31 @@ export function AdminLNB({ active, onNav }: AdminLNBProps) {
         <SubItem id="admin-settings-terms" label="Terms Management" />
         <SubItem id="admin-settings-storage-integration" label="Internal Storage Integration" />
       </>}
+
+      {/* 하단 프로필 + 콘솔 전환 */}
+      <div style={{ marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${GRAY_10}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px", marginBottom: 4 }}>
+          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: PRIMARY_10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <User size={13} color={PRIMARY} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>지염염</div>
+            <div style={{ fontSize: 11, color: GRAY_60, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>yeomeyeom.ji@sdt.inc</div>
+          </div>
+        </div>
+        {onSwitchMode && (
+          <button onClick={onSwitchMode} style={{
+            display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "8px 10px",
+            borderRadius: 8, border: "none", backgroundColor: "transparent",
+            cursor: "pointer", fontSize: 12, fontWeight: 500, color: GRAY_60, transition: "all 0.1s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; e.currentTarget.style.color = GRAY_90; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = GRAY_60; }}>
+            <ArrowLeftRight size={13} />
+            <span>User Console로 전환</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

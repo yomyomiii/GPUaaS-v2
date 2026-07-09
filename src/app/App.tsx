@@ -68,7 +68,7 @@ export default function App() {
   const lnbActive: UserScreen = userScreen;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", fontFamily: "Pretendard Variable, Pretendard, -apple-system, sans-serif" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", fontFamily: "Pretendard Variable, Pretendard, -apple-system, sans-serif" }}>
       <GNB
         isAdmin={mode === "admin"}
         onSwitchMode={() => setMode(m => m === "user" ? "admin" : "user")}
@@ -122,7 +122,7 @@ export default function App() {
           </>
         ) : (
           <>
-            <AdminLNB active={adminScreen} onNav={handleAdminNav} />
+            <AdminLNB active={adminScreen} onNav={handleAdminNav} onSwitchMode={() => setMode("user")} />
             <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
               {adminScreen === "admin-dashboard" && <AdminDashboard />}
               {adminScreen === "admin-users" && <AdminUserManagement />}

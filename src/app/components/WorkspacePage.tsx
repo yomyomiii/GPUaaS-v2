@@ -11,7 +11,7 @@ import {
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const members = [
-  { name: "박선욱", email: "sunwook.park@sdt.inc", role: "workspace.owner", avatar: "박", joined: "2026-01-15", online: true, usedCr: 5200, activeServers: ["pytorch-dev-01", "llm-finetuning"], localStorages: ["local-vol-01", "pytorch-data"], sharedStorages: ["shared-team-01"] },
+  { name: "지염염", email: "yeomeyeom.ji@sdt.inc", role: "workspace.owner", avatar: "지", joined: "2026-01-15", online: true, usedCr: 5200, activeServers: ["pytorch-dev-01", "llm-finetuning"], localStorages: ["local-vol-01", "pytorch-data"], sharedStorages: ["shared-team-01"] },
   { name: "이지현", email: "jihyun.lee@sdt.inc", role: "workspace.admin", avatar: "이", joined: "2026-02-20", online: true, usedCr: 3100, activeServers: ["stable-diffusion"], localStorages: ["local-vol-02"], sharedStorages: ["shared-team-01"] },
   { name: "김태민", email: "taemin.kim@sdt.inc", role: "workspace.user", avatar: "김", joined: "2026-03-10", online: false, usedCr: 1800, activeServers: [], localStorages: ["local-vol-03"], sharedStorages: [] },
   { name: "최유진", email: "yujin.choi@sdt.inc", role: "workspace.user", avatar: "최", joined: "2026-04-05", online: true, usedCr: 1620, activeServers: ["data-preprocess"], localStorages: [], sharedStorages: ["shared-team-01"] },
@@ -41,17 +41,17 @@ const memberHistory = [
   { date: "2026-05-22", name: "최유진", role: "workspace.user", action: "워크스페이스 참여", tag: "신규" as const },
   { date: "2026-03-10", name: "김태민", role: "workspace.user", action: "워크스페이스 참여", tag: "신규" as const },
   { date: "2026-02-20", name: "이지현", role: "workspace.admin", action: "Admin 권한 승격", tag: "역할변경" as const },
-  { date: "2026-01-15", name: "박선욱", role: "workspace.owner", action: "워크스페이스 생성", tag: "생성" as const },
+  { date: "2026-01-15", name: "지염염", role: "workspace.owner", action: "워크스페이스 생성", tag: "생성" as const },
 ];
 
 const SPEND_TOTAL = 12450;
 const SPEND_PREV = 11100;
 
 const settingsHistory = [
-  { date: "2026-07-01", desc: "크레딧 잔액 경고 알림 활성화", by: "박선욱", type: "임계값" },
-  { date: "2026-06-20", desc: "이메일 알림 채널 등록", by: "박선욱", type: "채널" },
+  { date: "2026-07-01", desc: "크레딧 잔액 경고 알림 활성화", by: "지염염", type: "임계값" },
+  { date: "2026-06-20", desc: "이메일 알림 채널 등록", by: "지염염", type: "채널" },
   { date: "2026-05-10", desc: "멤버 변동 알림 비활성화", by: "이지현", type: "임계값" },
-  { date: "2026-02-15", desc: "결제 실패 알림 활성화", by: "박선욱", type: "임계값" },
+  { date: "2026-02-15", desc: "결제 실패 알림 활성화", by: "지염염", type: "임계값" },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -129,11 +129,10 @@ function MemberCard({ m, isOwner }: { m: typeof members[0]; isOwner: boolean }) 
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
 
         {/* Avatar */}
-        <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{ flexShrink: 0 }}>
           <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 700, color: avatarColor }}>
             {m.avatar}
           </div>
-          <div style={{ position: "absolute", bottom: 1, right: 1, width: 11, height: 11, borderRadius: "50%", backgroundColor: m.online ? GREEN : GRAY_30, border: "2px solid white" }} />
         </div>
 
         {/* Name + Role */}
@@ -323,12 +322,10 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                   <span style={{ fontSize: 18, fontWeight: 800, color: GRAY_90 }}>My Workspace</span>
-                  <Badge color="success">활성</Badge>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 0 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
                   {[
-                    { label: "Owner", value: "박선욱" },
-                    { label: "플랜", value: "Standard" },
+                    { label: "Owner", value: "지염염" },
                     { label: "멤버", value: `${members.length}명` },
                     { label: "생성일", value: "2026-01-15" },
                     { label: "크레딧 잔액", value: `${CREDIT_NOW.toLocaleString()} cr` },
@@ -394,43 +391,38 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
                   {[
                     { label: "완전 소진까지", value: "약 16일", color: GRAY_70 },
                     { label: "임계 잔액(20%)", value: `${(CREDIT_MAX * 0.2).toLocaleString()} cr`, color: RED },
-                    { label: "현재 잔액", value: `${CREDIT_NOW.toLocaleString()} cr`, color: GRAY_90 },
                   ].map(({ label, value, color }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
                       <span style={{ color: GRAY_60 }}>{label}</span>
                       <span style={{ fontWeight: 600, color }}>{value}</span>
                     </div>
                   ))}
-                  <div style={{ height: 6, backgroundColor: GRAY_5, borderRadius: 3, overflow: "hidden", position: "relative", marginTop: 4 }}>
-                    <div style={{ height: "100%", width: `${CREDIT_PCT}%`, backgroundColor: CREDIT_PCT < 20 ? RED : CREDIT_PCT < 40 ? YELLOW : PRIMARY, borderRadius: 3 }} />
-                    <div style={{ position: "absolute", top: 0, bottom: 0, left: "20%", width: 1.5, backgroundColor: RED, opacity: 0.6 }} />
-                  </div>
                 </div>
               </div>
             </SectionCard>
 
             {/* [Row 1-3] 멤버별 이달 소비 */}
             <SectionCard title="멤버별 이달 소비" subtitle={`팀 합계 ${members.reduce((s, m) => s + m.usedCr, 0).toLocaleString()} cr`}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {[...members].sort((a, b) => b.usedCr - a.usedCr).map(m => {
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {[...members].sort((a, b) => b.usedCr - a.usedCr).slice(0, 3).map(m => {
                   const teamTotal = members.reduce((s, x) => s + x.usedCr, 0);
                   const pct = Math.round((m.usedCr / teamTotal) * 100);
                   const barColor = m.role === "workspace.owner" ? PRIMARY : m.role === "workspace.admin" ? "rgb(255,149,0)" : GRAY_30;
                   const avatarBg = m.role === "workspace.owner" ? PRIMARY : m.role === "workspace.admin" ? "rgb(255,149,0)" : GRAY_40;
                   return (
                     <div key={m.email}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "white", flexShrink: 0 }}>{m.avatar}</div>
-                          <span style={{ fontSize: 12, color: GRAY_90 }}>{m.name}</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                          <div style={{ width: 30, height: 30, borderRadius: "50%", backgroundColor: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "white", flexShrink: 0 }}>{m.avatar}</div>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{m.name}</span>
                         </div>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <span style={{ fontSize: 11, color: GRAY_60 }}>{m.usedCr.toLocaleString()} cr</span>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: GRAY_70, width: 26, textAlign: "right" }}>{pct}%</span>
+                          <span style={{ fontSize: 12, color: GRAY_60 }}>{m.usedCr.toLocaleString()} cr</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: GRAY_70, width: 30, textAlign: "right" }}>{pct}%</span>
                         </div>
                       </div>
-                      <div style={{ height: 4, backgroundColor: GRAY_5, borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${pct}%`, backgroundColor: barColor, borderRadius: 2 }} />
+                      <div style={{ height: 6, backgroundColor: GRAY_5, borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${pct}%`, backgroundColor: barColor, borderRadius: 3 }} />
                       </div>
                     </div>
                   );
@@ -441,12 +433,12 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
             {/* [Row 2-1] 멤버 변동 이력 */}
             <SectionCard title="멤버 변동 이력">
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {memberHistory.map((ev, i) => {
+                {memberHistory.slice(0, 5).map((ev, i, arr) => {
                   const tagColor = ev.tag === "신규" ? GREEN : ev.tag === "역할변경" ? "rgb(180,100,0)" : PRIMARY;
                   const tagBg = ev.tag === "신규" ? "rgb(230,248,237)" : ev.tag === "역할변경" ? "rgb(255,246,224)" : PRIMARY_10;
                   const Icon = ev.tag === "신규" ? UserPlus : ev.tag === "역할변경" ? Shield : Crown;
                   return (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < memberHistory.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
                       <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: tagBg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <Icon size={12} color={tagColor} />
                       </div>
@@ -469,10 +461,10 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {[
                   ...paymentHistory.map(p => ({ icon: "payment" as const, date: p.date, title: p.desc, sub: p.amount, value: p.credits, valueColor: GREEN })),
-                  ...usageHistory.filter(u => u.type === "서버").slice(0, 3).map(u => ({ icon: "usage" as const, date: u.date, title: u.desc, sub: u.type, value: u.credits, valueColor: RED })),
-                ].slice(0, 6).map((row, i, arr) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "7px 0", borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
-                    <div style={{ width: 26, height: 26, borderRadius: 7, backgroundColor: row.icon === "payment" ? "rgb(230,248,237)" : PRIMARY_10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  ...usageHistory.filter(u => u.type === "서버").map(u => ({ icon: "usage" as const, date: u.date, title: u.desc, sub: u.type, value: u.credits, valueColor: RED })),
+                ].slice(0, 5).map((row, i, arr) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: row.icon === "payment" ? "rgb(230,248,237)" : PRIMARY_10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       {row.icon === "payment" ? <CreditCard size={12} color={GREEN} /> : <Server size={11} color={PRIMARY} />}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -488,8 +480,8 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
             {/* [Row 2-3] 설정 변동 이력 */}
             <SectionCard title="설정 변동 이력">
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {settingsHistory.map((s, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < settingsHistory.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
+                {settingsHistory.slice(0, 5).map((s, i, arr) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
                     <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: GRAY_5, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                       <Settings size={12} color={GRAY_60} />
                     </div>
@@ -551,38 +543,27 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
 
       {tab === "Wallet" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Credit cards */}
+          {/* Credit summary */}
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
             <Card style={{ padding: "22px 24px" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>크레딧 + 포인트 잔액</div>
-                  <div style={{ fontSize: 34, fontWeight: 800, color: PRIMARY, lineHeight: 1, marginBottom: 4 }}>{CREDIT_NOW.toLocaleString()} cr</div>
-                  <div style={{ fontSize: 12, color: GRAY_60 }}>크레딧 44,230 cr + 포인트 1,000 cr</div>
-                </div>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
+                <div style={{ fontSize: 13, color: GRAY_60 }}>크레딧 포인트 잔액</div>
                 <PrimaryBtn size="small">크레딧 충전</PrimaryBtn>
               </div>
-
-              {/* Progress bar toward depletion */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 5 }}>
-                  <span>잔액 {CREDIT_PCT}%</span>
-                  <span>최대 {CREDIT_MAX.toLocaleString()} cr 기준</span>
+              <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginBottom: 2 }}>{CREDIT_NOW.toLocaleString()} cr</div>
+              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>크레딧 + 포인트 합산</div>
+              {[
+                { label: "크레딧", amount: 44230, color: PRIMARY },
+                { label: "포인트", amount: 1000, color: YELLOW },
+              ].map(({ label, amount, color }) => (
+                <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: color }} />
+                  <span style={{ flex: 1, fontSize: 12, color: GRAY_70 }}>{label}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color }}>{amount.toLocaleString()} cr</span>
                 </div>
-                <div style={{ height: 8, backgroundColor: GRAY_5, borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${CREDIT_PCT}%`, backgroundColor: CREDIT_PCT < 20 ? RED : CREDIT_PCT < 40 ? YELLOW : PRIMARY, borderRadius: 4 }} />
-                </div>
-              </div>
-
-              <div style={{ padding: "12px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, display: "flex", alignItems: "center", gap: 10 }}>
-                <CreditCard size={15} color={PRIMARY} />
-                <span style={{ fontSize: 12, color: GRAY_70, fontWeight: 500 }}>등록 카드: **** **** **** 4521 (VISA)</span>
-                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                  <span style={{ fontSize: 11, color: GRAY_60 }}>workspace.owner 전용</span>
-                  <button style={{ fontSize: 11, color: PRIMARY, backgroundColor: "white", border: `1px solid ${PRIMARY}`, borderRadius: 6, padding: "3px 9px", cursor: "pointer", fontWeight: 600 }}>
-                    카드 변경
-                  </button>
-                </div>
+              ))}
+              <div style={{ height: 6, backgroundColor: GRAY_5, borderRadius: 3, overflow: "hidden", marginTop: 4 }}>
+                <div style={{ height: "100%", width: `${(44230 / 45230) * 100}%`, backgroundColor: PRIMARY, borderRadius: 3 }} />
               </div>
             </Card>
 
@@ -606,32 +587,29 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
             </Card>
           </div>
 
-          {/* Payment History */}
-          <ListCard title="결제 이력" action={<Badge color="neutral">workspace.owner / admin만 조회</Badge>}>
-            <Table
-              headers={["날짜", "내역", "금액", "크레딧", "상태"]}
-              rows={paymentHistory.map(p => [
-                <span style={{ fontSize: 12, color: GRAY_60 }}>{p.date}</span>,
-                <span>{p.desc}</span>,
-                <span style={{ fontWeight: 600 }}>{p.amount}</span>,
-                <span style={{ color: GREEN, fontWeight: 700, fontFamily: "Roboto Mono, monospace" }}>{p.credits}</span>,
-                <Badge color="success">{p.status}</Badge>,
-              ])}
-            />
-          </ListCard>
-
-          {/* Usage History */}
-          <ListCard title="크레딧 사용 이력" action={<Badge color="info">모든 멤버 조회 가능</Badge>}>
-            <Table
-              headers={["날짜", "내역", "구분", "차감"]}
-              rows={usageHistory.map(u => [
-                <span style={{ fontSize: 12, color: GRAY_60 }}>{u.date}</span>,
-                <span>{u.desc}</span>,
-                <Badge color={u.type === "서버" ? "primary" : "info"}>{u.type}</Badge>,
-                <span style={{ color: RED, fontWeight: 700, fontFamily: "Roboto Mono, monospace" }}>{u.credits}</span>,
-              ])}
-            />
-          </ListCard>
+          {/* 크레딧 충전 및 차감 이력 */}
+          {(() => {
+            const chargeRows = paymentHistory.map(p => ({
+              date: p.date, desc: p.desc, credits: p.credits, isCharge: true,
+            }));
+            const useRows = usageHistory.map(u => ({
+              date: u.date, desc: u.desc, credits: u.credits, isCharge: false,
+            }));
+            const merged = [...chargeRows, ...useRows].sort((a, b) => b.date.localeCompare(a.date));
+            return (
+              <ListCard title="크레딧 충전 및 차감 이력">
+                <Table
+                  headers={["날짜", "내역", "구분", "크레딧"]}
+                  rows={merged.map(r => [
+                    <span style={{ fontSize: 12, color: GRAY_60 }}>{r.date}</span>,
+                    <span>{r.desc}</span>,
+                    <Badge color={r.isCharge ? "success" : "danger"}>{r.isCharge ? "충전" : "차감"}</Badge>,
+                    <span style={{ color: r.isCharge ? GREEN : RED, fontWeight: 700, fontFamily: "Roboto Mono, monospace" }}>{r.credits}</span>,
+                  ])}
+                />
+              </ListCard>
+            );
+          })()}
         </div>
       )}
 
