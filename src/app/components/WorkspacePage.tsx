@@ -55,7 +55,7 @@ const settingsHistory = [
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type AlertKey = "credit" | "server" | "payment" | "member";
+type AlertKey = "credit" | "gpu_usage" | "gpu_vram" | "storage_temp" | "storage_local" | "storage_shared";
 type AlertCfg = {
   enabled: boolean;
   threshold: number;
@@ -64,11 +64,13 @@ type AlertCfg = {
 };
 type MemberSortField = "name" | "email" | "role" | "servers" | "local" | "shared" | "credits" | "joined" | null;
 
-const alertDefs: { key: AlertKey; label: string; hasThreshold: boolean; triggerLabel: string }[] = [
-  { key: "credit", label: "크레딧 잔액 경고", hasThreshold: true, triggerLabel: "% 미만 시" },
-  { key: "server", label: "서버 오류 알림", hasThreshold: false, triggerLabel: "Error/OOMKilled 발생 시" },
-  { key: "payment", label: "결제 실패 알림", hasThreshold: false, triggerLabel: "카드 결제 실패 시" },
-  { key: "member", label: "멤버 변동 알림", hasThreshold: false, triggerLabel: "초대/삭제 발생 시" },
+const alertDefs: { key: AlertKey; label: string; desc: string; hasThreshold: boolean; unit: string }[] = [
+  { key: "credit",         label: "Low Credit Balance",    desc: "Sent when the credit balance falls below the configured threshold.",          hasThreshold: true, unit: "% below" },
+  { key: "gpu_usage",      label: "High GPU Usage",        desc: "Sent when GPU utilization exceeds the configured threshold.",                hasThreshold: true, unit: "% above" },
+  { key: "gpu_vram",       label: "High GPU vRAM Usage",   desc: "Sent when vRAM utilization exceeds the configured threshold.",               hasThreshold: true, unit: "% above" },
+  { key: "storage_temp",   label: "Low Temporary Storage", desc: "Sent when temporary storage utilization exceeds the configured threshold.",  hasThreshold: true, unit: "% above" },
+  { key: "storage_local",  label: "Low Local Storage",     desc: "Sent when local storage utilization exceeds the configured threshold.",      hasThreshold: true, unit: "% above" },
+  { key: "storage_shared", label: "Low Shared Storage",    desc: "Sent when shared storage utilization exceeds the configured threshold.",     hasThreshold: true, unit: "% above" },
 ];
 
 // ─── InfoTooltip ──────────────────────────────────────────────────────────────
@@ -237,10 +239,12 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
   const [tab, setTab] = useState(initialTab);
 
   const [alertConfig, setAlertConfig] = useState<Record<AlertKey, AlertCfg>>({
-    credit:  { enabled: true,  threshold: 20, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
-    server:  { enabled: true,  threshold: 0,  channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: true  } },
-    payment: { enabled: true,  threshold: 0,  channels: { inapp: true,  email: true  }, recipients: { owner: true,  admin: false, user: false } },
-    member:  { enabled: false, threshold: 0,  channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
+    credit:         { enabled: true,  threshold: 20, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
+    gpu_usage:      { enabled: true,  threshold: 80, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: true  } },
+    gpu_vram:       { enabled: true,  threshold: 90, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: true  } },
+    storage_temp:   { enabled: false, threshold: 90, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
+    storage_local:  { enabled: false, threshold: 90, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
+    storage_shared: { enabled: false, threshold: 90, channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
   });
 
   const [sortField, setSortField] = useState<MemberSortField>(null);
@@ -308,7 +312,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
 
   return (
     <PageContainer title="Workspace" subtitle="My Workspace — 워크스페이스 현황·멤버·크레딧을 한눈에 관리합니다.">
-      <TabBar tabs={["Overview", `Members (${members.length})`, "Wallet", "Settings"]} active={tab === "Members" ? `Members (${members.length})` : tab} onChange={t => handleTabChange(t.replace(/ \(\d+\)$/, ""))} />
+      <TabBar tabs={["Overview", `Members (${members.length})`, "Credit", "Settings"]} active={tab === "Members" ? `Members (${members.length})` : tab} onChange={t => handleTabChange(t.replace(/ \(\d+\)$/, ""))} />
 
       {tab === "Overview" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -344,7 +348,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
 
             {/* [Row 1-1] 크레딧 잔액 및 소비 현황 */}
-            <SectionCard title="크레딧 잔액 및 소비 현황">
+            <SectionCard title="크레딧 잔액 및 소비 현황" headerStyle={{ minHeight: 52 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 5 }}>현재 잔액</div>
@@ -380,7 +384,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
             </SectionCard>
 
             {/* [Row 1-2] 크레딧 런웨이 */}
-            <SectionCard title="크레딧 런웨이">
+            <SectionCard title="크레딧 런웨이" headerStyle={{ minHeight: 52 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 5 }}>임계값(20%) 도달까지</div>
@@ -500,35 +504,28 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
       )}
 
       {tab === "Members" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-
-          {/* Toolbar */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-            <span style={{ fontSize: 13, color: GRAY_60 }}>총 <strong style={{ color: GRAY_90 }}>{members.length}명</strong></span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: GRAY_90 }}>멤버</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: GRAY_60, backgroundColor: GRAY_5, border: `1px solid ${GRAY_10}`, borderRadius: 999, padding: "1px 8px" }}>{members.length}명</span>
+            </div>
             <PrimaryBtn size="small"><Plus size={14} /> 멤버 초대</PrimaryBtn>
           </div>
 
           {/* Column header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "2px 20px" }}>
-            {/* Avatar spacer */}
-            <div style={{ width: 44, flexShrink: 0 }} />
-            {/* Name / Email / Role sort buttons */}
-            <div style={{ width: 160, flexShrink: 0, display: "flex", alignItems: "center", gap: 2 }}>
-              <SortBtn field="name"  label="이름"  justify="flex-start" />
-              <span style={{ color: GRAY_30, fontSize: 10 }}>/</span>
-              <SortBtn field="email" label="이메일" justify="flex-start" />
-              <span style={{ color: GRAY_30, fontSize: 10 }}>/</span>
-              <SortBtn field="role"  label="역할"  justify="flex-start" />
+          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "0 20px", paddingLeft: 78 }}>
+            <div style={{ width: 160, flexShrink: 0 }}>
+              <SortBtn field="name" label="이름 / 역할" justify="flex-start" />
             </div>
-            {/* Stats column headers */}
             <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8 }}>
-              <SortBtn field="servers"  label="활성 서버" />
-              <SortBtn field="local"    label="활성 로컬" />
-              <SortBtn field="shared"   label="활성 공유" />
-              <SortBtn field="credits"  label="이달 소비" />
-              <SortBtn field="joined"   label="참여일" />
+              <SortBtn field="servers" label="활성/비활성 서버" />
+              <SortBtn field="local" label="로컬 스토리지" />
+              <SortBtn field="shared" label="공유 스토리지" />
+              <SortBtn field="credits" label="이달 소비" />
+              <SortBtn field="joined" label="참여일" />
             </div>
-            {/* Action spacer */}
             <div style={{ width: 28, flexShrink: 0 }} />
           </div>
 
@@ -541,13 +538,13 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
         </div>
       )}
 
-      {tab === "Wallet" && (
+      {tab === "Credit" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {/* Credit summary */}
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
             <Card style={{ padding: "22px 24px" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 6 }}>
-                <div style={{ fontSize: 13, color: GRAY_60 }}>크레딧 포인트 잔액</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>크레딧 포인트 잔액</span>
                 <PrimaryBtn size="small">크레딧 충전</PrimaryBtn>
               </div>
               <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginBottom: 2 }}>{CREDIT_NOW.toLocaleString()} cr</div>
@@ -557,7 +554,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
                 { label: "포인트", amount: 1000, color: YELLOW },
               ].map(({ label, amount, color }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: color }} />
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
                   <span style={{ flex: 1, fontSize: 12, color: GRAY_70 }}>{label}</span>
                   <span style={{ fontSize: 12, fontWeight: 700, color }}>{amount.toLocaleString()} cr</span>
                 </div>
@@ -568,7 +565,10 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
             </Card>
 
             <Card style={{ padding: "22px 24px" }}>
-              <div style={{ fontSize: 13, color: GRAY_60, marginBottom: 6 }}>이번 달 사용</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>이번 달 사용</span>
+                <PrimaryBtn size="small" style={{ visibility: "hidden" }}>크레딧 충전</PrimaryBtn>
+              </div>
               <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginBottom: 2 }}>12,450 cr</div>
               <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>≈ 124,500원</div>
               {[
@@ -576,7 +576,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
                 { label: "스토리지", amount: 1560, color: BLUE },
               ].map(({ label, amount, color }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: color }} />
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
                   <span style={{ flex: 1, fontSize: 12, color: GRAY_70 }}>{label}</span>
                   <span style={{ fontSize: 12, fontWeight: 700, color }}>{amount.toLocaleString()} cr</span>
                 </div>
@@ -614,69 +614,43 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
       )}
 
       {tab === "Settings" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <SectionCard title="알림 임계값 설정" subtitle="workspace.owner/admin 전용">
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 680 }}>
+          <SectionCard title="Alert Settings" bodyStyle={{ padding: "6px 20px" }}>
             {alertDefs.map((def, i) => {
               const cfg = alertConfig[def.key];
               return (
                 <div key={def.key} style={{ padding: "14px 0", borderBottom: i < alertDefs.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-
-                    {/* Left: label + trigger condition */}
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: cfg.enabled ? GRAY_90 : GRAY_60, marginBottom: 4 }}>
-                        {def.label}
-                      </div>
-                      {def.hasThreshold ? (
-                        <span style={{ fontSize: 11, color: GRAY_60, display: "flex", alignItems: "center", gap: 3 }}>
-                          잔액&nbsp;
-                          <input
-                            type="number" min={1} max={99}
-                            value={cfg.threshold}
-                            onChange={e => setThreshold(def.key, Number(e.target.value))}
-                            disabled={!cfg.enabled}
-                            style={{ width: 38, fontSize: 11, border: `1px solid ${GRAY_30}`, borderRadius: 5, padding: "2px 5px", textAlign: "center", color: GRAY_90, backgroundColor: cfg.enabled ? "white" : GRAY_5, outline: "none" }}
-                          />
-                          % 미만 시
-                        </span>
-                      ) : (
-                        <span style={{ fontSize: 11, color: GRAY_60 }}>{def.triggerLabel}</span>
-                      )}
+                  <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{def.label}</div>
+                      <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{def.desc}</div>
                     </div>
 
-                    {/* Right: 인앱/이메일 toggles + main toggle */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
-                      {/* Channel toggles */}
-                      <div style={{ display: "flex", gap: 16 }}>
-                        {(["inapp", "email"] as Array<"inapp" | "email">).map(ch => (
-                          <div key={ch} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-                            <span style={{ fontSize: 10, color: cfg.enabled ? GRAY_60 : GRAY_40 }}>
-                              {ch === "inapp" ? "인앱" : "이메일"}
-                            </span>
-                            <button
-                              onClick={() => { if (cfg.enabled) toggleChannel(def.key, ch); }}
-                              style={{
-                                width: 36, height: 20, borderRadius: 10, border: "none",
-                                cursor: cfg.enabled ? "pointer" : "default",
-                                backgroundColor: cfg.enabled && cfg.channels[ch] ? PRIMARY : GRAY_40,
-                                position: "relative", transition: "background 0.2s",
-                                opacity: cfg.enabled ? 1 : 0.35,
-                              }}>
-                              <span style={{ position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: cfg.enabled && cfg.channels[ch] ? 18 : 2 }} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                      <input
+                        type="number" min={1} max={99}
+                        value={cfg.threshold}
+                        onChange={e => setThreshold(def.key, Number(e.target.value))}
+                        style={{ width: 46, fontSize: 13, fontWeight: 600, border: `1px solid ${GRAY_30}`, borderRadius: 6, padding: "3px 6px", textAlign: "center", color: GRAY_90, outline: "none" }}
+                      />
+                      <span style={{ fontSize: 11, color: GRAY_60 }}>{def.unit}</span>
+                    </div>
 
-                      {/* Main alert on/off toggle */}
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-                        <span style={{ fontSize: 10, color: GRAY_60 }}>알림</span>
-                        <button
-                          onClick={() => toggleAlert(def.key)}
-                          style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: cfg.enabled ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s" }}>
-                          <span style={{ position: "absolute", top: 3, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: cfg.enabled ? 21 : 3 }} />
-                        </button>
-                      </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+                      {(["inapp", "email"] as Array<"inapp" | "email">).map(ch => (
+                        <div key={ch} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 11, color: GRAY_60 }}>{ch === "inapp" ? "Console" : "Email"}</span>
+                          <button
+                            onClick={() => toggleChannel(def.key, ch)}
+                            style={{
+                              width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
+                              backgroundColor: cfg.channels[ch] ? PRIMARY : GRAY_40,
+                              position: "relative", transition: "background 0.2s",
+                            }}>
+                            <span style={{ position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: cfg.channels[ch] ? 18 : 2 }} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -684,13 +658,19 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
             })}
           </SectionCard>
 
-          <SectionCard title="알림 수신 설정" subtitle="알림을 수신할 역할을 설정합니다">
-            {([
-              { key: "owner" as const, label: "Owner", desc: "워크스페이스 소유자", icon: <Crown size={13} />, bg: PRIMARY_10, color: PRIMARY },
-              { key: "admin" as const, label: "Admin", desc: "워크스페이스 관리자", icon: <Shield size={13} />, bg: "rgb(255,246,230)", color: "rgb(180,80,0)" },
-              { key: "user"  as const, label: "User",  desc: "일반 멤버",           icon: <User  size={13} />, bg: GRAY_5,     color: GRAY_60 },
-            ] as const).map((r, i) => (
-              <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0", borderBottom: i < 2 ? `1px solid ${GRAY_5}` : "none" }}>
+          <SectionCard title="Notification Recipients" bodyStyle={{ padding: "6px 20px" }}>
+            {(() => {
+              const byRole = (role: string) => members.filter(m => m.role === role);
+              const emailDesc = (list: typeof members) =>
+                list.length === 0 ? "None"
+                : list.length === 1 ? list[0].email
+                : `${list[0].email} +${list.length - 1} more`;
+              return ([
+                { key: "owner" as const, label: "Owner", desc: emailDesc(byRole("workspace.owner")), icon: <Crown size={13} />, bg: PRIMARY_10, color: PRIMARY },
+                { key: "admin" as const, label: "Admin", desc: emailDesc(byRole("workspace.admin")), icon: <Shield size={13} />, bg: "rgb(255,246,230)", color: "rgb(180,80,0)" },
+                { key: "user"  as const, label: "User",  desc: emailDesc(byRole("workspace.user")),  icon: <User  size={13} />, bg: GRAY_5,     color: GRAY_60 },
+              ] as const).map((r, i) => (
+              <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", borderBottom: i < 2 ? `1px solid ${GRAY_5}` : "none" }}>
                 <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: r.bg, display: "flex", alignItems: "center", justifyContent: "center", color: r.color, flexShrink: 0 }}>
                   {r.icon}
                 </div>
@@ -704,7 +684,8 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange }: { initia
                   <span style={{ position: "absolute", top: 3, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: notifRecipients[r.key] ? 21 : 3 }} />
                 </button>
               </div>
-            ))}
+            ));
+            })()}
           </SectionCard>
         </div>
       )}

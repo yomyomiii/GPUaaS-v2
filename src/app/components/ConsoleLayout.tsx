@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Bell, HelpCircle, ChevronDown, LayoutDashboard, Server, FolderOpen,
   Database, Layers, Users, CreditCard, Settings, Activity, Image,
@@ -6,7 +6,7 @@ import {
   ReceiptText, ShieldCheck, Mail, BarChart3, ArrowLeftRight
 } from "lucide-react";
 import {
-  PRIMARY, PRIMARY_10, PRIMARY_80,
+  PRIMARY, PRIMARY_10, PRIMARY_20, PRIMARY_80,
   GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
   RED, GREEN, BLUE, YELLOW,
   RADIUS_CARD, RADIUS_LG, RADIUS_XL, RADIUS_MD, RADIUS_SM, RADIUS_FULL,
@@ -17,7 +17,7 @@ import {
 } from "../../styles/tokens";
 
 export {
-  PRIMARY, PRIMARY_10, PRIMARY_80,
+  PRIMARY, PRIMARY_10, PRIMARY_20, PRIMARY_80,
   GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
   RED, GREEN, BLUE, YELLOW,
 };
@@ -42,11 +42,12 @@ export function Badge({ color = "neutral", variant = "filled", children }: Badge
   return (
     <span style={{
       display: "inline-flex", alignItems: "center",
-      height: 22, padding: "0 8px", borderRadius: 9999,
-      fontSize: 12, fontWeight: 500, lineHeight: 1,
+      height: 20, padding: "0 7px", borderRadius: 99,
+      fontSize: 11, fontWeight: 600, lineHeight: 1,
       backgroundColor: variant === "filled" ? c.bg : "transparent",
       color: c.text,
-      border: variant === "outline" ? `1px solid ${c.border}` : "none",
+      border: `1px solid ${variant === "outline" ? c.border : c.border + "40"}`,
+      whiteSpace: "nowrap" as const,
     }}>{children}</span>
   );
 }
@@ -163,9 +164,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
               <div style={{ fontSize: 12, color: GRAY_60 }}>yeomeyeom.ji@sdt.inc</div>
             </div>
             {[
-              { icon: <User size={14} />, label: "내 정보" },
               { icon: <User size={14} />, label: "내 프로필" },
-              { icon: <Layers size={14} />, label: "내 워크스페이스" },
               { icon: <BellRing size={14} />, label: "알림 설정" },
             ].map(item => (
               <button key={item.label} style={{
@@ -211,7 +210,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
 }
 
 // ─── User LNB ─────────────────────────────────────────────────────────────────
-type UserScreen = "dashboard" | "workspace-overview" | "workspace-members" | "workspace-wallet"
+type UserScreen = "dashboard" | "workspace-overview" | "workspace-members" | "workspace-credit"
   | "workspace-settings" | "gallery" | "server-list" | "server-detail"
   | "storage-overview" | "storage-temp" | "storage-local" | "storage-shared"
   | "notifications";
@@ -236,7 +235,7 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
   const workspaceSubs = [
     { id: "workspace-overview" as UserScreen, label: "Overview" },
     { id: "workspace-members" as UserScreen, label: "Members" },
-    { id: "workspace-wallet" as UserScreen, label: "Wallet" },
+    { id: "workspace-credit" as UserScreen, label: "Credit" },
     { id: "workspace-settings" as UserScreen, label: "Settings" },
   ];
 
@@ -405,7 +404,7 @@ type AdminScreen = "admin-dashboard" | "admin-users" | "admin-workspaces" | "adm
   | "admin-storage" | "admin-storage-pricing" | "admin-images" | "admin-categories"
   | "admin-templates" | "admin-tiers" | "admin-gpu-types" | "admin-gpu-pricing"
   | "admin-credits" | "admin-credit-products" | "admin-payments" | "admin-refunds"
-  | "admin-notif-templates" | "admin-notif-thresholds" | "admin-notif-email"
+  | "admin-notif"
   | "admin-settings-auth" | "admin-settings-terms" | "admin-settings-storage-integration";
 
 export type { UserScreen, AdminScreen };
@@ -414,16 +413,16 @@ interface AdminLNBProps {
   active: AdminScreen;
   onNav: (screen: AdminScreen) => void;
   onSwitchMode?: () => void;
+  disabledMenus?: Set<string>;
 }
 
-export function AdminLNB({ active, onNav, onSwitchMode }: AdminLNBProps) {
+export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set() }: AdminLNBProps) {
   const [storageExp, setStorageExp] = useState(true);
+  const [serverExp, setServerExp] = useState(false);
   const [imageExp, setImageExp] = useState(false);
   const [gpuExp, setGpuExp] = useState(false);
   const [creditExp, setCreditExp] = useState(false);
   const [paymentExp, setPaymentExp] = useState(false);
-  const [notifExp, setNotifExp] = useState(false);
-  const [settingsExp, setSettingsExp] = useState(false);
 
   const navItemStyle = (isActive: boolean) => ({
     display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "8px 12px",
@@ -477,76 +476,71 @@ export function AdminLNB({ active, onNav, onSwitchMode }: AdminLNBProps) {
       overflowY: "auto",
     }}>
       <NavItem id="admin-dashboard" icon={<LayoutDashboard size={16} />} label="Dashboard" />
-      <NavItem id="admin-users" icon={<Users size={16} />} label="User Management" />
-      <NavItem id="admin-workspaces" icon={<Layers size={16} />} label="Workspace Management" />
-      <NavItem id="admin-servers" icon={<Server size={16} />} label="Server Management" />
-
+      {/* User Management */}
+      <div style={{ opacity: disabledMenus.has("admin-users") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-users") ? "none" : "auto" }}>
+        <NavItem id="admin-users" icon={<Users size={16} />} label="User Management" />
+      </div>
+      {/* Workspace Management */}
+      <div style={{ opacity: disabledMenus.has("admin-workspaces") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-workspaces") ? "none" : "auto" }}>
+        <NavItem id="admin-workspaces" icon={<Layers size={16} />} label="Workspace Management" />
+      </div>
+      {/* Server Management */}
+      <div style={{ opacity: disabledMenus.has("admin-servers") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-servers") ? "none" : "auto" }}>
+        <SectionHeader icon={<Server size={16} />} label="Server Management"
+          active={active === "admin-servers" || active === "admin-templates"}
+          expanded={serverExp} onClick={() => setServerExp(!serverExp)} />
+        {serverExp && <>
+          <SubItem id="admin-servers" label="Servers" />
+          <SubItem id="admin-templates" label="Server Templates" />
+        </>}
+      </div>
       {/* Storage Management */}
-      <SectionHeader icon={<Database size={16} />} label="Storage Management"
-        active={active.startsWith("admin-storage")} expanded={storageExp}
-        onClick={() => { setStorageExp(!storageExp); }} />
-      {storageExp && <>
-        <SubItem id="admin-storage" label="All Storages" />
-        <SubItem id="admin-storage-pricing" label="Pricing Policy" />
-      </>}
-
+      <div style={{ opacity: disabledMenus.has("admin-storage") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-storage") ? "none" : "auto" }}>
+        <SectionHeader icon={<Database size={16} />} label="Storage Management"
+          active={active.startsWith("admin-storage")} expanded={storageExp}
+          onClick={() => { setStorageExp(!storageExp); }} />
+        {storageExp && <>
+          <SubItem id="admin-storage" label="Storage" />
+          <SubItem id="admin-storage-pricing" label="Storage Pricing" />
+        </>}
+      </div>
       {/* Image Management */}
-      <SectionHeader icon={<Image size={16} />} label="Image Management"
-        active={active.startsWith("admin-images") || active.startsWith("admin-categories") || active.startsWith("admin-templates") || active === "admin-tiers"}
-        expanded={imageExp} onClick={() => setImageExp(!imageExp)} />
-      {imageExp && <>
-        <SubItem id="admin-images" label="Server Images" />
-        <SubItem id="admin-categories" label="Categories" />
-        <SubItem id="admin-templates" label="Server Templates" />
-        <SubItem id="admin-tiers" label="Tier 관리" />
-      </>}
-
+      <div style={{ opacity: disabledMenus.has("admin-images") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-images") ? "none" : "auto" }}>
+        <SectionHeader icon={<Image size={16} />} label="Image Management"
+          active={active.startsWith("admin-images") || active.startsWith("admin-categories") || active === "admin-tiers"}
+          expanded={imageExp} onClick={() => setImageExp(!imageExp)} />
+        {imageExp && <>
+          <SubItem id="admin-images" label="Image" />
+          <SubItem id="admin-categories" label="Category" />
+          <SubItem id="admin-tiers" label="Tier" />
+        </>}
+      </div>
       {/* GPU Type Management */}
-      <SectionHeader icon={<Cpu size={16} />} label="GPU Type Management"
-        active={active.startsWith("admin-gpu")} expanded={gpuExp}
-        onClick={() => setGpuExp(!gpuExp)} />
-      {gpuExp && <>
-        <SubItem id="admin-gpu-types" label="GPU Type & Nodes" />
-        <SubItem id="admin-gpu-pricing" label="GPU Type Pricing" />
-      </>}
-
+      <div style={{ opacity: disabledMenus.has("admin-gpu") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-gpu") ? "none" : "auto" }}>
+        <SectionHeader icon={<Cpu size={16} />} label="GPU Type Management"
+          active={active.startsWith("admin-gpu")} expanded={gpuExp}
+          onClick={() => setGpuExp(!gpuExp)} />
+        {gpuExp && <>
+          <SubItem id="admin-gpu-types" label="GPU Type" />
+          <SubItem id="admin-gpu-pricing" label="GPU Type Pricing" />
+        </>}
+      </div>
       {/* Credit Management */}
-      <SectionHeader icon={<CreditCard size={16} />} label="Credit Management"
-        active={active.startsWith("admin-credit")} expanded={creditExp}
-        onClick={() => setCreditExp(!creditExp)} />
-      {creditExp && <>
-        <SubItem id="admin-credits" label="Credit Grants" />
-        <SubItem id="admin-credit-products" label="Credit Products" />
-      </>}
-
-      {/* Payment History */}
-      <SectionHeader icon={<ReceiptText size={16} />} label="Payment History"
-        active={active.startsWith("admin-payment") || active.startsWith("admin-refund")}
-        expanded={paymentExp} onClick={() => setPaymentExp(!paymentExp)} />
-      {paymentExp && <>
-        <SubItem id="admin-payments" label="History" />
-        <SubItem id="admin-refunds" label="Refund Management" />
-      </>}
-
+      <div style={{ opacity: disabledMenus.has("admin-credits") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-credits") ? "none" : "auto" }}>
+        <SectionHeader icon={<CreditCard size={16} />} label="Credit Management"
+          active={active.startsWith("admin-credit")} expanded={creditExp}
+          onClick={() => setCreditExp(!creditExp)} />
+        {creditExp && <>
+          <SubItem id="admin-credits" label="Credit Grants" />
+          <SubItem id="admin-credit-products" label="Credit Products" />
+        </>}
+      </div>
       {/* Notification Management */}
-      <SectionHeader icon={<BellRing size={16} />} label="Notification Mgmt"
-        active={active.startsWith("admin-notif")} expanded={notifExp}
-        onClick={() => setNotifExp(!notifExp)} />
-      {notifExp && <>
-        <SubItem id="admin-notif-templates" label="Template Management" />
-        <SubItem id="admin-notif-thresholds" label="Threshold Management" />
-        <SubItem id="admin-notif-email" label="Email Sender Settings" />
-      </>}
-
+      <div style={{ opacity: disabledMenus.has("admin-notif") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-notif") ? "none" : "auto" }}>
+        <NavItem id="admin-notif" icon={<BellRing size={16} />} label="Notification Management" />
+      </div>
       {/* System Settings */}
-      <SectionHeader icon={<Settings size={16} />} label="System Settings"
-        active={active.startsWith("admin-settings")} expanded={settingsExp}
-        onClick={() => setSettingsExp(!settingsExp)} />
-      {settingsExp && <>
-        <SubItem id="admin-settings-auth" label="Auth Settings" />
-        <SubItem id="admin-settings-terms" label="Terms Management" />
-        <SubItem id="admin-settings-storage-integration" label="Internal Storage Integration" />
-      </>}
+      <NavItem id="admin-settings-auth" icon={<Settings size={16} />} label="System Settings" />
 
       {/* 하단 프로필 + 콘솔 전환 */}
       <div style={{ marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${GRAY_10}` }}>
@@ -662,8 +656,9 @@ export function MetricCard({ label, value, sub, icon, color = PRIMARY, trend }: 
     <Card style={{ padding: "20px 24px" }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
         <span style={{ fontSize: 13, color: GRAY_60, fontWeight: 500 }}>{label}</span>
-        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ color }}>{icon}</span>
+        <div style={{ position: "relative", width: 36, height: 36, borderRadius: 10, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ position: "absolute", inset: 0, backgroundColor: color, opacity: 0.12 }} />
+          <span style={{ color, position: "relative" }}>{icon}</span>
         </div>
       </div>
       <div style={{ fontSize: 28, fontWeight: 700, color: GRAY_90, lineHeight: 1 }}>{value}</div>
@@ -680,19 +675,79 @@ export function MetricCard({ label, value, sub, icon, color = PRIMARY, trend }: 
 }
 
 // ─── Table ────────────────────────────────────────────────────────────────────
-export function Table({ headers, rows, onRowClick }: {
-  headers: string[];
+export function Table({ headers, rows, onRowClick, colWidths, spacerGaps }: {
+  headers: React.ReactNode[];
   rows: React.ReactNode[][];
   onRowClick?: (i: number) => void;
+  colWidths?: string[];
+  spacerGaps?: boolean;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const n = headers.length;
+
+  if (spacerGaps) {
+    const thStyle = (i: number): React.CSSProperties => ({
+      width: "1px", whiteSpace: "nowrap",
+      padding: i === 0 ? "10px 0 10px 16px" : i === n - 1 ? "10px 16px 10px 0" : "10px 0",
+      fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left",
+      borderBottom: `1px solid ${GRAY_10}`,
+    });
+    const tdStyle = (j: number): React.CSSProperties => ({
+      width: "1px",
+      padding: j === 0 ? "12px 0 12px 16px" : j === n - 1 ? "12px 16px 12px 0" : "12px 0",
+      fontSize: 13, color: GRAY_90, borderBottom: `1px solid ${GRAY_10}`,
+    });
+    const spacerThStyle: React.CSSProperties = { borderBottom: `1px solid ${GRAY_10}` };
+    const spacerTdStyle = (i: number): React.CSSProperties => ({
+      borderBottom: `1px solid ${GRAY_10}`,
+      backgroundColor: hovered === i ? "rgba(99,90,220,0.025)" : "white",
+    });
+    return (
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ backgroundColor: GRAY_5 }}>
+              {headers.map((h, i) => (
+                <React.Fragment key={i}>
+                  <th style={thStyle(i)}>{h}</th>
+                  {i < n - 1 && <th style={spacerThStyle} />}
+                </React.Fragment>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i}
+                onClick={() => onRowClick?.(i)}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
+                style={{ cursor: onRowClick ? "pointer" : "default", transition: "background 0.1s" }}>
+                {row.map((cell, j) => (
+                  <React.Fragment key={j}>
+                    <td style={{ ...tdStyle(j), backgroundColor: hovered === i ? "rgba(99,90,220,0.025)" : "white" }}>{cell}</td>
+                    {j < n - 1 && <td style={spacerTdStyle(i)} />}
+                  </React.Fragment>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
     <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: colWidths && colWidths.length === headers.length ? "fixed" : "auto" }}>
+        {colWidths && (
+          <colgroup>
+            {headers.map((_, i) => <col key={i} style={i < colWidths.length ? { width: colWidths[i] } : {}} />)}
+          </colgroup>
+        )}
         <thead>
           <tr style={{ backgroundColor: GRAY_5 }}>
             {headers.map((h, i) => (
-              <th key={i} style={{ padding: "10px 16px", fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", borderBottom: `1px solid ${GRAY_10}`, whiteSpace: "nowrap" }}>
+              <th key={i} style={{ padding: i === 0 ? "10px 12px 10px 16px" : i === headers.length - 1 ? "10px 16px 10px 20px" : "10px 12px", ...(i === headers.length - 1 ? { width: "1px", whiteSpace: "nowrap" as const } : {}), fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", borderBottom: `1px solid ${GRAY_10}`, whiteSpace: "nowrap" }}>
                 {h}
               </th>
             ))}
@@ -710,7 +765,7 @@ export function Table({ headers, rows, onRowClick }: {
                 transition: "background 0.1s",
               }}>
               {row.map((cell, j) => (
-                <td key={j} style={{ padding: "12px 16px", fontSize: 13, color: GRAY_90, borderBottom: `1px solid ${GRAY_10}` }}>
+                <td key={j} style={{ padding: j === 0 ? "12px 12px 12px 16px" : j === row.length - 1 ? "12px 16px 12px 20px" : "12px 12px", fontSize: 13, color: GRAY_90, borderBottom: `1px solid ${GRAY_10}` }}>
                   {cell}
                 </td>
               ))}
@@ -724,16 +779,16 @@ export function Table({ headers, rows, onRowClick }: {
 
 // ─── Card Variants ────────────────────────────────────────────────────────────
 // SectionCard: titled card with header separator + padded body
-export function SectionCard({ title, subtitle, action, children, style }: {
+export function SectionCard({ title, subtitle, action, children, style, bodyStyle, headerStyle }: {
   title?: string; subtitle?: string; action?: React.ReactNode;
-  children: React.ReactNode; style?: React.CSSProperties;
+  children: React.ReactNode; style?: React.CSSProperties; bodyStyle?: React.CSSProperties; headerStyle?: React.CSSProperties;
 }) {
   return (
     <Card style={{ display: "flex", flexDirection: "column", height: "100%", ...style }}>
       {title && (
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "14px 20px", borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0,
+          padding: "14px 20px", borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, ...headerStyle,
         }}>
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90 }}>{title}</div>
@@ -742,7 +797,7 @@ export function SectionCard({ title, subtitle, action, children, style }: {
           {action && <div>{action}</div>}
         </div>
       )}
-      <div style={{ padding: "20px 24px", flex: 1 }}>{children}</div>
+      <div style={{ padding: "20px 24px", flex: 1, ...bodyStyle }}>{children}</div>
     </Card>
   );
 }

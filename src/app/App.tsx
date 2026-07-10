@@ -12,8 +12,7 @@ import {
   AdminWorkspaceManagement,
   AdminWorkspaceDetail,
   AdminServerManagement,
-  AdminGPUTypeManagement,
-  AdminGPUPricing,
+  AdminGPUManagement,
   AdminImageManagement,
   AdminCreditManagement,
   AdminStorageManagement,
@@ -34,6 +33,7 @@ export default function App() {
   // ─── Admin Console State ───────────────────────────────────────────────────
   const [adminScreen, setAdminScreen] = useState<AdminScreen>("admin-dashboard");
   const [adminWsDetailVisible, setAdminWsDetailVisible] = useState(false);
+  const [disabledMenus, setDisabledMenus] = useState<Set<string>>(new Set());
 
   // ─── User nav mapper ───────────────────────────────────────────────────────
   const handleUserNav = (screen: UserScreen) => {
@@ -41,7 +41,7 @@ export default function App() {
       const tabMap: Record<string, string> = {
         "workspace-overview": "Overview",
         "workspace-members": "Members",
-        "workspace-wallet": "Wallet",
+        "workspace-credit": "Credit",
         "workspace-settings": "Settings",
       };
       setWorkspaceTab(tabMap[screen] ?? "Overview");
@@ -62,6 +62,14 @@ export default function App() {
   const handleAdminNav = (screen: AdminScreen) => {
     setAdminWsDetailVisible(false);
     setAdminScreen(screen);
+  };
+
+  const toggleMenu = (key: string) => {
+    setDisabledMenus(prev => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
   };
 
   // Resolve active LNB item for workspace/storage sub-screens
@@ -90,7 +98,7 @@ export default function App() {
                     const reverseMap: Record<string, UserScreen> = {
                       "Overview": "workspace-overview",
                       "Members": "workspace-members",
-                      "Wallet": "workspace-wallet",
+                      "Credit": "workspace-credit",
                       "Settings": "workspace-settings",
                     };
                     const screen = reverseMap[tab];
@@ -122,7 +130,7 @@ export default function App() {
           </>
         ) : (
           <>
-            <AdminLNB active={adminScreen} onNav={handleAdminNav} onSwitchMode={() => setMode("user")} />
+            <AdminLNB active={adminScreen} onNav={handleAdminNav} onSwitchMode={() => setMode("user")} disabledMenus={disabledMenus} />
             <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
               {adminScreen === "admin-dashboard" && <AdminDashboard />}
               {adminScreen === "admin-users" && <AdminUserManagement />}
@@ -131,24 +139,28 @@ export default function App() {
                   ? <AdminWorkspaceDetail onBack={() => setAdminWsDetailVisible(false)} />
                   : <AdminWorkspaceManagement onDetail={() => setAdminWsDetailVisible(true)} />
               )}
-              {adminScreen === "admin-servers" && <AdminServerManagement />}
+              {(adminScreen === "admin-servers" || adminScreen === "admin-templates") && (
+                <AdminServerManagement initialTab={adminScreen === "admin-templates" ? "Server Templates" : "Servers"} />
+              )}
               {(adminScreen === "admin-storage" || adminScreen === "admin-storage-pricing") && (
                 <AdminStorageManagement
-                  initialTab={adminScreen === "admin-storage-pricing" ? "Pricing Policy" : "All Storages"}
+                  initialTab={adminScreen === "admin-storage-pricing" ? "Storage Pricing" : "Storage"}
                 />
               )}
-              {(adminScreen === "admin-images" || adminScreen === "admin-categories" || adminScreen === "admin-templates" || adminScreen === "admin-tiers") && (
+              {(adminScreen === "admin-images" || adminScreen === "admin-categories" || adminScreen === "admin-tiers") && (
                 <AdminImageManagement
                   initialTab={
-                    adminScreen === "admin-categories" ? "카테고리"
-                    : adminScreen === "admin-templates" ? "Server Templates"
-                    : adminScreen === "admin-tiers" ? "Tier 관리"
-                    : "Server Images"
+                    adminScreen === "admin-categories" ? "Category"
+                    : adminScreen === "admin-tiers" ? "Tier"
+                    : "Image"
                   }
                 />
               )}
-              {adminScreen === "admin-gpu-types" && <AdminGPUTypeManagement />}
-              {adminScreen === "admin-gpu-pricing" && <AdminGPUPricing />}
+              {(adminScreen === "admin-gpu-types" || adminScreen === "admin-gpu-pricing") && (
+                <AdminGPUManagement
+                  initialTab={adminScreen === "admin-gpu-pricing" ? "GPU Type Pricing" : "GPU Type"}
+                />
+              )}
               {(adminScreen === "admin-credits" || adminScreen === "admin-credit-products") && (
                 <AdminCreditManagement
                   initialTab={adminScreen === "admin-credit-products" ? "크레딧 상품" : "크레딧 지급/회수"}
@@ -159,16 +171,10 @@ export default function App() {
                   initialTab={adminScreen === "admin-refunds" ? "환불 관리" : "결제 내역"}
                 />
               )}
-              {(adminScreen === "admin-notif-templates" || adminScreen === "admin-notif-thresholds" || adminScreen === "admin-notif-email") && (
-                <AdminNotificationManagement
-                  initialTab={
-                    adminScreen === "admin-notif-thresholds" ? "임계치 설정"
-                      : adminScreen === "admin-notif-email" ? "이메일 발신 설정"
-                        : "알림 템플릿"
-                  }
-                />
+              {adminScreen === "admin-notif" && (
+                <AdminNotificationManagement />
               )}
-              {(adminScreen === "admin-settings-auth" || adminScreen === "admin-settings-terms" || adminScreen === "admin-settings-storage-integration") && (
+              {adminScreen === "admin-settings-auth" && (
                 <AdminSystemSettings />
               )}
             </div>
@@ -178,4 +184,3 @@ export default function App() {
     </div>
   );
 }
-

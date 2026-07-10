@@ -79,7 +79,7 @@ export const TRANSITION_SLOW   = "0.2s ease";
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 export const GNB_HEIGHT     = 40;
-export const LNB_WIDTH      = 220;
+export const LNB_WIDTH      = 244;
 export const PAGE_MAX_WIDTH = 1200;
 export const PAGE_PADDING   = SPACE_7;  // 28px
 
