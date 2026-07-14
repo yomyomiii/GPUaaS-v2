@@ -211,8 +211,8 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
 
 // ─── User LNB ─────────────────────────────────────────────────────────────────
 type UserScreen = "dashboard" | "workspace-overview" | "workspace-members" | "workspace-credit"
-  | "workspace-settings" | "gallery" | "server-list" | "server-detail"
-  | "storage-overview" | "storage-temp" | "storage-local" | "storage-shared"
+  | "workspace-settings" | "server-list" | "server-detail"
+  | "storage"
   | "notifications";
 
 interface UserLNBProps {
@@ -223,10 +223,9 @@ interface UserLNBProps {
 }
 export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLNBProps) {
   const [wsExpanded, setWsExpanded] = useState(true);
-  const [storageExpanded, setStorageExpanded] = useState(true);
 
   const isWorkspaceActive = active.startsWith("workspace");
-  const isStorageActive = active.startsWith("storage");
+  const isStorageActive = active === "storage";
 
   const topItems = [
     { id: "dashboard" as UserScreen, icon: <LayoutDashboard size={16} />, label: "Dashboard" },
@@ -239,12 +238,6 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
     { id: "workspace-settings" as UserScreen, label: "Settings" },
   ];
 
-  const storageSubs = [
-    { id: "storage-overview" as UserScreen, label: "Overview" },
-    { id: "storage-temp" as UserScreen, label: "Temporary Storage" },
-    { id: "storage-local" as UserScreen, label: "Local Storage" },
-    { id: "storage-shared" as UserScreen, label: "Shared Storage" },
-  ];
 
   const navItemStyle = (isActive: boolean) => ({
     display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "9px 12px",
@@ -319,13 +312,7 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
         </button>
       ))}
 
-      {/* Gallery */}
-      <button onClick={() => onNav("gallery")} style={navItemStyle(active === "gallery")}
-        onMouseEnter={e => { if (active !== "gallery") e.currentTarget.style.backgroundColor = GRAY_5; }}
-        onMouseLeave={e => { if (active !== "gallery") e.currentTarget.style.backgroundColor = "transparent"; }}>
-        <span style={{ color: active === "gallery" ? PRIMARY : GRAY_60 }}><Image size={16} /></span>
-        Gallery
-      </button>
+
 
       {/* Server */}
       <button onClick={() => onNav(active === "server-detail" ? "server-detail" : "server-list")} style={navItemStyle(active === "server-list" || active === "server-detail")}
@@ -336,24 +323,12 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
       </button>
 
       {/* Storage */}
-      <div
-        onClick={() => setStorageExpanded(!storageExpanded)}
-        style={{ ...navItemStyle(false), justifyContent: "space-between", cursor: "default" }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = GRAY_5; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <span style={{ color: isStorageActive ? PRIMARY : GRAY_60 }}><Database size={16} /></span>
-          <span style={{ color: isStorageActive ? PRIMARY : GRAY_90, fontWeight: isStorageActive ? 600 : 400 }}>Storage</span>
-        </span>
-        <ChevronDown size={13} color={GRAY_60} style={{ transform: storageExpanded ? "rotate(0)" : "rotate(-90deg)", transition: "transform 0.2s" }} />
-      </div>
-      {storageExpanded && storageSubs.map(sub => (
-        <button key={sub.id} onClick={() => onNav(sub.id)} style={subItemStyle(active === sub.id)}
-          onMouseEnter={e => { if (active !== sub.id) e.currentTarget.style.backgroundColor = GRAY_5; }}
-          onMouseLeave={e => { if (active !== sub.id) e.currentTarget.style.backgroundColor = "transparent"; }}>
-          {sub.label}
-        </button>
-      ))}
+      <button onClick={() => onNav("storage")} style={navItemStyle(isStorageActive)}
+        onMouseEnter={e => { if (!isStorageActive) e.currentTarget.style.backgroundColor = GRAY_5; }}
+        onMouseLeave={e => { if (!isStorageActive) e.currentTarget.style.backgroundColor = "transparent"; }}>
+        <span style={{ color: isStorageActive ? PRIMARY : GRAY_60 }}><Database size={16} /></span>
+        Storage
+      </button>
 
       {/* Notifications */}
       <button onClick={() => onNav("notifications")} style={navItemStyle(active === "notifications")}
@@ -401,10 +376,10 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
 
 // ─── Admin LNB ────────────────────────────────────────────────────────────────
 type AdminScreen = "admin-dashboard" | "admin-users" | "admin-workspaces" | "admin-servers"
-  | "admin-storage" | "admin-storage-pricing" | "admin-images" | "admin-categories"
+  | "admin-storage" | "admin-storage-pricing" | "admin-storage-policy" | "admin-images" | "admin-categories"
   | "admin-templates" | "admin-tiers" | "admin-gpu-types" | "admin-gpu-pricing"
-  | "admin-credits" | "admin-credit-products" | "admin-payments" | "admin-refunds"
-  | "admin-notif"
+  | "admin-credits" | "admin-credit-history"
+  | "admin-notif" | "admin-notif-settings"
   | "admin-settings-auth" | "admin-settings-terms" | "admin-settings-storage-integration";
 
 export type { UserScreen, AdminScreen };
@@ -421,8 +396,9 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
   const [serverExp, setServerExp] = useState(false);
   const [imageExp, setImageExp] = useState(false);
   const [gpuExp, setGpuExp] = useState(false);
-  const [creditExp, setCreditExp] = useState(false);
-  const [paymentExp, setPaymentExp] = useState(false);
+  const [creditExp, setCreditExp] = useState(active.startsWith("admin-credit"));
+  const [notifExp, setNotifExp] = useState(active.startsWith("admin-notif"));
+
 
   const navItemStyle = (isActive: boolean) => ({
     display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "8px 12px",
@@ -493,6 +469,7 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
           <SubItem id="admin-servers" label="Servers" />
           <SubItem id="admin-templates" label="Server Templates" />
         </>}
+
       </div>
       {/* Storage Management */}
       <div style={{ opacity: disabledMenus.has("admin-storage") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-storage") ? "none" : "auto" }}>
@@ -502,6 +479,7 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
         {storageExp && <>
           <SubItem id="admin-storage" label="Storage" />
           <SubItem id="admin-storage-pricing" label="Storage Pricing" />
+          <SubItem id="admin-storage-policy" label="Storage Policy" />
         </>}
       </div>
       {/* Image Management */}
@@ -525,19 +503,25 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
           <SubItem id="admin-gpu-pricing" label="GPU Type Pricing" />
         </>}
       </div>
-      {/* Credit Management */}
+      {/* Credit */}
       <div style={{ opacity: disabledMenus.has("admin-credits") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-credits") ? "none" : "auto" }}>
         <SectionHeader icon={<CreditCard size={16} />} label="Credit Management"
           active={active.startsWith("admin-credit")} expanded={creditExp}
           onClick={() => setCreditExp(!creditExp)} />
         {creditExp && <>
-          <SubItem id="admin-credits" label="Credit Grants" />
-          <SubItem id="admin-credit-products" label="Credit Products" />
+          <SubItem id="admin-credits"        label="Credit" />
+          <SubItem id="admin-credit-history" label="Credit History" />
         </>}
       </div>
       {/* Notification Management */}
       <div style={{ opacity: disabledMenus.has("admin-notif") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-notif") ? "none" : "auto" }}>
-        <NavItem id="admin-notif" icon={<BellRing size={16} />} label="Notification Management" />
+        <SectionHeader icon={<BellRing size={16} />} label="Notification Management"
+          active={active.startsWith("admin-notif")} expanded={notifExp}
+          onClick={() => setNotifExp(!notifExp)} />
+        {notifExp && <>
+          <SubItem id="admin-notif"          label="Notification" />
+          <SubItem id="admin-notif-settings" label="Notification Settings" />
+        </>}
       </div>
       {/* System Settings */}
       <NavItem id="admin-settings-auth" icon={<Settings size={16} />} label="System Settings" />
@@ -632,6 +616,7 @@ export function PrimaryBtn({ children, onClick, size = "medium", variant = "prim
   const v = variantMap[variant];
   return (
     <button
+      type="button"
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -809,13 +794,13 @@ export function ListCard({ title, action, children, style }: {
 }) {
   return (
     <Card style={{ overflow: "hidden", ...style }}>
-      {title && (
+      {(title || action) && (
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "14px 20px", borderBottom: `1px solid ${GRAY_10}`,
         }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90 }}>{title}</div>
-          {action && <div>{action}</div>}
+          {title && <div style={{ fontSize: 14, fontWeight: 600, color: GRAY_90 }}>{title}</div>}
+          {action && <div style={{ marginLeft: "auto" }}>{action}</div>}
         </div>
       )}
       {children}

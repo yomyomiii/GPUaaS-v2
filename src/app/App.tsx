@@ -3,7 +3,6 @@ import { GNB, UserLNB, AdminLNB, type UserScreen, type AdminScreen } from "./com
 import { UserDashboard } from "./components/UserDashboard";
 import { WorkspacePage } from "./components/WorkspacePage";
 import { NotificationsPage } from "./components/NotificationsPage";
-import { GalleryPage } from "./components/GalleryPage";
 import { ServerPage } from "./components/ServerPage";
 import { StoragePage } from "./components/StoragePage";
 import {
@@ -16,7 +15,6 @@ import {
   AdminImageManagement,
   AdminCreditManagement,
   AdminStorageManagement,
-  AdminPaymentHistory,
   AdminNotificationManagement,
   AdminSystemSettings,
 } from "./components/AdminConsole";
@@ -28,7 +26,6 @@ export default function App() {
   // ─── User Console State ────────────────────────────────────────────────────
   const [userScreen, setUserScreen] = useState<UserScreen>("dashboard");
   const [workspaceTab, setWorkspaceTab] = useState("Overview");
-  const [storageTab, setStorageTab] = useState("Overview");
 
   // ─── Admin Console State ───────────────────────────────────────────────────
   const [adminScreen, setAdminScreen] = useState<AdminScreen>("admin-dashboard");
@@ -45,15 +42,6 @@ export default function App() {
         "workspace-settings": "Settings",
       };
       setWorkspaceTab(tabMap[screen] ?? "Overview");
-    }
-    if (screen.startsWith("storage")) {
-      const tabMap: Record<string, string> = {
-        "storage-overview": "Overview",
-        "storage-temp": "Temporary Storage",
-        "storage-local": "Local Storage",
-        "storage-shared": "Shared Storage",
-      };
-      setStorageTab(tabMap[screen] ?? "Overview");
     }
     setUserScreen(screen);
   };
@@ -107,24 +95,11 @@ export default function App() {
                 />
               )}
               {userScreen === "notifications" && <NotificationsPage />}
-              {userScreen === "gallery" && <GalleryPage onServerCreate={() => handleUserNav("server-list")} />}
               {(userScreen === "server-list" || userScreen === "server-create" || userScreen === "server-detail") && (
                 <ServerPage />
               )}
-              {userScreen.startsWith("storage") && (
-                <StoragePage
-                  initialTab={storageTab}
-                  onTabChange={(tab) => {
-                    const reverseMap: Record<string, UserScreen> = {
-                      "Overview": "storage-overview",
-                      "Temporary Storage": "storage-temp",
-                      "Local Storage": "storage-local",
-                      "Shared Storage": "storage-shared",
-                    };
-                    const screen = reverseMap[tab];
-                    if (screen) setUserScreen(screen);
-                  }}
-                />
+              {userScreen === "storage" && (
+                <StoragePage />
               )}
             </div>
           </>
@@ -142,9 +117,9 @@ export default function App() {
               {(adminScreen === "admin-servers" || adminScreen === "admin-templates") && (
                 <AdminServerManagement initialTab={adminScreen === "admin-templates" ? "Server Templates" : "Servers"} />
               )}
-              {(adminScreen === "admin-storage" || adminScreen === "admin-storage-pricing") && (
+              {(adminScreen === "admin-storage" || adminScreen === "admin-storage-pricing" || adminScreen === "admin-storage-policy") && (
                 <AdminStorageManagement
-                  initialTab={adminScreen === "admin-storage-pricing" ? "Storage Pricing" : "Storage"}
+                  initialTab={adminScreen === "admin-storage-pricing" ? "Storage Pricing" : adminScreen === "admin-storage-policy" ? "Storage Policy" : "Storage"}
                 />
               )}
               {(adminScreen === "admin-images" || adminScreen === "admin-categories" || adminScreen === "admin-tiers") && (
@@ -161,18 +136,18 @@ export default function App() {
                   initialTab={adminScreen === "admin-gpu-pricing" ? "GPU Type Pricing" : "GPU Type"}
                 />
               )}
-              {(adminScreen === "admin-credits" || adminScreen === "admin-credit-products") && (
-                <AdminCreditManagement
-                  initialTab={adminScreen === "admin-credit-products" ? "크레딧 상품" : "크레딧 지급/회수"}
-                />
+              {adminScreen === "admin-credits" && (
+                <AdminCreditManagement />
               )}
-              {(adminScreen === "admin-payments" || adminScreen === "admin-refunds") && (
-                <AdminPaymentHistory
-                  initialTab={adminScreen === "admin-refunds" ? "환불 관리" : "결제 내역"}
-                />
+              {adminScreen === "admin-credit-history" && (
+                <AdminCreditManagement initialTab="Credit History" />
               )}
+
               {adminScreen === "admin-notif" && (
                 <AdminNotificationManagement />
+              )}
+              {adminScreen === "admin-notif-settings" && (
+                <AdminNotificationManagement initialTab="Notification Settings" />
               )}
               {adminScreen === "admin-settings-auth" && (
                 <AdminSystemSettings />

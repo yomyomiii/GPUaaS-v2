@@ -5,8 +5,8 @@ import {
 } from "recharts";
 import {
   Server, Users, Layers, Database, Image, Cpu, CreditCard, ReceiptText, Zap,
-  BellRing, Settings, Plus, Edit, Trash2, ChevronRight, AlertTriangle, Search, ChevronUp, ChevronDown, Clock, X, Star, TrendingUp,
-  Crown, Shield, User, CloudDownload, HardDriveUpload, CheckCircle, Link2,
+  BellRing, Settings, Plus, Edit, Trash2, ChevronRight, AlertTriangle, Search, ChevronUp, ChevronDown, Clock, X, TrendingUp,
+  Crown, Shield, User, HardDriveUpload, CheckCircle,
 } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, PRIMARY_20, GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
@@ -40,13 +40,12 @@ const gpuOccupancy = [
   { name: "H100 SXM5", occupied: 24, free: 8, total: 32 },
   { name: "A100 SXM4", occupied: 36, free: 12, total: 48 },
   { name: "RTX A5000", occupied: 33, free: 15, total: 48 },
-  { name: "RTX 4090",  occupied: 0,  free: 16, total: 16 },
 ];
 
 const storageDist = [
-  { name: "임시", value: 110, color: BLUE },
-  { name: "로컬", value: 498, color: PRIMARY },
-  { name: "공유", value: 1700, color: GREEN },
+  { name: "Local Storage",  value: 110,  color: BLUE    },
+  { name: "Volume Storage", value: 498,  color: PRIMARY },
+  { name: "Shared Storage", value: 1700, color: GREEN   },
 ];
 
 // ─── SVG Donut for storage distribution (no recharts clipping) ───────────────
@@ -87,11 +86,11 @@ function StorageDonut({ data, total, size }: { data: { name: string; value: numb
   );
 }
 
-const adminAlerts = [
-  { type: "Node Error", msg: "gpu-node-07 — GPU #3 error 감지", time: "2분 전", severity: "danger" as const },
-  { type: "충전 실패", msg: "team-alpha — 충전 실패 (카드 만료)", time: "18분 전", severity: "danger" as const },
-  { type: "강제 종료", msg: "abuse-server-01 강제 종료 완료", time: "1시간 전", severity: "warning" as const },
-  { type: "저장소 연동", msg: "Internal Storage 연동 재시도 성공", time: "3시간 전", severity: "info" as const },
+const adminAlerts: { msg: string; time: string; level: "info" | "warning" | "critical" }[] = [
+  { msg: "RTX A6000 GPU 타입 전체 슬롯이 점유되어 신규 서버 배포가 불가합니다.", time: "18분 전",  level: "critical" },
+  { msg: "ML Research Lab의 크레딧 소비가 롤링 기준 대비 200% 초과했습니다.",    time: "42분 전",  level: "critical" },
+  { msg: "abuse-server-01이 72시간 이상 연속 실행 중입니다.",                    time: "1시간 전", level: "warning"  },
+  { msg: "새로운 워크스페이스 'Team Beta'가 생성되었습니다.",                     time: "2시간 전", level: "info"     },
 ];
 
 const CreditUsageTooltip = ({ active, payload, label }: any) => {
@@ -120,19 +119,17 @@ export function AdminDashboard() {
   const totalStorage = storageDist.reduce((s, d) => s + d.value, 0);
 
   return (
-    <PageContainer title="Admin Dashboard" subtitle="서비스 전체 현황을 실시간 모니터링합니다. · 2026년 7월 8일">
+    <PageContainer
+      title="Admin Dashboard"
+      subtitle="서비스 전체 현황을 실시간 모니터링합니다."
+      actions={
+        <span style={{ fontSize: 12, color: GRAY_60 }}>마지막 업데이트 · 2026년 7월 13일 14:32</span>
+      }
+    >
       {/* ── 긴급 알림 배너 ── */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "11px 18px", marginBottom: 20, borderRadius: 12,
-        backgroundColor: "rgb(254,242,242)", border: `1px solid ${RED}`,
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <AlertTriangle size={15} color={RED} />
-          <span style={{ fontSize: 13, color: GRAY_90, fontWeight: 500 }}>
-            긴급 알림 2건 — <strong>gpu-node-07 GPU 오류</strong>, <strong>team-alpha 충전 실패</strong> 확인이 필요합니다.
-          </span>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(254,242,242)", borderRadius: 10, marginBottom: 20 }}>
+        <AlertTriangle size={12} color={RED} />
+        <span style={{ flex: 1, fontSize: 12, color: GRAY_70, fontWeight: 500 }}>Critical 알림 1건 — <strong>RTX A6000 GPU 타입 전체 점유</strong> 확인이 필요합니다.</span>
         <Badge color="danger">즉시 확인 필요</Badge>
       </div>
 
@@ -183,11 +180,11 @@ export function AdminDashboard() {
       {/* ── Row 2: GPU 점유율 (가로 바) + 사용자 성장 추이 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         {/* GPU 점유율 */}
-        <SectionCard title="GPU 유형별 점유율" subtitle="전체 가용 GPU 144개">
+        <SectionCard title="GPU 유형별 점유율" subtitle="전체 가용 GPU 128개">
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {gpuOccupancy.map(gpu => {
               const pct = Math.round(gpu.occupied / gpu.total * 100);
-              const barColor = pct > 90 ? RED : pct > 70 ? YELLOW : gpu.name.startsWith("H100") ? PRIMARY : gpu.name.startsWith("A100") ? BLUE : gpu.name.startsWith("RTX A") ? GREEN : GRAY_40;
+              const barColor = pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN;
               return (
                 <div key={gpu.name}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
@@ -198,16 +195,15 @@ export function AdminDashboard() {
                     <div style={{ fontSize: 12, color: GRAY_70 }}>
                       <span style={{ fontWeight: 700, color: barColor }}>{gpu.occupied}</span>
                       <span style={{ color: GRAY_40 }}>/{gpu.total} GPU</span>
-                      <span style={{ marginLeft: 8, color: GREEN, fontSize: 11 }}>여유 {gpu.free}</span>
                     </div>
                   </div>
                   <div style={{ height: 10, backgroundColor: GRAY_5, borderRadius: 5, overflow: "hidden", display: "flex" }}>
                     <div style={{ height: "100%", width: `${pct}%`, backgroundColor: barColor, borderRadius: 5, transition: "width 0.4s" }} />
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontSize: 10, color: GRAY_60 }}>
-                    <span>{pct}% 점유</span>
-                    <span style={{ color: pct > 90 ? RED : pct > 70 ? YELLOW : GRAY_60 }}>
-                      {pct > 90 ? "⚠ 포화 임박" : pct > 70 ? "여유 적음" : pct === 0 ? "비활성" : "여유 있음"}
+                    <span>{pct}% 점유 · 여유 {gpu.free}개</span>
+                    <span style={{ color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_60 }}>
+                      {pct >= 90 ? "⚠ 포화 임박" : pct === 0 ? "비활성" : ""}
                     </span>
                   </div>
                 </div>
@@ -238,25 +234,33 @@ export function AdminDashboard() {
       {/* ── Row 3: 알림 + 스토리지 분포 + 결제 현황 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 14 }}>
         {/* 알림 피드 */}
-        <ListCard title="최근 어드민 알림" action={<Badge color="danger">2 긴급</Badge>}>
-          {adminAlerts.map((a, i) => (
-            <div key={i} style={{
-              padding: "12px 20px", display: "flex", gap: 12, cursor: "pointer",
-              borderBottom: i < adminAlerts.length - 1 ? `1px solid rgb(248,248,248)` : "none",
-              backgroundColor: a.severity === "danger" ? "rgb(255,252,252)" : "white",
-            }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = GRAY_5)}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = a.severity === "danger" ? "rgb(255,252,252)" : "white")}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: a.severity === "danger" ? RED : a.severity === "warning" ? YELLOW : BLUE, marginTop: 5, flexShrink: 0 }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                  <Badge color={a.severity}>{a.type}</Badge>
-                  <span style={{ fontSize: 11, color: GRAY_60 }}>{a.time}</span>
+        <ListCard title="최근 알림" action={<Badge color="danger">2 Critical</Badge>}>
+          {adminAlerts.map((a, i) => {
+            const lvMeta = {
+              info:     { label: "Info",     color: BLUE,    bg: "rgba(36,142,213,0.1)"  },
+              warning:  { label: "Warning",  color: YELLOW,  bg: "rgba(234,179,8,0.1)"   },
+              critical: { label: "Critical", color: RED,     bg: "rgba(239,68,68,0.1)"   },
+            }[a.level];
+            return (
+              <div key={i} style={{
+                padding: "12px 20px", display: "flex", gap: 12, cursor: "pointer",
+                borderBottom: i < adminAlerts.length - 1 ? `1px solid rgb(248,248,248)` : "none",
+                backgroundColor: a.level === "critical" ? "rgb(255,252,252)" : "white",
+              }}
+                onMouseEnter={e => (e.currentTarget.style.backgroundColor = GRAY_5)}
+                onMouseLeave={e => (e.currentTarget.style.backgroundColor = a.level === "critical" ? "rgb(255,252,252)" : "white")}>
+                <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600, color: lvMeta.color, backgroundColor: lvMeta.bg, flexShrink: 0, alignSelf: "flex-start" }}>
+                  {lvMeta.label}
+                </span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: GRAY_70 }}>{a.msg}</span>
+                    <span style={{ fontSize: 11, color: GRAY_60, whiteSpace: "nowrap", flexShrink: 0 }}>{a.time}</span>
+                  </div>
                 </div>
-                <div style={{ fontSize: 12, color: GRAY_70 }}>{a.msg}</div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </ListCard>
 
         {/* 스토리지 분포 */}
@@ -279,8 +283,8 @@ export function AdminDashboard() {
         {/* 오늘 크레딧 현황 */}
         <SectionCard title="오늘 크레딧 현황">
           {[
-            { label: "크레딧 사용", value: "28건", amount: "84,000 cr", color: GREEN, icon: "✓" },
-            { label: "충전 실패", value: "2건", amount: "4,200 cr", color: RED, icon: "✗" },
+            { label: "관리자 지급", value: "3건", amount: "+32,000 cr", color: GREEN, icon: "↑" },
+            { label: "관리자 회수", value: "1건", amount: "-5,000 cr",  color: RED,   icon: "↓" },
           ].map(({ label, value, amount, color, icon }) => (
             <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid rgb(248,248,248)` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -294,8 +298,8 @@ export function AdminDashboard() {
             </div>
           ))}
           <div style={{ marginTop: 14, padding: "10px 14px", backgroundColor: PRIMARY_10, borderRadius: 8 }}>
-            <div style={{ fontSize: 11, color: GRAY_60 }}>이번 달 누적 크레딧 사용</div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: PRIMARY, marginTop: 2 }}>1,245,000 cr</div>
+            <div style={{ fontSize: 11, color: GRAY_60 }}>순 지급 (지급 - 회수)</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: PRIMARY, marginTop: 2 }}>+27,000 cr</div>
           </div>
         </SectionCard>
       </div>
@@ -453,10 +457,10 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const allWorkspaces = [
-    { name: "My Workspace", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", members: 5, servers: 4, credits: 45230, maxCredits: 80000, status: "active", rate: 120, plan: "Standard" },
-    { name: "Team Alpha", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc", members: 8, servers: 12, credits: 120500, maxCredits: 200000, status: "active", rate: 480, plan: "Enterprise" },
-    { name: "ML Research Lab", owner: "김태민", ownerEmail: "taemin.kim@sdt.inc", members: 3, servers: 2, credits: 8200, maxCredits: 50000, status: "active", rate: 48, plan: "Standard" },
-    { name: "Old Project", owner: "최유진", ownerEmail: "yujin.choi@sdt.inc", members: 1, servers: 0, credits: 1000, maxCredits: 10000, status: "inactive", rate: 0, plan: "Standard" },
+    { name: "My Workspace",   wsId: "ws-a3f8b2c1", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", members: 5, servers: 4,  credits: 45230,  status: "active",   rate: 120, createdAt: "2026-01-15", lastActivity: "오늘 09:42" },
+    { name: "Team Alpha",     wsId: "ws-d7e9a1b5", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc",   members: 8, servers: 12, credits: 120500, status: "active",   rate: 480, createdAt: "2026-02-20", lastActivity: "오늘 14:15" },
+    { name: "ML Research Lab",wsId: "ws-c2f4d8e3", owner: "김태민", ownerEmail: "taemin.kim@sdt.inc",   members: 3, servers: 2,  credits: 8200,   status: "active",   rate: 48,  createdAt: "2026-03-10", lastActivity: "2일 전" },
+    { name: "Old Project",    wsId: "ws-b6a9c7d4", owner: "최유진", ownerEmail: "yujin.choi@sdt.inc",   members: 1, servers: 0,  credits: 1000,   status: "inactive", rate: 0,   createdAt: "2026-04-05", lastActivity: "14일 전" },
   ];
 
   const handleSort = (key: string) => {
@@ -474,8 +478,10 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
       else if (sortKey === "status")  { va = a.status;  vb = b.status; }
       else if (sortKey === "members") { va = a.members; vb = b.members; }
       else if (sortKey === "servers") { va = a.servers; vb = b.servers; }
-      else if (sortKey === "credits") { va = a.credits; vb = b.credits; }
-      else if (sortKey === "rate")    { va = a.rate;    vb = b.rate; }
+      else if (sortKey === "credits")      { va = a.credits;      vb = b.credits; }
+      else if (sortKey === "rate")         { va = a.rate;         vb = b.rate; }
+      else if (sortKey === "createdAt")    { va = a.createdAt;    vb = b.createdAt; }
+      else if (sortKey === "lastActivity") { va = a.lastActivity; vb = b.lastActivity; }
       const cmp = va < vb ? -1 : va > vb ? 1 : 0;
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -514,10 +520,11 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
             <SortableHeader k="owner" label="Owner" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             <SortableHeader k="members" label="Members" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             <SortableHeader k="credits" label="Credit Balance" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="createdAt" label="Created At" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="lastActivity" label="Last Activity" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             "Actions",
           ]}
           rows={workspaces.map(w => {
-            const creditPct = Math.round((w.credits / w.maxCredits) * 100);
             const isLow = w.credits < 5000;
             return [
               /* Workspace */
@@ -527,7 +534,7 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
                 </div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{w.name}</div>
-                  <div style={{ fontSize: 11, color: GRAY_60 }}>{w.plan}</div>
+                  <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1 }}>{w.wsId}</div>
                 </div>
               </div>,
               /* 상태 */
@@ -543,15 +550,11 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
                 <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_90 }}>{w.members}</span>
               </div>,
               /* 크레딧 잔액 */
-              <div style={{ minWidth: 120 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: isLow ? RED : GRAY_90, fontWeight: 600 }}>{w.credits.toLocaleString()} cr</span>
-                  <span style={{ fontSize: 11, color: GRAY_60 }}>{creditPct}%</span>
-                </div>
-                <div style={{ height: 5, backgroundColor: GRAY_10, borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${creditPct}%`, backgroundColor: isLow ? RED : creditPct < 40 ? YELLOW : PRIMARY, borderRadius: 3 }} />
-                </div>
-              </div>,
+              <span style={{ fontSize: 12, color: isLow ? RED : GRAY_90, fontWeight: 600 }}>{w.credits.toLocaleString()} cr</span>,
+              /* 생성 일시 */
+              <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" as const }}>{w.createdAt}</span>,
+              /* 마지막 활동 */
+              <span style={{ fontSize: 12, color: w.status === "inactive" ? GRAY_40 : GRAY_70, whiteSpace: "nowrap" as const }}>{w.lastActivity}</span>,
               /* 액션 */
               <div style={{ display: "flex", gap: 4 }}>
                 <PrimaryBtn size="xsmall" variant="secondary" onClick={onDetail}>상세</PrimaryBtn>
@@ -574,7 +577,7 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
       <div style={{ maxWidth: 1100 }}>
-        <button onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 16 }}>← Workspace Management</button>
+        <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 16 }}>← Workspace Management</button>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0 }}>My Workspace</h1>
@@ -617,7 +620,7 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
 
         {tab === "Wallet" && (
           <SectionCard title="지갑 정보 (조회 전용)" subtitle="카드번호는 마스킹 처리됩니다">
-            {[["크레딧 잔액", "45,230 cr"], ["등록 카드", "**** **** **** 4521 (VISA)"], ["이번 달 결제", "724,500원"]].map(([k, v]) => (
+            {[["크레딧 잔액", "45,230 cr"]].map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid rgb(242,242,242)`, fontSize: 13 }}>
                 <span style={{ color: GRAY_60 }}>{k}</span><span style={{ fontWeight: 600, color: GRAY_90 }}>{v}</span>
               </div>
@@ -711,7 +714,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
   const renderTemplateForm = (isEdit: boolean) => (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
       <div style={{ maxWidth: 700 }}>
-        <button onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← Server Management</button>
+        <button type="button" onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← Server Management</button>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: "0 0 24px" }}>{isEdit ? "서버 템플릿 편집" : "서버 템플릿 생성"}</h1>
 
         {/* 기본 정보 */}
@@ -737,7 +740,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", gap: 6 }}>
                 {["24GB+", "48GB+", "80GB+", "160GB+"].map(v => (
-                  <button key={v} onClick={() => setTplForm(f => ({ ...f, recVram: v }))} style={{ padding: "6px 14px", borderRadius: 8, border: `2px solid ${tplForm.recVram === v ? PRIMARY : GRAY_30}`, backgroundColor: tplForm.recVram === v ? PRIMARY_10 : "white", color: tplForm.recVram === v ? PRIMARY : GRAY_70, fontSize: 13, fontWeight: tplForm.recVram === v ? 700 : 400, cursor: "pointer" }}>
+                  <button type="button" key={v} onClick={() => setTplForm(f => ({ ...f, recVram: v }))} style={{ padding: "6px 14px", borderRadius: 8, border: `2px solid ${tplForm.recVram === v ? PRIMARY : GRAY_30}`, backgroundColor: tplForm.recVram === v ? PRIMARY_10 : "white", color: tplForm.recVram === v ? PRIMARY : GRAY_70, fontSize: 13, fontWeight: tplForm.recVram === v ? 700 : 400, cursor: "pointer" }}>
                     {v}
                   </button>
                 ))}
@@ -745,13 +748,13 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               <input style={{ ...fldStyle, width: 120, marginBottom: 0 }} placeholder="직접 입력 (예: 40GB+)" value={tplForm.recVram} onChange={e => setTplForm(f => ({ ...f, recVram: e.target.value }))} />
             </div>
           </FormRow>
-          <FormRow label="권장 임시 스토리지 (GB)">
+          <FormRow label="권장 볼륨 스토리지 (GB)">
             <input type="number" style={fldStyle} min={10} step={10} value={tplForm.tmp} onChange={e => setTplForm(f => ({ ...f, tmp: Number(e.target.value) }))} />
           </FormRow>
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: tplForm.hasLocal ? 10 : 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>권장 로컬 스토리지</div>
-              <button onClick={() => setTplForm(f => ({ ...f, hasLocal: !f.hasLocal }))} style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: tplForm.hasLocal ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>권장 볼륨 스토리지</div>
+              <button type="button" onClick={() => setTplForm(f => ({ ...f, hasLocal: !f.hasLocal }))} style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: tplForm.hasLocal ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                 <span style={{ position: "absolute", top: 3, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: tplForm.hasLocal ? 21 : 3 }} />
               </button>
             </div>
@@ -788,9 +791,9 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
       {tab === "Servers" && <>
       {/* Abuse alert */}
       {flagged.length > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", backgroundColor: "rgb(255,242,242)", borderRadius: 10, border: `1px solid ${RED}30`, marginBottom: 14 }}>
-          <AlertTriangle size={14} color={RED} />
-          <div style={{ flex: 1, fontSize: 13, color: GRAY_90 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(254,242,242)", borderRadius: 10, marginBottom: 14 }}>
+          <AlertTriangle size={12} color={RED} />
+          <div style={{ flex: 1, fontSize: 12, color: GRAY_70 }}>
             <strong>어뷰징 의심 서버:</strong> abuse-server-01 — 72시간 이상 실행, GPU 점유율 14% (저점유)
           </div>
           <PrimaryBtn size="xsmall" variant="danger">강제 종료</PrimaryBtn>
@@ -913,6 +916,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
           />
         </Card>
       )}
+
     </PageContainer>
   );
 }
@@ -922,7 +926,7 @@ function LabelToggle({ on, labelOn, labelOff, width, onToggle }: { on: boolean; 
   const thumbSize = 16;
   const pad = 3;
   return (
-    <button onClick={onToggle} style={{ position: "relative", border: "none", cursor: "pointer", backgroundColor: on ? PRIMARY : GRAY_30, borderRadius: 11, height: 22, width, transition: "background 0.2s", flexShrink: 0, display: "inline-block", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)" }}>
+    <button type="button" onClick={onToggle} style={{ position: "relative", border: "none", cursor: "pointer", backgroundColor: on ? PRIMARY : GRAY_30, borderRadius: 11, height: 22, width, transition: "background 0.2s", flexShrink: 0, display: "inline-block", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)" }}>
       <span style={{ position: "absolute", fontSize: 9, fontWeight: 700, color: on ? "white" : GRAY_70, letterSpacing: "0.02em", top: "50%", transform: "translateY(-50%)", left: on ? pad + 2 : undefined, right: on ? undefined : pad + 2, pointerEvents: "none", whiteSpace: "nowrap" }}>
         {on ? labelOn : labelOff}
       </span>
@@ -932,31 +936,12 @@ function LabelToggle({ on, labelOn, labelOff, width, onToggle }: { on: boolean; 
 }
 
 function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
-  const [expanded, setExpanded] = useState<string | null>("H100 SXM5");
   const gpuTypes = [
-    {
-      name: "H100 SXM5", vram: "80GB", nodeCount: 4, occupied: 24, total: 32, capacity: "High", on: true, pub: true,
-      nodes: [
-        { name: "gpu-node-01", status: "available",   totalGPU: 8, occupiedGPU: 7, freeGPU: 1, lastUsed: "2026-07-10 14:32" },
-        { name: "gpu-node-02", status: "available",   totalGPU: 8, occupiedGPU: 6, freeGPU: 2, lastUsed: "2026-07-10 13:58" },
-        { name: "gpu-node-03", status: "available",   totalGPU: 8, occupiedGPU: 6, freeGPU: 2, lastUsed: "2026-07-10 14:11" },
-        { name: "gpu-node-04", status: "error",       totalGPU: 8, occupiedGPU: 5, freeGPU: 3, lastUsed: "2026-07-10 09:44", issueTime: "2026-07-10 10:22" },
-      ],
-    },
-    {
-      name: "A100 SXM4", vram: "80GB", nodeCount: 6, occupied: 36, total: 48, capacity: "Medium", on: true, pub: true,
-      nodes: [
-        { name: "gpu-node-05", status: "available",    totalGPU: 8, occupiedGPU: 6, freeGPU: 2, lastUsed: "2026-07-10 14:05" },
-        { name: "gpu-node-06", status: "available",    totalGPU: 8, occupiedGPU: 5, freeGPU: 3, lastUsed: "2026-07-10 12:30" },
-        { name: "gpu-node-07", status: "maintenance",  totalGPU: 8, occupiedGPU: 0, freeGPU: 8, lastUsed: "2026-07-09 18:00", issueTime: "2026-07-09 18:15" },
-      ],
-    },
-    { name: "RTX A5000", vram: "24GB", nodeCount: 6, occupied: 33, total: 48, capacity: "Low",  on: true,  pub: true,  nodes: [] },
-    { name: "RTX 4090",  vram: "24GB", nodeCount: 2, occupied: 0,  total: 16, capacity: "No",   on: false, pub: false, nodes: [] },
+    { name: "H100 SXM5", vram: "80GB", occupied: 24, total: 32, capacity: "High",   on: true,  pub: true  },
+    { name: "A100 SXM4", vram: "80GB", occupied: 36, total: 48, capacity: "Medium", on: true,  pub: true  },
+    { name: "RTX A5000", vram: "24GB", occupied: 33, total: 48, capacity: "Low",    on: true,  pub: true  },
+    { name: "RTX 4090",  vram: "24GB", occupied: 0,  total: 16, capacity: "No",     on: false, pub: false },
   ];
-
-  const nodeBadge = (s: string) => s === "available" ? "success" : s === "maintenance" ? "warning" : "danger";
-  const nodeColor = (s: string) => s === "available" ? GREEN : s === "maintenance" ? YELLOW : RED;
 
   const [gpuList, setGpuList] = useState(gpuTypes);
   const toggleOn  = (name: string) => setGpuList(ts => ts.map(t => t.name === name ? { ...t, on:  !t.on  } : t));
@@ -979,12 +964,9 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ backgroundColor: GRAY_5 }}>
-            <th style={{ ...thBase, padding: "10px 0 10px 16px", width: 32 }} />
-            <th style={{ ...thBase, padding: "10px 0 10px 12px" }}>GPU Type</th>
+            <th style={{ ...thBase, padding: "10px 0 10px 16px" }}>GPU Type</th>
             <th style={thSp} />
             <th style={{ ...thBase, padding: "10px 0" }}>GPU Usage</th>
-            <th style={thSp} />
-            <th style={{ ...thBase, padding: "10px 0" }}>Nodes</th>
             <th style={thSp} />
             <th style={{ ...thBase, padding: "10px 0" }}>Rate</th>
             <th style={thSp} />
@@ -996,132 +978,59 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
         <tbody>
           {gpuList.map(gpu => {
             const pct = Math.round(gpu.occupied / gpu.total * 100);
-            const isExpanded = expanded === gpu.name;
-            const hasNodes = gpu.nodes.length > 0;
-            const rowBg = isExpanded ? "rgba(99,90,220,0.03)" : "white";
             return (
-              <React.Fragment key={gpu.name}>
-                <tr
-                  onClick={() => hasNodes && setExpanded(isExpanded ? null : gpu.name)}
-                  style={{ cursor: hasNodes ? "pointer" : "default" }}
-                  onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.backgroundColor = GRAY_5; }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = rowBg; }}
-                >
-                  {/* chevron */}
-                  <td style={{ ...td("first"), backgroundColor: rowBg, width: 32 }}>
-                    {hasNodes && <ChevronRight size={14} color={GRAY_60} style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s", display: "block" }} />}
-                  </td>
-                  {/* GPU Type — no spacer, left padding only */}
-                  <td style={{ ...td("mid"), backgroundColor: rowBg, paddingLeft: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: "rgba(99,90,220,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <Cpu size={13} color={PRIMARY} />
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{gpu.name}</div>
-                        <div style={{ fontSize: 11, color: GRAY_60, whiteSpace: "nowrap" }}>VRAM {gpu.vram}</div>
-                      </div>
+              <tr key={gpu.name}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}
+              >
+                {/* GPU Type */}
+                <td style={{ ...td("first") }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: "rgba(99,90,220,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Cpu size={13} color={PRIMARY} />
                     </div>
-                  </td>
-                  <td style={sp(false, rowBg)} />
-                  {/* GPU Usage */}
-                  <td style={{ ...td("mid"), backgroundColor: rowBg, minWidth: 160 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                      <span style={{ fontSize: 12, color: GRAY_70 }}>{gpu.occupied} / {gpu.total} GPU</span>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: pct >= 90 ? RED : pct >= 60 ? YELLOW : GRAY_90 }}>{pct}%</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{gpu.name}</div>
+                      <div style={{ fontSize: 11, color: GRAY_60, whiteSpace: "nowrap" }}>VRAM {gpu.vram}</div>
                     </div>
-                    <div style={{ height: 5, backgroundColor: GRAY_10, borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pct >= 90 ? RED : pct >= 60 ? YELLOW : PRIMARY, borderRadius: 3 }} />
-                    </div>
-                  </td>
-                  <td style={sp(false, rowBg)} />
-                  {/* Nodes */}
-                  <td style={{ ...td("mid"), backgroundColor: rowBg }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "nowrap" }}>
-                      {gpu.nodes.length > 0
-                        ? gpu.nodes.map(node => <div key={node.name} title={`${node.name} · ${node.status}`} style={{ width: 14, height: 14, borderRadius: 3, backgroundColor: nodeColor(node.status), flexShrink: 0 }} />)
-                        : Array.from({ length: gpu.nodeCount }).map((_, i) => <div key={i} style={{ width: 14, height: 14, borderRadius: 3, backgroundColor: GRAY_30, flexShrink: 0 }} />)
-                      }
-                    </div>
-                  </td>
-                  <td style={sp(false, rowBg)} />
-                  {/* Rate */}
-                  {(() => {
-                    const p = prices.find(p => p.name === gpu.name);
-                    return (
-                      <td style={{ ...td("mid"), backgroundColor: rowBg }}>
-                        {p ? (
-                          <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{p.rate} cr / GPU / {p.unit}</span>
-                        ) : (
-                          <Badge color="neutral">미설정</Badge>
-                        )}
-                      </td>
-                    );
-                  })()}
-                  <td style={sp(false, rowBg)} />
-                  {/* Visibility toggle */}
-                  <td style={{ ...td("mid"), backgroundColor: rowBg }} onClick={e => e.stopPropagation()}>
-                    <LabelToggle on={gpu.pub} labelOn="Public" labelOff="Private" width={64} onToggle={() => togglePub(gpu.name)} />
-                  </td>
-                  <td style={sp(false, rowBg)} />
-                  {/* Status toggle — last, right padding only */}
-                  <td style={{ ...td("last"), backgroundColor: rowBg }} onClick={e => e.stopPropagation()}>
-                    <LabelToggle on={gpu.on} labelOn="Active" labelOff="Inactive" width={64} onToggle={() => toggleOn(gpu.name)} />
-                  </td>
-                </tr>
-
-                {/* Node sub-rows */}
-                {isExpanded && gpu.nodes.map((node, i) => {
-                  const nodePct = Math.round(node.occupiedGPU / node.totalGPU * 100);
-                  const light = i < gpu.nodes.length - 1;
+                  </div>
+                </td>
+                <td style={sp()} />
+                {/* GPU Usage */}
+                <td style={{ ...td("mid"), minWidth: 160 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <span style={{ fontSize: 12, color: GRAY_70 }}>{gpu.occupied} / {gpu.total} GPU</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_90 }}>{pct}%</span>
+                  </div>
+                  <div style={{ height: 5, backgroundColor: GRAY_10, borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, borderRadius: 3 }} />
+                  </div>
+                </td>
+                <td style={sp()} />
+                {/* Rate */}
+                {(() => {
+                  const p = prices.find(p => p.name === gpu.name);
                   return (
-                    <tr key={node.name} style={{ backgroundColor: GRAY_5 }}>
-                      <td style={{ ...td("first", light), backgroundColor: GRAY_5 }} />
-                      <td style={{ ...td("mid", light), backgroundColor: GRAY_5, paddingLeft: 20 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <div style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: nodeColor(node.status), boxShadow: `0 0 5px ${nodeColor(node.status)}`, flexShrink: 0 }} />
-                          <div>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{node.name}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={sp(light, GRAY_5)} />
-                      <td style={{ ...td("mid", light), backgroundColor: GRAY_5, minWidth: 160 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                          <span style={{ fontSize: 11, color: GRAY_70 }}>{node.occupiedGPU} / {node.totalGPU} GPU</span>
-                          <span style={{ fontSize: 11, fontWeight: 600, color: nodePct >= 90 ? RED : GRAY_70 }}>{nodePct}%</span>
-                        </div>
-                        <div style={{ height: 4, backgroundColor: GRAY_10, borderRadius: 2, overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${nodePct}%`, backgroundColor: nodePct >= 90 ? RED : PRIMARY, borderRadius: 2 }} />
-                        </div>
-                      </td>
-                      <td style={sp(light, GRAY_5)} />
-                      <td style={{ ...td("mid", light), backgroundColor: GRAY_5 }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                          <span style={{ fontSize: 10, color: GRAY_60, fontWeight: 600 }}>Last Used</span>
-                          <span style={{ fontSize: 11, color: GRAY_70, fontFamily: "'Roboto Mono', monospace", whiteSpace: "nowrap" }}>{node.lastUsed}</span>
-                        </div>
-                      </td>
-                      <td style={sp(light, GRAY_5)} />
-                      <td style={{ ...td("mid", light), backgroundColor: GRAY_5 }}>
-                        {"issueTime" in node && node.issueTime && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                              <AlertTriangle size={10} color={RED} style={{ flexShrink: 0 }} />
-                              <span style={{ fontSize: 10, color: RED, fontWeight: 600 }}>Issue</span>
-                            </div>
-                            <span style={{ fontSize: 11, color: RED, fontFamily: "'Roboto Mono', monospace", whiteSpace: "nowrap" }}>{node.issueTime}</span>
-                          </div>
-                        )}
-                      </td>
-                      <td style={sp(light, GRAY_5)} />
-                      <td style={{ ...td("mid", light), backgroundColor: GRAY_5 }} />
-                      <td style={sp(light, GRAY_5)} />
-                      <td style={{ ...td("last", light), backgroundColor: GRAY_5 }} />
-                    </tr>
+                    <td style={{ ...td("mid") }}>
+                      {p ? (
+                        <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{p.rate} cr / GPU / {p.unit}</span>
+                      ) : (
+                        <Badge color="neutral">미설정</Badge>
+                      )}
+                    </td>
                   );
-                })}
-              </React.Fragment>
+                })()}
+                <td style={sp()} />
+                {/* Visibility toggle */}
+                <td style={{ ...td("mid") }}>
+                  <LabelToggle on={gpu.pub} labelOn="Public" labelOff="Private" width={64} onToggle={() => togglePub(gpu.name)} />
+                </td>
+                <td style={sp()} />
+                {/* Status toggle */}
+                <td style={{ ...td("last") }}>
+                  <LabelToggle on={gpu.on} labelOn="Active" labelOff="Inactive" width={64} onToggle={() => toggleOn(gpu.name)} />
+                </td>
+              </tr>
             );
           })}
         </tbody>
@@ -1160,6 +1069,139 @@ function SectionDivider({ label }: { label: string }) {
   );
 }
 
+// ─── Image Form shared components (module-level for stable references) ───────
+function MdEditor({ value, onChange, onFocus, onBlur }: {
+  value: string;
+  onChange: (v: string) => void;
+  onFocus?: React.FocusEventHandler<HTMLTextAreaElement>;
+  onBlur?: React.FocusEventHandler<HTMLTextAreaElement>;
+}) {
+  const ref = React.useRef<HTMLTextAreaElement>(null);
+
+  const wrap = (before: string, after = before) => {
+    const el = ref.current;
+    if (!el) return;
+    const s = el.selectionStart, e = el.selectionEnd;
+    const sel = value.slice(s, e);
+    onChange(value.slice(0, s) + before + sel + after + value.slice(e));
+    setTimeout(() => { el.focus(); el.setSelectionRange(s + before.length, e + before.length); }, 0);
+  };
+
+  const linePrefix = (text: string) => {
+    const el = ref.current;
+    if (!el) return;
+    const s = el.selectionStart;
+    const ls = value.lastIndexOf("\n", s - 1) + 1;
+    onChange(value.slice(0, ls) + text + value.slice(ls));
+    setTimeout(() => { el.focus(); el.setSelectionRange(s + text.length, s + text.length); }, 0);
+  };
+
+  const insertAt = (text: string) => {
+    const el = ref.current;
+    if (!el) return;
+    const s = el.selectionStart;
+    onChange(value.slice(0, s) + text + value.slice(s));
+    setTimeout(() => { el.focus(); el.setSelectionRange(s + text.length, s + text.length); }, 0);
+  };
+
+  const tools: ({ label: string; title: string; action: () => void; mono?: boolean; bold?: boolean; italic?: boolean } | { sep: true })[] = [
+    { label: "H1", title: "제목 1", action: () => linePrefix("# ") },
+    { label: "H2", title: "제목 2", action: () => linePrefix("## ") },
+    { sep: true },
+    { label: "B",  title: "굵게",   action: () => wrap("**"), bold: true },
+    { label: "I",  title: "기울임", action: () => wrap("*"),  italic: true },
+    { sep: true },
+    { label: "`",   title: "인라인 코드", action: () => wrap("`"),           mono: true },
+    { label: "</>", title: "코드 블록",   action: () => wrap("```\n", "\n```"), mono: true },
+    { sep: true },
+    { label: "•",  title: "목록",       action: () => linePrefix("- ") },
+    { label: "1.", title: "번호 목록",   action: () => linePrefix("1. ") },
+    { label: ">",  title: "인용",       action: () => linePrefix("> ") },
+    { sep: true },
+    { label: "─",  title: "구분선",     action: () => insertAt("\n---\n") },
+  ];
+
+  return (
+    <div style={{ border: `1px solid ${GRAY_30}`, borderRadius: 10, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 2, padding: "5px 8px", backgroundColor: GRAY_5, borderBottom: `1px solid ${GRAY_10}`, flexWrap: "wrap" as const }}>
+        {tools.map((tool, i) =>
+          "sep" in tool ? (
+            <div key={i} style={{ width: 1, height: 16, backgroundColor: GRAY_30, margin: "0 3px" }} />
+          ) : (
+            <button type="button" key={i} title={tool.title} onClick={tool.action}
+              style={{ minWidth: 28, height: 26, padding: "0 5px", borderRadius: 5, border: "none", backgroundColor: "transparent", cursor: "pointer",
+                fontSize: tool.mono ? 11 : 12, fontWeight: tool.bold ? 700 : 600,
+                fontStyle: tool.italic ? "italic" : "normal",
+                fontFamily: tool.mono ? "'Roboto Mono', monospace" : "inherit",
+                color: GRAY_70, display: "flex", alignItems: "center", justifyContent: "center" }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; e.currentTarget.style.color = GRAY_90; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = GRAY_70; }}
+            >{tool.label}</button>
+          )
+        )}
+      </div>
+      <textarea
+        ref={ref}
+        style={{ width: "100%", minHeight: 220, padding: "12px 14px", border: "none", outline: "none",
+          resize: "vertical" as const, fontSize: 13, fontFamily: "'Roboto Mono', monospace",
+          color: GRAY_90, backgroundColor: "white", boxSizing: "border-box" as const, lineHeight: 1.7, display: "block" }}
+        placeholder={"## 이미지 설명\n\n주요 특징을 마크다운으로 작성하세요.\n\n- 특징 1\n- 특징 2"}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onFocus={onFocus}
+        onBlur={onBlur}
+      />
+    </div>
+  );
+}
+
+function ImgSecCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ backgroundColor: "#ffffff", borderRadius: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)", marginBottom: 20, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 24px", borderBottom: `1px solid ${GRAY_10}` }}>
+        <div style={{ width: 3, height: 14, borderRadius: 99, backgroundColor: PRIMARY, flexShrink: 0 }} />
+        <span style={{ fontSize: 13, fontWeight: 700, color: GRAY_90 }}>{label}</span>
+      </div>
+      <div style={{ padding: "20px 24px 4px" }}>{children}</div>
+    </div>
+  );
+}
+
+function ImgUploadBox({ file, dragOver, onDragOver, onDragLeave, onDrop, onClick, hint }: {
+  file: string | null; dragOver: boolean;
+  onDragOver: () => void; onDragLeave: () => void;
+  onDrop: (e: React.DragEvent) => void; onClick: () => void;
+  hint: string;
+}) {
+  return (
+    <div
+      onDragOver={e => { e.preventDefault(); onDragOver(); }}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+      onClick={onClick}
+      style={{
+        border: `2px dashed ${dragOver ? PRIMARY : file ? GREEN : GRAY_30}`,
+        borderRadius: 12, backgroundColor: dragOver ? PRIMARY_10 : file ? "rgba(34,197,94,0.05)" : GRAY_5,
+        padding: "28px 24px", textAlign: "center" as const, transition: "all 0.15s", cursor: "pointer",
+      }}
+    >
+      {file ? (
+        <>
+          <CheckCircle size={26} color={GREEN} style={{ marginBottom: 7 }} />
+          <div style={{ fontSize: 13, fontWeight: 600, color: GREEN, marginBottom: 3 }}>{file}</div>
+          <div style={{ fontSize: 12, color: GRAY_60 }}>다시 클릭하면 변경할 수 있습니다.</div>
+        </>
+      ) : (
+        <>
+          <HardDriveUpload size={26} color={GRAY_40} style={{ marginBottom: 7 }} />
+          <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_70, marginBottom: 3 }}>파일을 여기에 드래그하거나 클릭하여 업로드</div>
+          <div style={{ fontSize: 12, color: GRAY_60 }}>{hint}</div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Image Management ─────────────────────────────────────────────────────────
 export function AdminImageManagement({ initialTab = "Image", templates = [] as {id:string;image:string}[] }: { initialTab?: string; templates?: {id:string;image:string}[] }) {
   const [tab, setTab] = useState(initialTab);
@@ -1167,16 +1209,15 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
   const [editingImageId, setEditingImageId] = useState<string | null>(null);
   useEffect(() => { setTab(initialTab); setView("list"); }, [initialTab]);
 
-  const GPU_OPTIONS = ["RTX A5000", "A100 SXM4", "H100 SXM5", "RTX 4090"];
-  const THUMB_OPTIONS = ["🔵", "🟡", "🟣", "🟠", "🟢", "🔴", "⚪", "⚫", "🟤", "🧠", "💬", "👁", "📊", "🔬"];
-  const ACCESS_OPTIONS = ["JupyterLab", "VS Code", "SSH", "Terminal", "복합"];
+  const syncInfo = { status: "success" as "success" | "failed", lastSyncAt: "2026-07-13 14:30:22", failedAt: null as string | null };
+  // 실패 시뮬레이션: { status: "failed", lastSyncAt: "2026-07-13 09:15:44", failedAt: "2026-07-13 09:15:44" }
 
+  const GPU_OPTIONS = ["RTX A5000", "A100 SXM4", "H100 SXM5", "RTX 4090"];
   const [images, setImages] = useState([
-    { id: "i1", name: "PyTorch 2.1 + CUDA 12.1", path: "/pytorch:2.1-cuda12.1", tier: "Official", category: "ML/DL", status: "Public", isDeprecated: false, isFeatured: true,  thumb: "🔵", desc: "PyTorch 2.1과 CUDA 12.1이 사전 설치된 공식 딥러닝 개발 환경. JupyterLab과 VS Code 접속을 지원합니다.", recGpu: "A100 SXM4", recTmp: 30, recLocal: 100, tags: "PyTorch, CUDA 12.1, JupyterLab", packages: "torch==2.1.0\ntorchvision==0.16\ncuda==12.1\njupyterlab==4.0\nwandb\ntensorboard", access: ["JupyterLab", "VS Code"], ports: "8888:JupyterLab, 8080:VS Code", envKeys: "WANDB_API_KEY, HF_TOKEN", used: 847 },
-    { id: "i2", name: "TensorFlow 2.15",           path: "/tensorflow:2.15-cuda12.1",          tier: "Official", category: "ML/DL", status: "Public", isDeprecated: false, isFeatured: false, thumb: "🟡", desc: "TensorFlow 2.15 및 Keras를 포함한 완전한 ML 개발 환경.", recGpu: "RTX A5000", recTmp: 20, recLocal: 50, tags: "TensorFlow, Keras, CUDA", packages: "tensorflow==2.15.0\nkeras==2.15\ncuda==12.1\njupyterlab==4.0", access: ["JupyterLab", "VS Code"], ports: "8888:JupyterLab", envKeys: "", used: 623 },
-    { id: "i3", name: "LLaMA Fine-tuning v2",       path: "/llama-finetune:v2",                  tier: "Verified", category: "LLM",  status: "Public", isDeprecated: false, isFeatured: true,  thumb: "🟣", desc: "Meta LLaMA 시리즈 모델을 LoRA/QLoRA로 파인튜닝하기 위한 최적화 환경. 4비트 양자화 지원.", recGpu: "H100 SXM5", recTmp: 50, recLocal: 200, tags: "LLaMA, LoRA, QLoRA, bitsandbytes", packages: "transformers==4.38\npeft==0.8\nbitsandbytes\nacccelerate\ntrl\ndatasets", access: ["JupyterLab"], ports: "8888:JupyterLab", envKeys: "HF_TOKEN, WANDB_API_KEY", used: 412 },
-    { id: "i4", name: "Stable Diffusion WebUI",     path: "/sdwebui:latest",                     tier: "Verified", category: "CV",   status: "Public", isDeprecated: false, isFeatured: false, thumb: "🟠", desc: "AUTOMATIC1111 Stable Diffusion WebUI + ControlNet, LoRA 지원.", recGpu: "RTX 4090", recTmp: 20, recLocal: 50, tags: "Stable Diffusion, ControlNet, xFormers", packages: "stable-diffusion-webui\ncontrolnet\nxformers\nCLIP", access: ["VS Code", "SSH"], ports: "7860:WebUI", envKeys: "", used: 389 },
-    { id: "i5", name: "Legacy GPU Image v1",         path: "/legacy:v1",                          tier: "Verified", category: "개발환경", status: "Deprecated", isDeprecated: true,  isFeatured: false, thumb: "⚫", desc: "구 버전 개발 환경. 신규 이미지 사용을 권장합니다.", recGpu: "RTX A5000", recTmp: 10, recLocal: 20, tags: "Legacy", packages: "python==3.8\ntensorflow==1.15", access: ["SSH"], ports: "22:SSH", envKeys: "", used: 12 },
+    { id: "i1", name: "PyTorch 2.1 + CUDA 12.1", path: "/pytorch:2.1-cuda12.1", tier: "Official", category: "ML/DL", status: "Public", isFeatured: true,  thumb: "🔵", desc: "PyTorch 2.1과 CUDA 12.1이 사전 설치된 공식 딥러닝 개발 환경.", recGpu: "A100 SXM4", recTmp: 30, recLocal: 100, tags: "PyTorch, CUDA 12.1, JupyterLab", packages: "torch==2.1.0\ntorchvision==0.16\ncuda==12.1\njupyterlab==4.0\nwandb\ntensorboard", access: ["JupyterLab"], ports: "8888:JupyterLab", envKeys: "WANDB_API_KEY, HF_TOKEN", used: 847 },
+    { id: "i2", name: "TensorFlow 2.15",           path: "/tensorflow:2.15-cuda12.1",          tier: "Official", category: "ML/DL", status: "Public", isFeatured: false, thumb: "🟡", desc: "TensorFlow 2.15 및 Keras를 포함한 완전한 ML 개발 환경.", recGpu: "RTX A5000", recTmp: 20, recLocal: 50, tags: "TensorFlow, Keras, CUDA", packages: "tensorflow==2.15.0\nkeras==2.15\ncuda==12.1\njupyterlab==4.0", access: ["JupyterLab"], ports: "8888:JupyterLab", envKeys: "", used: 623 },
+    { id: "i3", name: "LLaMA Fine-tuning v2",       path: "/llama-finetune:v2",                  tier: "Verified", category: "LLM",  status: "Public", isFeatured: true,  thumb: "🟣", desc: "Meta LLaMA 시리즈 모델을 LoRA/QLoRA로 파인튜닝하기 위한 최적화 환경. 4비트 양자화 지원.", recGpu: "H100 SXM5", recTmp: 50, recLocal: 200, tags: "LLaMA, LoRA, QLoRA, bitsandbytes", packages: "transformers==4.38\npeft==0.8\nbitsandbytes\nacccelerate\ntrl\ndatasets", access: ["JupyterLab"], ports: "8888:JupyterLab", envKeys: "HF_TOKEN, WANDB_API_KEY", used: 412 },
+    { id: "i4", name: "Stable Diffusion WebUI",     path: "/sdwebui:latest",                     tier: "Verified", category: "CV",   status: "Public", isFeatured: false, thumb: "🟠", desc: "AUTOMATIC1111 Stable Diffusion WebUI + ControlNet, LoRA 지원.", recGpu: "RTX 4090", recTmp: 20, recLocal: 50, tags: "Stable Diffusion, ControlNet, xFormers", packages: "stable-diffusion-webui\ncontrolnet\nxformers\nCLIP", access: ["JupyterLab"], ports: "8888:JupyterLab", envKeys: "", used: 389 },
   ]);
 
   const CAT_COLORS = ["#635ADC", "#248ED5", "#22C55E", "#FFB144", "#EF4444", "#A855F7", "#EC4899", "#777777"];
@@ -1212,13 +1253,12 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
   };
 
   // ── Image form state ──
-  const blankImg = { name: "", path: "", desc: "", tier: "Official", category: "ML/DL", status: "Public", isDeprecated: false, thumb: "🔵", recGpu: "A100 SXM4", recTmp: 20, recLocal: 50, tags: "", packages: "", access: [] as string[], ports: "", envKeys: "" };
+  const blankImg = { name: "", path: "", desc: "", tier: "Official", category: "ML/DL", status: "Public", thumb: "🔵", recGpu: "A100 SXM4", recTmp: 20, recLocal: 50, tags: "", packages: "", access: ["JupyterLab"] as string[], ports: "8888:JupyterLab", envKeys: "" };
   const [imgForm, setImgForm] = useState({ ...blankImg });
-  const [imgSourceMode, setImgSourceMode] = useState<"nexus" | "local">("nexus");
-  const [nexusQuery, setNexusQuery] = useState("");
-  const [nexusStatus, setNexusStatus] = useState<"idle" | "loading" | "found" | "error">("idle");
   const [imgUploadFile, setImgUploadFile] = useState<string | null>(null);
   const [imgDragOver, setImgDragOver] = useState(false);
+  const [imgThumbFile, setImgThumbFile] = useState<string | null>(null);
+  const [imgThumbDragOver, setImgThumbDragOver] = useState(false);
 
   // ── Category drawer state ──
   const blankCatForm = { name: "", desc: "", icon: "📦", color: PRIMARY };
@@ -1238,28 +1278,24 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
   };
 
   const openCreate = () => {
-    setImgForm({ name: "", path: "/", desc: "", tier: "Official", category: "ML/DL", status: "Public", isDeprecated: false, thumb: "🔵", recGpu: "A100 SXM4", recTmp: 20, recLocal: 50, tags: "", packages: "", access: [], ports: "", envKeys: "" });
+    setImgForm({ name: "", path: "/", desc: "", tier: "Official", category: "ML/DL", status: "Public", thumb: "🔵", recGpu: "A100 SXM4", recTmp: 20, recLocal: 50, tags: "", packages: "", access: ["JupyterLab"], ports: "8888:JupyterLab", envKeys: "" });
     setEditingImageId(null);
-    setImgSourceMode("nexus");
-    setNexusQuery("");
-    setNexusStatus("idle");
     setImgUploadFile(null);
+    setImgThumbFile(null);
     setView("create-image");
   };
 
   // ── Image table expand / search / sort state ──
   const [expandedImgs, setExpandedImgs] = useState<Set<string>>(new Set());
   const toggleImg = (id: string) => setExpandedImgs(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  const toggleFeatured = (id: string) => setImages(imgs => imgs.map(img => img.id === id ? { ...img, isFeatured: !img.isFeatured } : img));
-  const [trendingConfig, setTrendingConfig] = useState<{ field: "used"; dir: "asc" | "desc"; count: number }>({ field: "used", dir: "desc", count: 3 });
-  const [showImgSettings, setShowImgSettings] = useState(false);
-  const trendingIds = new Set([...images].sort((a, b) => trendingConfig.dir === "desc" ? b[trendingConfig.field] - a[trendingConfig.field] : a[trendingConfig.field] - b[trendingConfig.field]).slice(0, trendingConfig.count).map(x => x.id));
+  const toggleStatus  = (id: string) => setImages(imgs => imgs.map(img => img.id === id ? { ...img, status: img.status === "Public" ? "Private" : "Public" } : img));
+  const trendingIds = new Set([...images].sort((a, b) => b.used - a.used).slice(0, 3).map(x => x.id));
 
   const [imgSearch, setImgSearch] = useState("");
   const [imgSort, setImgSort] = useState<{ col: string; dir: "asc" | "desc" }>({ col: "used", dir: "desc" });
   const [imgFilterTier, setImgFilterTier] = useState("All");
   const [imgFilterCat, setImgFilterCat] = useState("All");
-  const [imgFilterAccess, setImgFilterAccess] = useState("All");
+  const [imgFilterStatus, setImgFilterStatus] = useState("All");
   const cycleSort = (col: string) => setImgSort(s => s.col === col ? { col, dir: s.dir === "asc" ? "desc" : "asc" } : { col, dir: "asc" });
   const sortIcon = (col: string) => {
     if (imgSort.col !== col) return <ChevronUp size={11} color={GRAY_40} style={{ marginLeft: 3, flexShrink: 0 }} />;
@@ -1269,14 +1305,14 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
   };
   const allTiers = ["All", ...Array.from(new Set(images.map(x => x.tier)))];
   const allCats  = ["All", ...Array.from(new Set(images.map(x => x.category)))];
-  const allAccess = ["All", "JupyterLab", "VS Code", "SSH", "Terminal", "복합"];
+  const allStatuses = ["All", "Public", "Private"];
   const filteredImgs = (() => {
     const q = imgSearch.trim().toLowerCase();
     let list = images.filter(img => {
       if (q && !(img.name.toLowerCase().includes(q) || img.path.toLowerCase().includes(q) || img.tier.toLowerCase().includes(q) || img.category.toLowerCase().includes(q))) return false;
       if (imgFilterTier !== "All" && img.tier !== imgFilterTier) return false;
       if (imgFilterCat  !== "All" && img.category !== imgFilterCat) return false;
-      if (imgFilterAccess !== "All" && !(img.access ?? []).includes(imgFilterAccess)) return false;
+      if (imgFilterStatus !== "All" && img.status !== imgFilterStatus) return false;
       return true;
     });
     list = [...list].sort((a, b) => {
@@ -1286,10 +1322,11 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
       else if (imgSort.col === "category") { va = a.category; vb = b.category; }
       else if (imgSort.col === "used") { va = a.used; vb = b.used; }
       else if (imgSort.col === "access") { va = (a.access?.[0] ?? ""); vb = (b.access?.[0] ?? ""); }
+      else if (imgSort.col === "status") { va = a.status; vb = b.status; }
       if (typeof va === "number") return imgSort.dir === "asc" ? va - (vb as number) : (vb as number) - va;
       return imgSort.dir === "asc" ? va.localeCompare(vb as string) : (vb as string).localeCompare(va);
     });
-    return [...list.filter(x => x.isFeatured), ...list.filter(x => !x.isFeatured)];
+    return list;
   })();
 
   // ── Image table spacerGaps helpers ──
@@ -1310,7 +1347,7 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
   );
 
   const Toggle = ({ on, onToggle }: { on: boolean; onToggle: () => void }) => (
-    <button onClick={onToggle} style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: on ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+    <button type="button" onClick={onToggle} style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: on ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
       <span style={{ position: "absolute", top: 3, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: on ? 21 : 3 }} />
     </button>
   );
@@ -1340,219 +1377,109 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
     const hint = (text: string) => (
       <div style={{ fontSize: 12, color: GRAY_60, marginTop: 5 }}>{text}</div>
     );
-    const SecCard = ({ label, children }: { label: string; children: React.ReactNode }) => (
-      <div style={{ backgroundColor: "#ffffff", borderRadius: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)", marginBottom: 20, overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 24px", borderBottom: `1px solid ${GRAY_10}` }}>
-          <div style={{ width: 3, height: 14, borderRadius: 99, backgroundColor: PRIMARY, flexShrink: 0 }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: GRAY_90 }}>{label}</span>
-        </div>
-        <div style={{ padding: "20px 24px 4px" }}>{children}</div>
-      </div>
-    );
     return (
       <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
         <div style={{ maxWidth: 720 }}>
-          <button onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← Image Management</button>
+          <button type="button" onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← Image Management</button>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0 }}>{isEdit ? "이미지 편집" : "이미지 등록"}</h1>
             <div style={{ fontSize: 13, color: GRAY_60, marginTop: 4 }}>서버 이미지 메타데이터와 접속·환경 정보를 입력하세요.</div>
           </div>
 
-          {/* 이미지 소스 (등록 시에만 표시) */}
+          {/* 1. 이미지 파일 (등록 시에만) */}
           {!isEdit && (
-            <div style={{ backgroundColor: "#ffffff", borderRadius: 14, boxShadow: "0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)", marginBottom: 20, overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 24px", borderBottom: `1px solid ${GRAY_10}` }}>
-                <div style={{ width: 3, height: 14, borderRadius: 99, backgroundColor: PRIMARY, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, fontWeight: 700, color: GRAY_90 }}>이미지 소스</span>
+            <ImgSecCard label="이미지 파일">
+              <div style={{ paddingBottom: 16 }}>
+                <ImgUploadBox
+                  file={imgUploadFile} dragOver={imgDragOver}
+                  onDragOver={() => setImgDragOver(true)}
+                  onDragLeave={() => setImgDragOver(false)}
+                  onDrop={e => { const f = e.dataTransfer.files[0]; if (f) { setImgUploadFile(f.name); setImgForm(fm => ({ ...fm, name: fm.name || f.name.replace(/\.(tar\.gz|tar)$/, "") })); } }}
+                  onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".tar,.tar.gz"; inp.onchange = (ev: any) => { const f = ev.target.files?.[0]; if (f) { setImgUploadFile(f.name); setImgForm(fm => ({ ...fm, name: fm.name || f.name.replace(/\.(tar\.gz|tar)$/, "") })); } }; inp.click(); }}
+                  accept=".tar,.tar.gz"
+                  hint=".tar, .tar.gz 포맷 지원"
+                />
               </div>
-              <div style={{ padding: "20px 24px" }}>
-                {/* 소스 타입 선택 */}
-                <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-                  {([
-                    { mode: "nexus" as const, icon: <CloudDownload size={14} />, label: "Nexus에서 불러오기" },
-                    { mode: "local" as const, icon: <HardDriveUpload size={14} />, label: "로컬 이미지 업로드" },
-                  ]).map(({ mode, icon, label }) => {
-                    const active = imgSourceMode === mode;
-                    return (
-                      <button key={mode} onClick={() => setImgSourceMode(mode)} style={{
-                        display: "flex", alignItems: "center", gap: 7, padding: "9px 16px", borderRadius: 10,
-                        border: `2px solid ${active ? PRIMARY : GRAY_30}`,
-                        backgroundColor: active ? PRIMARY_10 : "white",
-                        color: active ? PRIMARY : GRAY_70,
-                        fontSize: 13, fontWeight: active ? 600 : 400, cursor: "pointer", transition: "all 0.1s",
-                      }}>
-                        {icon}{label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Nexus 패널 */}
-                {imgSourceMode === "nexus" && (
-                  <div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 8 }}>Nexus 이미지 경로</div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <div style={{ position: "relative", flex: 1 }}>
-                        <Link2 size={13} color={GRAY_60} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                        <input
-                          type="text"
-                          placeholder="nexus.internal/repository/docker/image:tag"
-                          value={nexusQuery}
-                          onChange={e => { setNexusQuery(e.target.value); setNexusStatus("idle"); }}
-                          onFocus={onFoc} onBlur={onBlr}
-                          style={{ width: "100%", height: 40, paddingLeft: 34, paddingRight: 12, borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, color: GRAY_90, outline: "none", boxSizing: "border-box" as const, backgroundColor: "#fff" }}
-                        />
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (!nexusQuery.trim()) return;
-                          setNexusStatus("loading");
-                          setTimeout(() => {
-                            if (nexusQuery.includes("/")) {
-                              const parts = nexusQuery.split(":").pop() ?? "latest";
-                              setNexusStatus("found");
-                              setImgForm(f => ({ ...f, path: nexusQuery.trim() }));
-                            } else {
-                              setNexusStatus("error");
-                            }
-                          }, 900);
-                        }}
-                        style={{ height: 40, padding: "0 18px", borderRadius: 8, border: "none", backgroundColor: PRIMARY, color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" as const, flexShrink: 0 }}
-                      >불러오기</button>
-                    </div>
-                    {/* 상태 표시 */}
-                    <div style={{ marginTop: 10, fontSize: 12, display: "flex", alignItems: "center", gap: 6 }}>
-                      {nexusStatus === "idle" && <span style={{ color: GRAY_60 }}>Nexus에서 이미지를 불러오면 경로가 자동 입력됩니다.</span>}
-                      {nexusStatus === "loading" && <><div style={{ width: 12, height: 12, borderRadius: "50%", border: `2px solid ${PRIMARY}`, borderTopColor: "transparent", animation: "spin 0.7s linear infinite" }} /><span style={{ color: PRIMARY }}>연결 중...</span></>}
-                      {nexusStatus === "found" && <><CheckCircle size={13} color={GREEN} /><span style={{ color: GREEN }}>이미지를 찾았습니다. 경로가 아래 폼에 자동 입력되었습니다.</span></>}
-                      {nexusStatus === "error" && <><AlertTriangle size={13} color={RED} /><span style={{ color: RED }}>이미지를 찾을 수 없습니다. 경로를 확인하세요.</span></>}
-                    </div>
-                  </div>
-                )}
-
-                {/* 로컬 업로드 패널 */}
-                {imgSourceMode === "local" && (
-                  <div
-                    onDragOver={e => { e.preventDefault(); setImgDragOver(true); }}
-                    onDragLeave={() => setImgDragOver(false)}
-                    onDrop={e => {
-                      e.preventDefault(); setImgDragOver(false);
-                      const file = e.dataTransfer.files[0];
-                      if (file) { setImgUploadFile(file.name); setImgForm(f => ({ ...f, name: f.name || file.name.replace(/\.(tar\.gz|tar)$/, "") })); }
-                    }}
-                    style={{
-                      border: `2px dashed ${imgDragOver ? PRIMARY : imgUploadFile ? GREEN : GRAY_30}`,
-                      borderRadius: 12, backgroundColor: imgDragOver ? PRIMARY_10 : imgUploadFile ? "rgba(34,197,94,0.05)" : GRAY_5,
-                      padding: "32px 24px", textAlign: "center" as const, transition: "all 0.15s", cursor: "pointer",
-                    }}
-                    onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".tar,.tar.gz"; inp.onchange = (ev: any) => { const f = ev.target.files?.[0]; if (f) { setImgUploadFile(f.name); setImgForm(fm => ({ ...fm, name: fm.name || f.name.replace(/\.(tar\.gz|tar)$/, "") })); } }; inp.click(); }}
-                  >
-                    {imgUploadFile ? (
-                      <>
-                        <CheckCircle size={28} color={GREEN} style={{ marginBottom: 8 }} />
-                        <div style={{ fontSize: 14, fontWeight: 600, color: GREEN, marginBottom: 4 }}>{imgUploadFile}</div>
-                        <div style={{ fontSize: 12, color: GRAY_60 }}>파일이 선택되었습니다. 다시 클릭하면 변경할 수 있습니다.</div>
-                      </>
-                    ) : (
-                      <>
-                        <HardDriveUpload size={28} color={GRAY_40} style={{ marginBottom: 8 }} />
-                        <div style={{ fontSize: 14, fontWeight: 500, color: GRAY_70, marginBottom: 4 }}>파일을 여기에 드래그하거나 클릭하여 업로드</div>
-                        <div style={{ fontSize: 12, color: GRAY_60 }}>.tar, .tar.gz 포맷 지원</div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            </ImgSecCard>
           )}
 
-          <SecCard label="기본 정보">
+          {/* 2. 기본 정보: 이미지명 → 설명 → 썸네일 */}
+          <ImgSecCard label="기본 정보">
             <FormRow label="이미지명" required>
               <input style={fld} placeholder="예: PyTorch 2.1 + CUDA 12.1" value={imgForm.name} onChange={e => setImgForm(f => ({ ...f, name: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
               {hint("사용자에게 노출되는 이름. 버전과 주요 특징을 포함하세요.")}
             </FormRow>
-            <FormRow label="설명 (마크다운)">
-              <textarea style={{ ...txa, minHeight: 100 }} placeholder={"## 이미지 설명\n\n이 이미지에 대한 설명을 마크다운으로 작성하세요.\n\n- 주요 특징\n- 사용 방법"} value={imgForm.desc} onChange={e => setImgForm(f => ({ ...f, desc: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
-              {hint("마크다운 형식으로 작성하면 안전하게 렌더링됩니다.")}
+            <FormRow label="설명">
+              <MdEditor value={imgForm.desc} onChange={v => setImgForm(f => ({ ...f, desc: v }))} onFocus={onFoc} onBlur={onBlr} />
             </FormRow>
-            <FormRow label="썸네일 이모지">
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const, marginBottom: 8 }}>
-                {THUMB_OPTIONS.map(th => (
-                  <button key={th} onClick={() => setImgForm(f => ({ ...f, thumb: th }))} style={{ width: 40, height: 40, borderRadius: 8, border: `2px solid ${imgForm.thumb === th ? PRIMARY : GRAY_30}`, backgroundColor: imgForm.thumb === th ? PRIMARY_10 : "white", cursor: "pointer", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>{th}</button>
+            <FormRow label="썸네일 이미지">
+              <ImgUploadBox
+                file={imgThumbFile} dragOver={imgThumbDragOver}
+                onDragOver={() => setImgThumbDragOver(true)}
+                onDragLeave={() => setImgThumbDragOver(false)}
+                onDrop={e => { const f = e.dataTransfer.files[0]; if (f) setImgThumbFile(f.name); }}
+                onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.onchange = (ev: any) => { const f = ev.target.files?.[0]; if (f) setImgThumbFile(f.name); }; inp.click(); }}
+                accept="image/*"
+                hint="PNG, JPG, SVG 지원 · 권장 크기 128×128px"
+              />
+            </FormRow>
+          </ImgSecCard>
+
+          {/* 3. 분류: Tier → 카테고리 → 태그 */}
+          <ImgSecCard label="분류">
+            <FormRow label="Tier">
+              <div style={{ display: "flex", gap: 8 }}>
+                {tiers.map(t => (
+                  <button type="button" key={t.id} onClick={() => setImgForm(f => ({ ...f, tier: t.name }))} style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `2px solid ${imgForm.tier === t.name ? t.color : GRAY_30}`, backgroundColor: imgForm.tier === t.name ? `${t.color}15` : "white", cursor: "pointer" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: imgForm.tier === t.name ? t.color : GRAY_70 }}>{t.name}</div>
+                  </button>
                 ))}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: PRIMARY_10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26 }}>{imgForm.thumb || "🔵"}</div>
-                <span style={{ fontSize: 12, color: GRAY_60 }}>카드 썸네일 미리보기</span>
-              </div>
             </FormRow>
-          </SecCard>
-
-          <SecCard label="접속 방식">
-            <FormRow label="접속 방식" required>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                {ACCESS_OPTIONS.map(a => {
-                  const checked = imgForm.access.includes(a);
-                  return (
-                    <button key={a} onClick={() => setImgForm(f => ({ ...f, access: checked ? f.access.filter(x => x !== a) : [...f.access, a] }))}
-                      style={{ padding: "7px 14px", borderRadius: 8, border: `2px solid ${checked ? PRIMARY : GRAY_30}`, backgroundColor: checked ? PRIMARY_10 : "white", color: checked ? PRIMARY : GRAY_70, cursor: "pointer", fontSize: 13, fontWeight: checked ? 600 : 400, transition: "all 0.1s" }}>
-                      {a}
-                    </button>
-                  );
-                })}
-              </div>
-              {hint("접속 UI 결정에 사용됩니다. 복수 선택 가능.")}
+            <FormRow label="카테고리">
+              <select style={{ ...fld, cursor: "pointer" }} value={imgForm.category} onChange={e => setImgForm(f => ({ ...f, category: e.target.value }))} onFocus={onFoc} onBlur={onBlr}>
+                {catOptions.map(c => <option key={c}>{c}</option>)}
+              </select>
             </FormRow>
-          </SecCard>
-
-          <SecCard label="분류 및 공개 설정">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <FormRow label="Tier">
-                <div style={{ display: "flex", gap: 8 }}>
-                  {tiers.map(t => (
-                    <button key={t.id} onClick={() => setImgForm(f => ({ ...f, tier: t.name }))} style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `2px solid ${imgForm.tier === t.name ? t.color : GRAY_30}`, backgroundColor: imgForm.tier === t.name ? `${t.color}15` : "white", cursor: "pointer" }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: imgForm.tier === t.name ? t.color : GRAY_70 }}>{t.name}</div>
-                    </button>
-                  ))}
-                </div>
-              </FormRow>
-              <FormRow label="카테고리">
-                <select style={{ ...fld, cursor: "pointer" }} value={imgForm.category} onChange={e => setImgForm(f => ({ ...f, category: e.target.value }))} onFocus={onFoc} onBlur={onBlr}>
-                  {catOptions.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </FormRow>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              <FormRow label="공개 여부">
-                <div style={{ display: "flex", alignItems: "center", gap: 10, height: 40 }}>
-                  <Toggle on={imgForm.status === "Public"} onToggle={() => setImgForm(f => ({ ...f, status: f.status === "Public" ? "Internal" : "Public" }))} />
-                  <span style={{ fontSize: 13, color: imgForm.status === "Public" ? GREEN : GRAY_60, fontWeight: 500 }}>{imgForm.status === "Public" ? "공개 (사용자 콘솔 노출)" : "비공개 (Internal)"}</span>
-                </div>
-              </FormRow>
-
-            </div>
             <FormRow label="태그">
               <input style={fld} placeholder="PyTorch, CUDA, JupyterLab" value={imgForm.tags} onChange={e => setImgForm(f => ({ ...f, tags: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
               {hint("쉼표(,)로 구분. 필터·검색에 활용됩니다.")}
             </FormRow>
-          </SecCard>
+          </ImgSecCard>
 
-          <SecCard label="포트 및 환경변수">
+          {/* 4. 접속 및 런타임: 접속 방식 → 포트 → 환경변수 */}
+          <ImgSecCard label="접속 및 런타임">
+            <FormRow label="접속 방식">
+              <div style={{ display: "flex", gap: 8, alignItems: "center", height: 40 }}>
+                <span style={{ padding: "7px 14px", borderRadius: 8, border: `2px solid ${PRIMARY}`, backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600 }}>JupyterLab</span>
+              </div>
+            </FormRow>
             <FormRow label="포트 정보">
-              <input style={fld} placeholder="8888:JupyterLab, 8080:VS Code, 22:SSH" value={imgForm.ports} onChange={e => setImgForm(f => ({ ...f, ports: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
-              {hint("이미지 메타에서 자동 파싱. 포트번호:서비스명 형식으로 쉼표 구분.")}
+              <input style={fld} placeholder="8888:JupyterLab" value={imgForm.ports} onChange={e => setImgForm(f => ({ ...f, ports: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
+              {hint("포트번호:서비스명 형식으로 쉼표 구분.")}
             </FormRow>
             <FormRow label="환경변수 사용자 입력용">
               <input style={fld} placeholder="WANDB_API_KEY, HF_TOKEN, OPENAI_API_KEY" value={imgForm.envKeys} onChange={e => setImgForm(f => ({ ...f, envKeys: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
               {hint("서버 생성 시 사용자에게 노출될 환경변수 키. 쉼표로 구분.")}
             </FormRow>
-          </SecCard>
+          </ImgSecCard>
 
-          <SecCard label="주요 패키지">
+          {/* 5. 주요 패키지 */}
+          <ImgSecCard label="주요 패키지">
             <FormRow label="패키지 목록 (줄바꿈으로 구분)">
               <textarea style={{ ...txa, minHeight: 100, fontFamily: "'Roboto Mono', monospace", fontSize: 12 }} placeholder={"torch==2.1.0\ntorchvision==0.16\ncuda==12.1"} value={imgForm.packages} onChange={e => setImgForm(f => ({ ...f, packages: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
             </FormRow>
-          </SecCard>
+          </ImgSecCard>
+
+          {/* 6. 공개 여부 */}
+          <ImgSecCard label="공개 여부">
+            <FormRow label="공개 여부">
+              <div style={{ display: "flex", alignItems: "center", gap: 10, height: 40 }}>
+                <Toggle on={imgForm.status === "Public"} onToggle={() => setImgForm(f => ({ ...f, status: f.status === "Public" ? "Private" : "Public" }))} />
+                <span style={{ fontSize: 13, color: imgForm.status === "Public" ? GREEN : GRAY_60, fontWeight: 500 }}>{imgForm.status === "Public" ? "Public (사용자 콘솔 노출)" : "Private (관리자만 접근)"}</span>
+              </div>
+            </FormRow>
+          </ImgSecCard>
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingBottom: 28, paddingTop: 8 }}>
             <PrimaryBtn variant="secondary" onClick={() => setView("list")}>취소</PrimaryBtn>
@@ -1589,9 +1516,19 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
       {/* ── Image ── */}
       {tab === "Image" && (
         <>
+          {/* Image Repository 동기화 상태 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 8, marginBottom: 12, backgroundColor: syncInfo.status === "success" ? "rgba(34,197,94,0.06)" : "rgba(239,68,68,0.06)", border: `1px solid ${syncInfo.status === "success" ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.25)"}` }}>
+            <div style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: syncInfo.status === "success" ? GREEN : RED, flexShrink: 0 }} />
+            <span style={{ fontSize: 12, color: GRAY_70 }}>Image Repository</span>
+            <span style={{ fontSize: 12, color: syncInfo.status === "success" ? GREEN : RED, fontWeight: 600 }}>{syncInfo.status === "success" ? "동기화 정상" : "동기화 실패"}</span>
+            <span style={{ fontSize: 11, color: GRAY_60 }}>마지막 동기화: {syncInfo.lastSyncAt}</span>
+            {syncInfo.status === "failed" && syncInfo.failedAt && (
+              <span style={{ fontSize: 11, color: RED }}>· 발생 시각: {syncInfo.failedAt}</span>
+            )}
+          </div>
           {(() => {
             const selStyle: React.CSSProperties = { height: 32, padding: "0 10px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", fontFamily: "inherit", color: GRAY_90, backgroundColor: "white", cursor: "pointer" };
-            const hasFilter = imgSearch || imgFilterTier !== "All" || imgFilterCat !== "All" || imgFilterAccess !== "All";
+            const hasFilter = imgSearch || imgFilterTier !== "All" || imgFilterCat !== "All" || imgFilterStatus !== "All";
             return (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, gap: 8 }}>
                 <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500, flexShrink: 0 }}>
@@ -1607,40 +1544,15 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                       onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }}
                     />
                   </div>
+                  <select value={imgFilterStatus} onChange={e => setImgFilterStatus(e.target.value)} style={selStyle}>
+                    {allStatuses.map(s => <option key={s} value={s}>{s === "All" ? "Status: All" : s}</option>)}
+                  </select>
                   <select value={imgFilterTier} onChange={e => setImgFilterTier(e.target.value)} style={selStyle}>
                     {allTiers.map(t => <option key={t} value={t}>{t === "All" ? "Tier: All" : t}</option>)}
                   </select>
                   <select value={imgFilterCat} onChange={e => setImgFilterCat(e.target.value)} style={selStyle}>
                     {allCats.map(c => <option key={c} value={c}>{c === "All" ? "Category: All" : c}</option>)}
                   </select>
-                  <select value={imgFilterAccess} onChange={e => setImgFilterAccess(e.target.value)} style={selStyle}>
-                    {allAccess.map(a => <option key={a} value={a}>{a === "All" ? "Access: All" : a}</option>)}
-                  </select>
-                  <div style={{ position: "relative" }}>
-                    <button
-                      onClick={() => setShowImgSettings(v => !v)}
-                      style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1.5px solid ${showImgSettings ? PRIMARY : PRIMARY_20}`, fontSize: 13, fontFamily: "inherit", color: PRIMARY, backgroundColor: showImgSettings ? PRIMARY_20 : PRIMARY_10, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 600, flexShrink: 0 }}
-                    >
-                      <Settings size={13} />Gallery Setting
-                    </button>
-                    {showImgSettings && (
-                      <div style={{ position: "absolute", right: 0, top: 38, zIndex: 200, backgroundColor: "white", border: `1px solid ${GRAY_10}`, borderRadius: 10, boxShadow: "0 4px 16px rgba(0,0,0,0.14)", padding: 16, width: 220, display: "flex", flexDirection: "column", gap: 12 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90 }}>Trending 설정</div>
-                        <div style={{ fontSize: 12, color: GRAY_60, lineHeight: 1.5 }}>
-                          Used 높은순 기준 상위 N개를 Trending으로 표시합니다.
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <input
-                            type="number" min={1} max={20}
-                            value={trendingConfig.count}
-                            onChange={e => setTrendingConfig(c => ({ ...c, count: Math.max(1, Math.min(20, Number(e.target.value))) }))}
-                            style={{ width: 60, height: 32, padding: "0 10px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, fontFamily: "inherit", color: GRAY_90, outline: "none", textAlign: "center" }}
-                          />
-                          <span style={{ fontSize: 13, color: GRAY_60 }}>개</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             );
@@ -1654,16 +1566,16 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                     <span style={{ display: "inline-flex", alignItems: "center" }}>Image{sortIcon("name")}</span>
                   </th>
                   <th style={imgThSp} />
+                  <th style={{ ...imgThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleSort("status")}>
+                    <span style={{ display: "inline-flex", alignItems: "center" }}>Status{sortIcon("status")}</span>
+                  </th>
+                  <th style={imgThSp} />
                   <th style={{ ...imgThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleSort("tier")}>
                     <span style={{ display: "inline-flex", alignItems: "center" }}>Tier{sortIcon("tier")}</span>
                   </th>
                   <th style={imgThSp} />
                   <th style={{ ...imgThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleSort("category")}>
                     <span style={{ display: "inline-flex", alignItems: "center" }}>Category{sortIcon("category")}</span>
-                  </th>
-                  <th style={imgThSp} />
-                  <th style={{ ...imgThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleSort("access")}>
-                    <span style={{ display: "inline-flex", alignItems: "center" }}>Access{sortIcon("access")}</span>
                   </th>
                   <th style={imgThSp} />
                   <th style={{ ...imgThBase, padding: "10px 0" }}>Template Status</th>
@@ -1679,7 +1591,7 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                 {filteredImgs.map((img, idx) => {
                   const isExp = expandedImgs.has(img.id);
                   const isLast = idx === filteredImgs.length - 1;
-                  const rowBg = isExp ? PRIMARY_20 : img.isFeatured ? PRIMARY_10 : "white";
+                  const rowBg = isExp ? PRIMARY_20 : "white";
                   const tplCount = templates.filter(t => t.image === img.name).length;
                   return (
                     <React.Fragment key={img.id}>
@@ -1700,11 +1612,16 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                                 <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{img.name}</span>
-                                {img.isFeatured && <Star size={12} color={PRIMARY} style={{ fill: PRIMARY, flexShrink: 0 }} />}
                               </div>
                               <div style={{ fontSize: 11, color: GRAY_60, fontFamily: "'Roboto Mono', monospace", whiteSpace: "nowrap" }}>{img.path}</div>
                             </div>
                           </div>
+                        </td>
+                        <td style={imgSp(isLast || isExp, rowBg)} />
+                        <td style={{ ...imgTd("mid", isLast || isExp), backgroundColor: rowBg }}>
+                          <Badge color={img.status === "Public" ? "success" : "neutral"}>
+                            {img.status === "Public" ? "Public" : "Private"}
+                          </Badge>
                         </td>
                         <td style={imgSp(isLast || isExp, rowBg)} />
                         <td style={{ ...imgTd("mid", isLast || isExp), backgroundColor: rowBg }}>
@@ -1713,12 +1630,6 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                         <td style={imgSp(isLast || isExp, rowBg)} />
                         <td style={{ ...imgTd("mid", isLast || isExp), backgroundColor: rowBg }}>
                           {colorChip(img.category, catColorMap[img.category] ?? GRAY_60)}
-                        </td>
-                        <td style={imgSp(isLast || isExp, rowBg)} />
-                        <td style={{ ...imgTd("mid", isLast || isExp), backgroundColor: rowBg }}>
-                          <div style={{ display: "flex", gap: 4 }}>
-                            {img.access?.map(a => <React.Fragment key={a}>{colorChip(a, accessColorMap[a] ?? GRAY_60)}</React.Fragment>)}
-                          </div>
                         </td>
                         <td style={imgSp(isLast || isExp, rowBg)} />
                         <td style={{ ...imgTd("mid", isLast || isExp), backgroundColor: rowBg }} onClick={e => e.stopPropagation()}>
@@ -1736,11 +1647,11 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                         <td style={imgSp(isLast || isExp, rowBg)} />
                         <td style={{ ...imgTd("last", isLast || isExp), backgroundColor: rowBg }} onClick={e => e.stopPropagation()}>
                           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                            <button onClick={() => toggleFeatured(img.id)} title={img.isFeatured ? "Featured 해제" : "Featured 설정"}
-                              style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${img.isFeatured ? PRIMARY : GRAY_30}`, backgroundColor: img.isFeatured ? PRIMARY_10 : "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-                              <Star size={12} color={img.isFeatured ? PRIMARY : GRAY_40} style={img.isFeatured ? { fill: PRIMARY } : {}} />
-                            </button>
-                            <PrimaryBtn size="xsmall" variant="secondary" onClick={() => { setImgForm({ name: img.name, path: img.path, desc: img.desc, tier: img.tier, category: img.category, status: img.status, isDeprecated: img.isDeprecated, thumb: img.thumb, recGpu: img.recGpu, recTmp: img.recTmp, recLocal: img.recLocal, tags: img.tags, packages: img.packages, access: img.access || [], ports: img.ports || "", envKeys: img.envKeys || "" }); setEditingImageId(img.id); setView("edit-image"); }}><Edit size={12} /></PrimaryBtn>
+                            <PrimaryBtn size="xsmall" variant="secondary" onClick={() => { setImgForm({ name: img.name, path: img.path, desc: img.desc, tier: img.tier, category: img.category, status: img.status, thumb: img.thumb, recGpu: img.recGpu, recTmp: img.recTmp, recLocal: img.recLocal, tags: img.tags, packages: img.packages, access: img.access || [], ports: img.ports || "", envKeys: img.envKeys || "" }); setEditingImageId(img.id); setView("edit-image"); }}><Edit size={12} /></PrimaryBtn>
+                            {img.status === "Public"
+                              ? <PrimaryBtn size="xsmall" variant="danger" onClick={() => toggleStatus(img.id)}>비공개</PrimaryBtn>
+                              : <PrimaryBtn size="xsmall" onClick={() => toggleStatus(img.id)}>공개</PrimaryBtn>
+                            }
                             <PrimaryBtn size="xsmall" variant="danger" onClick={() => setImages(images.filter(x => x.id !== img.id))}><Trash2 size={12} /></PrimaryBtn>
                           </div>
                         </td>
@@ -1856,7 +1767,7 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                         <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>이미지 카테고리를 {catDrawer.editId ? "수정" : "등록"}합니다.</div>
                       </div>
                     </div>
-                    <button onClick={closeCatDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
+                    <button type="button" onClick={closeCatDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
                       <X size={16} />
@@ -1901,7 +1812,7 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                     <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>색상</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
                       {CAT_COLORS.map(c => (
-                        <button key={c} onClick={() => setCatDrawer(d => d ? { ...d, form: { ...d.form, color: c } } : d)}
+                        <button type="button" key={c} onClick={() => setCatDrawer(d => d ? { ...d, form: { ...d.form, color: c } } : d)}
                           style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: c, border: `2.5px solid ${catDrawer.form.color === c ? GRAY_90 : "transparent"}`, cursor: "pointer", flexShrink: 0, outline: "none", boxShadow: catDrawer.form.color === c ? "0 0 0 2px white inset" : "none" }}
                         />
                       ))}
@@ -1976,7 +1887,7 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                         <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>이미지 Tier를 {tierDrawer.editId ? "수정" : "등록"}합니다.</div>
                       </div>
                     </div>
-                    <button onClick={closeTierDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
+                    <button type="button" onClick={closeTierDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
                       <X size={16} />
@@ -2017,7 +1928,7 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
                     <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>색상</div>
                     <div style={{ display: "flex", gap: 8 }}>
                       {TIER_COLORS.map(c => (
-                        <button key={c} onClick={() => setTierDrawer(d => d ? { ...d, form: { ...d.form, color: c } } : d)}
+                        <button type="button" key={c} onClick={() => setTierDrawer(d => d ? { ...d, form: { ...d.form, color: c } } : d)}
                           style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: c, border: `2.5px solid ${tierDrawer.form.color === c ? GRAY_90 : "transparent"}`, cursor: "pointer", flexShrink: 0, outline: "none", boxShadow: tierDrawer.form.color === c ? `0 0 0 2px white inset` : "none" }}
                         />
                       ))}
@@ -2055,93 +1966,516 @@ export function AdminImageManagement({ initialTab = "Image", templates = [] as {
 }
 
 // ─── Credit Management ────────────────────────────────────────────────────────
-export function AdminCreditManagement({ initialTab = "크레딧 지급/회수" }: { initialTab?: string }) {
+export function AdminCreditManagement({ initialTab = "Credit" }: { initialTab?: string }) {
   const [tab, setTab] = useState(initialTab);
   useEffect(() => { setTab(initialTab); }, [initialTab]);
-  const ledger = [
-    { date: "2026-07-08", workspace: "My Workspace", owner: "지염염", type: "지급", amount: "+10,000 cr", reason: "서비스 장애 보상" },
-    { date: "2026-07-07", workspace: "Team Alpha", owner: "이지현", type: "지급", amount: "+5,000 cr", reason: "신규 가입 프로모션" },
-    { date: "2026-07-05", workspace: "ML Research Lab", owner: "김태민", type: "회수", amount: "-2,000 cr", reason: "어뷰징 확인" },
+
+  const wsMap = [
+    { name: "My Workspace",    wsId: "ws-a3f8b2c1", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", credits: 45230,  status: "active"   },
+    { name: "Team Alpha",      wsId: "ws-d7e9a1b5", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc",   credits: 120500, status: "active"   },
+    { name: "ML Research Lab", wsId: "ws-c2f4d8e3", owner: "김태민", ownerEmail: "taemin.kim@sdt.inc",   credits: 8200,   status: "active"   },
+    { name: "Old Project",     wsId: "ws-b6a9c7d4", owner: "최유진", ownerEmail: "yujin.choi@sdt.inc",   credits: 1000,   status: "inactive" },
   ];
-  const products = [
-    { name: "기본 패키지", credits: 10000, price: "100,000원", bonus: "0 cr", status: "판매중" },
-    { name: "스타터 패키지", credits: 50000, price: "480,000원", bonus: "+5,000 cr", status: "판매중" },
-    { name: "프로 패키지", credits: 100000, price: "900,000원", bonus: "+15,000 cr", status: "판매중" },
-    { name: "(구) 소규모 패키지", credits: 5000, price: "50,000원", bonus: "0 cr", status: "판매중지" },
+  const getWs = (wsId: string) => wsMap.find(w => w.wsId === wsId) ?? wsMap[0];
+
+  const allLedger = [
+    { id: "l1", date: "2026-07-08 14:23:07", wsId: "ws-a3f8b2c1", type: "지급", amount: 10000, reason: "서비스 장애 보상" },
+    { id: "l2", date: "2026-07-07 09:11:42", wsId: "ws-d7e9a1b5", type: "지급", amount: 5000,  reason: "신규 가입 프로모션" },
+    { id: "l3", date: "2026-07-05 17:58:30", wsId: "ws-c2f4d8e3", type: "회수", amount: 2000,  reason: "어뷰징 확인" },
+    { id: "l4", date: "2026-07-03 11:04:55", wsId: "ws-a3f8b2c1", type: "지급", amount: 20000, reason: "베타 테스트 보상" },
+    { id: "l5", date: "2026-07-01 08:30:19", wsId: "ws-b6a9c7d4", type: "회수", amount: 1000,  reason: "서비스 해지 정산" },
   ];
+
+  const [creditSearch, setCreditSearch] = useState("");
+  const [creditFilterType, setCreditFilterType] = useState("All");
+  const [creditSortKey, setCreditSortKey] = useState("date");
+  const [creditSortDir, setCreditSortDir] = useState<"asc" | "desc">("desc");
+  const [creditDrawer, setCreditDrawer] = useState<{ form: { wsId: string; type: string; amount: string; reason: string } } | null>(null);
+  const [wsDrawerSearch, setWsDrawerSearch] = useState("");
+  const [wsDrawerPage, setWsDrawerPage] = useState(0);
+  const [wsDrawerSort, setWsDrawerSort] = useState<"name" | "credits">("name");
+  const [wsDrawerSortDir, setWsDrawerSortDir] = useState<"asc" | "desc">("asc");
+  const WS_PAGE_SIZE = 3;
+  const handleWsDrawerSort = (key: "name" | "credits") => {
+    if (wsDrawerSort === key) setWsDrawerSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setWsDrawerSort(key); setWsDrawerSortDir("asc"); }
+    setWsDrawerPage(0);
+  };
+
+  const handleCreditSort = (key: string) => {
+    if (creditSortKey === key) setCreditSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setCreditSortKey(key); setCreditSortDir("asc"); }
+  };
+
+  const filteredLedger = allLedger
+    .filter(l => {
+      const ws = getWs(l.wsId);
+      if (creditSearch && !ws.name.toLowerCase().includes(creditSearch.toLowerCase()) && !ws.owner.toLowerCase().includes(creditSearch.toLowerCase())) return false;
+      if (creditFilterType !== "All" && l.type !== creditFilterType) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      let va: string | number = "", vb: string | number = "";
+      const wa = getWs(a.wsId), wb = getWs(b.wsId);
+      if (creditSortKey === "date")      { va = a.date;     vb = b.date; }
+      else if (creditSortKey === "workspace") { va = wa.name;   vb = wb.name; }
+      else if (creditSortKey === "owner")     { va = wa.owner;  vb = wb.owner; }
+      else if (creditSortKey === "amount")    { va = a.amount;  vb = b.amount; }
+      if (va < vb) return creditSortDir === "asc" ? -1 : 1;
+      if (va > vb) return creditSortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+  const openCreditDrawer = (type: "지급" | "회수") => setCreditDrawer({ form: { wsId: "ws-a3f8b2c1", type, amount: "", reason: "" } });
+  const closeCreditDrawer = () => setCreditDrawer(null);
+
+
+  const crBrd = (light?: boolean) => `1px solid ${light ? "rgb(238,238,238)" : GRAY_10}`;
+  const crThBase: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", width: "1px", borderBottom: `1px solid ${GRAY_10}` };
+  const crThSp: React.CSSProperties = { borderBottom: `1px solid ${GRAY_10}` };
+  const crTdBase: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", width: "1px", whiteSpace: "nowrap" };
+  const crTd = (pos: "first" | "mid" | "last", light?: boolean): React.CSSProperties => ({
+    ...crTdBase,
+    padding: pos === "first" ? "12px 0 12px 16px" : pos === "last" ? "12px 16px 12px 0" : "12px 0",
+    borderBottom: crBrd(light),
+  });
+  const crSp = (light?: boolean, bg?: string): React.CSSProperties => ({ borderBottom: crBrd(light), backgroundColor: bg });
+  const crSortIcon = (col: string) => {
+    if (creditSortKey !== col) return <ChevronUp size={11} color={GRAY_40} style={{ marginLeft: 3, flexShrink: 0 }} />;
+    return creditSortDir === "asc"
+      ? <ChevronUp size={11} color={PRIMARY} style={{ marginLeft: 3, flexShrink: 0 }} />
+      : <ChevronDown size={11} color={PRIMARY} style={{ marginLeft: 3, flexShrink: 0 }} />;
+  };
+
+  // ── Credit History tab state ──
+  const [histSearch,    setHistSearch]    = useState("");
+  const [histFilterType, setHistFilterType] = useState("All");
+  const [histFilterWs,  setHistFilterWs]  = useState("All");
+  const [histSortKey,   setHistSortKey]   = useState("date");
+  const [histSortDir,   setHistSortDir]   = useState<"asc" | "desc">("desc");
+
+  const typeMeta: Record<PlatformCreditType, { bg: string; color: string; icon: React.ReactNode }> = {
+    "관리자 지급":        { bg: "rgb(230,248,237)", color: GREEN,   icon: <CreditCard size={12} color={GREEN} />   },
+    "관리자 회수":        { bg: "rgb(254,242,242)", color: RED,     icon: <CreditCard size={12} color={RED} />     },
+    "서버 사용":          { bg: PRIMARY_10,          color: PRIMARY, icon: <Server size={12} color={PRIMARY} />     },
+    "볼륨 스토리지 사용": { bg: "rgb(235,245,255)", color: BLUE,    icon: <Database size={12} color={BLUE} />      },
+    "공유 스토리지 사용": { bg: "rgb(255,251,235)", color: YELLOW,  icon: <Database size={12} color={YELLOW} />    },
+  };
+
+  const histWsOptions   = Array.from(new Set(platformCreditHistory.map(r => r.wsName)));
+  const histTypeOptions: [string, string][] = [
+    ["All", "구분"], ["관리자 지급", "관리자 지급"], ["관리자 회수", "관리자 회수"],
+    ["서버 사용", "서버 사용"], ["볼륨 스토리지 사용", "볼륨 스토리지 사용"], ["공유 스토리지 사용", "공유 스토리지 사용"],
+  ];
+  const histWsOptionPairs: [string, string][] = [["All", "워크스페이스"], ...histWsOptions.map(w => [w, w] as [string, string])];
+
+  function handleHistSort(key: string) {
+    if (histSortKey === key) setHistSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setHistSortKey(key); setHistSortDir("desc"); }
+  }
+
+  const histFiltered = platformCreditHistory
+    .filter(r => histFilterType === "All" || r.type === histFilterType)
+    .filter(r => histFilterWs   === "All" || r.wsName === histFilterWs)
+    .filter(r => {
+      const q = histSearch.toLowerCase();
+      return !q || [r.wsName, r.desc, r.by, r.byEmail ?? ""].some(v => v.toLowerCase().includes(q));
+    })
+    .sort((a, b) => {
+      const va = histSortKey === "date" ? `${a.date} ${a.time}` : histSortKey === "ws" ? a.wsName : histSortKey === "amount" ? a.amount : a.type;
+      const vb = histSortKey === "date" ? `${b.date} ${b.time}` : histSortKey === "ws" ? b.wsName : histSortKey === "amount" ? b.amount : b.type;
+      if (va < vb) return histSortDir === "asc" ? -1 : 1;
+      if (va > vb) return histSortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
   return (
-    <PageContainer title="Credit Management" subtitle="크레딧 지급·회수 및 상품을 관리합니다.">
-      <TabBar tabs={["크레딧 지급/회수", "크레딧 상품"]} active={tab} onChange={setTab} />
-      {tab === "크레딧 지급/회수" && (
-        <div>
-          <Card style={{ padding: "20px 24px", marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 16 }}>크레딧 수동 지급 · 회수</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>워크스페이스</div>
-                <select style={{ width: "100%", height: 40, padding: "0 12px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13 }}>
-                  <option>My Workspace (지염염)</option>
-                  <option>Team Alpha (이지현)</option>
-                </select>
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>유형</div>
-                <select style={{ width: "100%", height: 40, padding: "0 12px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13 }}>
-                  <option>크레딧 지급</option>
-                  <option>크레딧 회수</option>
-                  <option>포인트 지급</option>
-                </select>
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>수량 (cr)</div>
-                <input type="number" placeholder="0" style={{ width: "100%", height: 40, padding: "0 12px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13, boxSizing: "border-box" }} />
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>사유 (필수)</div>
-                <input type="text" placeholder="사유를 입력하세요" style={{ width: "100%", height: 40, padding: "0 12px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13, boxSizing: "border-box" }} />
-              </div>
+    <PageContainer title="Credit Management" subtitle="워크스페이스 크레딧을 관리하고 이력을 조회합니다."
+      actions={tab === "Credit" ? <PrimaryBtn size="small" onClick={() => openCreditDrawer("지급")}><Plus size={14} /> 크레딧 관리</PrimaryBtn> : undefined}>
+      <TabBar tabs={["Credit", "Credit History"]} active={tab} onChange={setTab} />
+      {tab === "Credit" && (
+      <>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+            <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
+              전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{filteredLedger.length}</span>건
+              {(creditFilterType !== "All" || creditSearch) && (
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {allLedger.length}건 중</span>
+              )}
             </div>
-            <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-              <PrimaryBtn size="small">지급 실행</PrimaryBtn>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ position: "relative" }}>
+                <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                <input type="text" placeholder="검색어를 입력하세요." value={creditSearch}
+                  onChange={e => setCreditSearch(e.target.value)}
+                  style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }} />
+              </div>
+              {[
+                { value: creditFilterType, onChange: (v: string) => setCreditFilterType(v), options: [["All", "유형"], ["지급", "지급"], ["회수", "회수"]] },
+              ].map(({ value, onChange, options }) => (
+                <div key={options[0][1]} style={{ position: "relative" }}>
+                  <select value={value} onChange={e => onChange(e.target.value)}
+                    style={{ height: 34, paddingLeft: 10, paddingRight: 26, border: `1px solid ${value !== "All" ? PRIMARY : GRAY_30}`, borderRadius: 8, fontSize: 12, color: value !== "All" ? PRIMARY : GRAY_70, fontFamily: "inherit", fontWeight: value !== "All" ? 600 : 400, backgroundColor: value !== "All" ? PRIMARY_10 : "white", outline: "none", cursor: "pointer", appearance: "none" as const }}>
+                    {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <ChevronDown size={11} color={value !== "All" ? PRIMARY : GRAY_60} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                </div>
+              ))}
             </div>
-          </Card>
-          <Card style={{ overflow: "hidden" }}>
-            <Table headers={["날짜", "워크스페이스", "Owner", "유형", "수량", "사유"]}
-              rows={ledger.map(l => [
-                <span style={{ fontSize: 12, color: GRAY_60 }}>{l.date}</span>,
-                <span>{l.workspace}</span>,
-                <span style={{ fontSize: 12, color: GRAY_60 }}>{l.owner}</span>,
-                <Badge color={l.type === "지급" ? "success" : "danger"}>{l.type}</Badge>,
-                <span style={{ fontWeight: 700, color: l.type === "지급" ? GREEN : RED, fontFamily: "'Roboto Mono', monospace" }}>{l.amount}</span>,
-                <span style={{ fontSize: 12, color: GRAY_70 }}>{l.reason}</span>,
-              ])}
-            />
-          </Card>
-        </div>
-      )}
-      {tab === "크레딧 상품" && (
-        <div>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
-            <PrimaryBtn size="small"><Plus size={14} /> 상품 등록</PrimaryBtn>
           </div>
           <Card style={{ overflow: "hidden" }}>
-            <Table headers={["상품명", "크레딧", "판매가", "보너스", "상태", "액션"]}
-              rows={products.map(p => [
-                <span style={{ fontWeight: 600 }}>{p.name}</span>,
-                <span style={{ fontFamily: "'Roboto Mono', monospace" }}>{p.credits.toLocaleString()} cr</span>,
-                <span style={{ fontWeight: 600 }}>{p.price}</span>,
-                <span style={{ color: GREEN, fontWeight: 600 }}>{p.bonus}</span>,
-                <Badge color={p.status === "판매중" ? "success" : "neutral"}>{p.status}</Badge>,
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button style={{ fontSize: 11, color: PRIMARY, background: PRIMARY_10, border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}>편집</button>
-                  <button style={{ fontSize: 11, color: RED, background: "rgb(254,242,242)", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}>삭제</button>
-                </div>,
-              ])}
-            />
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ backgroundColor: GRAY_5 }}>
+                  <th style={{ ...crThBase, padding: "10px 0 10px 16px", cursor: "pointer" }} onClick={() => handleCreditSort("date")}>
+                    <span style={{ display: "inline-flex", alignItems: "center" }}>날짜{crSortIcon("date")}</span>
+                  </th>
+                  <th style={crThSp} />
+                  <th style={{ ...crThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => handleCreditSort("workspace")}>
+                    <span style={{ display: "inline-flex", alignItems: "center" }}>워크스페이스{crSortIcon("workspace")}</span>
+                  </th>
+                  <th style={crThSp} />
+                  <th style={{ ...crThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => handleCreditSort("owner")}>
+                    <span style={{ display: "inline-flex", alignItems: "center" }}>Owner{crSortIcon("owner")}</span>
+                  </th>
+                  <th style={crThSp} />
+                  <th style={{ ...crThBase, padding: "10px 0" }}>유형</th>
+                  <th style={crThSp} />
+                  <th style={{ ...crThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => handleCreditSort("amount")}>
+                    <span style={{ display: "inline-flex", alignItems: "center" }}>수량{crSortIcon("amount")}</span>
+                  </th>
+                  <th style={crThSp} />
+                  <th style={{ ...crThBase, padding: "10px 16px 10px 0" }}>사유</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLedger.map((l, idx) => {
+                  const isLast = idx === filteredLedger.length - 1;
+                  const ws = getWs(l.wsId);
+                  return (
+                    <tr key={l.id} style={{ backgroundColor: "white" }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>
+                      <td style={{ ...crTd("first", isLast) }}>
+                        <div>
+                          <div style={{ fontSize: 12, color: GRAY_90, fontWeight: 500 }}>{l.date.slice(0, 10)}</div>
+                          <div style={{ fontSize: 11, color: GRAY_60 }}>{l.date.slice(11)}</div>
+                        </div>
+                      </td>
+                      <td style={crSp(isLast)} />
+                      <td style={{ ...crTd("mid", isLast) }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{ws.name}</div>
+                          <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1 }}>{ws.wsId}</div>
+                        </div>
+                      </td>
+                      <td style={crSp(isLast)} />
+                      <td style={{ ...crTd("mid", isLast) }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{ws.owner}</div>
+                          <div style={{ fontSize: 11, color: GRAY_60 }}>{ws.ownerEmail}</div>
+                        </div>
+                      </td>
+                      <td style={crSp(isLast)} />
+                      <td style={{ ...crTd("mid", isLast) }}>
+                        <Badge color={l.type === "지급" ? "success" : "danger"}>{l.type}</Badge>
+                      </td>
+                      <td style={crSp(isLast)} />
+                      <td style={{ ...crTd("mid", isLast) }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: l.type === "지급" ? GREEN : RED }}>
+                          {l.type === "지급" ? "+" : "−"}{l.amount.toLocaleString()} cr
+                        </span>
+                      </td>
+                      <td style={crSp(isLast)} />
+                      <td style={{ ...crTd("last", isLast) }}>
+                        <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{l.reason}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </Card>
-        </div>
-      )}
+          {creditDrawer && (() => {
+            const selWs = getWs(creditDrawer.form.wsId);
+            const amt = parseInt(creditDrawer.form.amount || "0", 10);
+            const isGrant = creditDrawer.form.type === "지급";
+            const canSubmit = amt > 0 && creditDrawer.form.reason.trim().length > 0;
+            return (
+              <>
+                <div onClick={closeCreditDrawer} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.25)", zIndex: 290 }} />
+                <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 440, backgroundColor: "white", boxShadow: "-4px 0 32px rgba(0,0,0,0.12)", zIndex: 300, display: "flex", flexDirection: "column" }}>
+                  {/* 헤더 */}
+                  <div style={{ padding: "20px 24px 18px", borderBottom: `1px solid ${GRAY_10}` }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: PRIMARY_10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <CreditCard size={16} color={PRIMARY} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>크레딧 관리</div>
+                          <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>워크스페이스에 크레딧을 지급하거나 회수합니다.</div>
+                        </div>
+                      </div>
+                      <button type="button" onClick={closeCreditDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
+                        onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
 
+                  {/* 폼 */}
+                  <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
+                    {/* 워크스페이스 */}
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>워크스페이스</div>
+                      <div style={{ position: "relative", marginBottom: 8 }}>
+                        <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                        <input value={wsDrawerSearch} onChange={e => { setWsDrawerSearch(e.target.value); setWsDrawerPage(0); }} placeholder="이름, Owner 검색"
+                          style={{ width: "100%", height: 34, paddingLeft: 30, paddingRight: 10, border: `1px solid ${GRAY_30}`, borderRadius: 8, fontSize: 12, outline: "none", fontFamily: "inherit", boxSizing: "border-box" as const }} />
+                      </div>
+                      {(() => {
+                        const filtered = wsMap
+                          .filter(w => w.status === "active")
+                          .filter(w => !wsDrawerSearch || w.name.toLowerCase().includes(wsDrawerSearch.toLowerCase()) || w.owner.toLowerCase().includes(wsDrawerSearch.toLowerCase()))
+                          .sort((a, b) => {
+                            const va = wsDrawerSort === "name" ? a.name : a.credits;
+                            const vb = wsDrawerSort === "name" ? b.name : b.credits;
+                            if (va < vb) return wsDrawerSortDir === "asc" ? -1 : 1;
+                            if (va > vb) return wsDrawerSortDir === "asc" ? 1 : -1;
+                            return 0;
+                          });
+                        const totalPages = Math.ceil(filtered.length / WS_PAGE_SIZE);
+                        const paged = filtered.slice(wsDrawerPage * WS_PAGE_SIZE, (wsDrawerPage + 1) * WS_PAGE_SIZE);
+                        const thBase: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", borderBottom: `1px solid ${GRAY_10}`, backgroundColor: GRAY_5 };
+                        const tdStyle: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", padding: "10px 0", borderBottom: `1px solid ${GRAY_10}` };
+                        return (
+                          <>
+                            <Card style={{ overflow: "hidden", marginBottom: 8 }}>
+                              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                <thead>
+                                  <tr>
+                                    <th style={{ ...thBase, padding: "8px 0 8px 12px" }}>
+                                      <button type="button" onClick={() => handleWsDrawerSort("name")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, fontWeight: 600, color: wsDrawerSort === "name" ? PRIMARY : GRAY_60, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                                        Workspace {wsDrawerSort === "name" ? (wsDrawerSortDir === "asc" ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : <ChevronUp size={10} color={GRAY_40} />}
+                                      </button>
+                                    </th>
+                                    <th style={{ ...thBase, padding: "8px 0" }}>Owner</th>
+                                    <th style={{ ...thBase, padding: "8px 12px 8px 0", textAlign: "right" }}>
+                                      <button type="button" onClick={() => handleWsDrawerSort("credits")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, fontWeight: 600, color: wsDrawerSort === "credits" ? PRIMARY : GRAY_60, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                                        {wsDrawerSort === "credits" ? (wsDrawerSortDir === "asc" ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : <ChevronUp size={10} color={GRAY_40} />} Credit Balance
+                                      </button>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {paged.length === 0
+                                    ? <tr><td colSpan={3} style={{ padding: "16px 12px", fontSize: 12, color: GRAY_40, textAlign: "center" }}>검색 결과 없음</td></tr>
+                                    : paged.map((w, idx) => {
+                                      const selected = creditDrawer.form.wsId === w.wsId;
+                                      const isLast = idx === paged.length - 1;
+                                      const rowBg = selected ? PRIMARY_10 : "white";
+                                      return (
+                                        <tr key={w.wsId} onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, wsId: w.wsId } } : d)}
+                                          style={{ cursor: "pointer", backgroundColor: rowBg }}
+                                          onMouseEnter={e => { if (!selected) e.currentTarget.style.backgroundColor = GRAY_5; }}
+                                          onMouseLeave={e => { e.currentTarget.style.backgroundColor = rowBg; }}>
+                                          <td style={{ ...tdStyle, padding: `10px 0 10px 12px`, borderBottom: isLast ? "none" : `1px solid ${GRAY_10}`, backgroundColor: rowBg }}>
+                                            <div>
+                                              <div style={{ fontSize: 13, fontWeight: 600, color: selected ? PRIMARY : GRAY_90 }}>{w.name}</div>
+                                              <div style={{ fontSize: 11, color: GRAY_60 }}>{w.wsId}</div>
+                                            </div>
+                                          </td>
+                                          <td style={{ ...tdStyle, borderBottom: isLast ? "none" : `1px solid ${GRAY_10}`, backgroundColor: rowBg, paddingRight: 8 }}>
+                                            <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{w.owner}</div>
+                                            <div style={{ fontSize: 11, color: GRAY_60 }}>{w.ownerEmail}</div>
+                                          </td>
+                                          <td style={{ ...tdStyle, padding: `10px 12px 10px 0`, borderBottom: isLast ? "none" : `1px solid ${GRAY_10}`, backgroundColor: rowBg, textAlign: "right" }}>
+                                            <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{w.credits.toLocaleString()} cr</div>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })
+                                  }
+                                </tbody>
+                              </table>
+                            </Card>
+                            {totalPages > 1 && (
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <button type="button" onClick={() => setWsDrawerPage(p => Math.max(0, p - 1))} disabled={wsDrawerPage === 0}
+                                  style={{ height: 28, padding: "0 10px", borderRadius: 6, border: `1px solid ${GRAY_30}`, backgroundColor: "white", fontSize: 12, color: wsDrawerPage === 0 ? GRAY_40 : GRAY_70, cursor: wsDrawerPage === 0 ? "default" : "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "inherit" }}>
+                                  <ChevronUp size={11} style={{ transform: "rotate(-90deg)" }} /> 이전
+                                </button>
+                                <span style={{ fontSize: 12, color: GRAY_60 }}>{wsDrawerPage + 1} / {totalPages}</span>
+                                <button type="button" onClick={() => setWsDrawerPage(p => Math.min(totalPages - 1, p + 1))} disabled={wsDrawerPage === totalPages - 1}
+                                  style={{ height: 28, padding: "0 10px", borderRadius: 6, border: `1px solid ${GRAY_30}`, backgroundColor: "white", fontSize: 12, color: wsDrawerPage === totalPages - 1 ? GRAY_40 : GRAY_70, cursor: wsDrawerPage === totalPages - 1 ? "default" : "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "inherit" }}>
+                                  다음 <ChevronDown size={11} style={{ transform: "rotate(-90deg)" }} />
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* 유형 */}
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>유형</div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {(["지급", "회수"] as const).map(t => (
+                          <button type="button" key={t} onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, type: t } } : d)}
+                            style={{ flex: 1, height: 42, borderRadius: 8, border: `1.5px solid ${creditDrawer.form.type === t ? (t === "지급" ? PRIMARY : RED) : GRAY_30}`, backgroundColor: creditDrawer.form.type === t ? (t === "지급" ? PRIMARY_10 : "rgb(254,242,242)") : "white", fontSize: 13, fontWeight: creditDrawer.form.type === t ? 700 : 400, color: creditDrawer.form.type === t ? (t === "지급" ? PRIMARY : RED) : GRAY_70, cursor: "pointer", transition: "all 0.12s" }}>
+                            {t}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 수량 */}
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>수량 (cr)</div>
+                      <input type="number" value={creditDrawer.form.amount} placeholder="0"
+                        onChange={e => setCreditDrawer(d => d ? { ...d, form: { ...d.form, amount: e.target.value } } : d)}
+                        style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box" as const, fontFamily: "inherit" }}
+                        onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+                        onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }} />
+                      <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                        {[100, 500, 1000, 5000, 10000].map(preset => (
+                          <button type="button" key={preset}
+                            onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, amount: String((parseInt(d.form.amount || "0", 10) + preset)) } } : d)}
+                            style={{ flex: 1, height: 32, borderRadius: 7, border: `1px solid ${GRAY_30}`, backgroundColor: "white", fontSize: 11, fontWeight: 600, color: GRAY_70, cursor: "pointer", fontFamily: "inherit" }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = PRIMARY; e.currentTarget.style.color = PRIMARY; e.currentTarget.style.backgroundColor = PRIMARY_10; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = GRAY_30; e.currentTarget.style.color = GRAY_70; e.currentTarget.style.backgroundColor = "white"; }}>
+                            +{preset >= 1000 ? `${preset / 1000}K` : preset}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 사유 */}
+                    <div style={{ marginBottom: 24 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>사유 <span style={{ color: RED }}>*</span></div>
+                      <input type="text" value={creditDrawer.form.reason} placeholder="사유를 입력하세요"
+                        onChange={e => setCreditDrawer(d => d ? { ...d, form: { ...d.form, reason: e.target.value } } : d)}
+                        style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box" as const, fontFamily: "inherit" }}
+                        onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
+                        onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }} />
+                    </div>
+
+                    {/* 실행 전후 미리보기 */}
+                    {(() => {
+                      const before = selWs.credits;
+                      const after = isGrant ? before + amt : before - amt;
+                      const overLimit = after < 0;
+                      return (
+                        <div style={{ backgroundColor: GRAY_5, border: `1px solid ${GRAY_10}`, borderRadius: 10, padding: "14px 16px", marginBottom: 24 }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>실행 미리보기</div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 10, color: GRAY_40, marginBottom: 3 }}>변경 전</div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{before.toLocaleString()} <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>cr</span></div>
+                            </div>
+                            <div style={{ fontSize: 13, color: GRAY_40, flexShrink: 0 }}>→</div>
+                            <div style={{ flex: 1, textAlign: "right" as const }}>
+                              <div style={{ fontSize: 10, color: GRAY_40, marginBottom: 3 }}>변경 후</div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: overLimit ? RED : isGrant ? PRIMARY : GRAY_90 }}>
+                                {overLimit ? "−" : ""}{Math.abs(after).toLocaleString()} <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>cr</span>
+                              </div>
+                            </div>
+                          </div>
+                          {amt > 0 && (
+                            <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${GRAY_10}`, fontSize: 12, color: isGrant ? PRIMARY : RED, fontWeight: 600, textAlign: "center" as const }}>
+                              {isGrant ? "+" : "−"}{amt.toLocaleString()} cr {creditDrawer.form.type}
+                              {overLimit && <span style={{ fontSize: 11, color: RED, fontWeight: 400, marginLeft: 6 }}>· 잔액 한도 초과</span>}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* 액션 */}
+                    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                      <PrimaryBtn size="small" onClick={closeCreditDrawer} style={{ opacity: canSubmit ? 1 : 0.45, cursor: canSubmit ? "pointer" : "not-allowed" }}>실행</PrimaryBtn>
+                      <PrimaryBtn size="small" variant="secondary" onClick={closeCreditDrawer}>취소</PrimaryBtn>
+                    </div>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
+      </>
+      )}
+      {tab === "Credit History" && (
+        <>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+            <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
+              전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{histFiltered.length}</span>건
+              {(histFilterType !== "All" || histFilterWs !== "All" || histSearch) && (
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {platformCreditHistory.length}건 중</span>
+              )}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ position: "relative" }}>
+                <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                <input type="text" placeholder="검색어를 입력하세요." value={histSearch}
+                  onChange={e => setHistSearch(e.target.value)}
+                  style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }} />
+              </div>
+              {[
+                { value: histFilterWs,   onChange: (v: string) => setHistFilterWs(v),   options: histWsOptionPairs },
+                { value: histFilterType, onChange: (v: string) => setHistFilterType(v), options: histTypeOptions },
+              ].map(({ value, onChange, options }) => (
+                <div key={String(options[0][1])} style={{ position: "relative" }}>
+                  <select value={value} onChange={e => onChange(e.target.value)}
+                    style={{ height: 34, paddingLeft: 10, paddingRight: 26, border: `1px solid ${value !== "All" ? PRIMARY : GRAY_30}`, borderRadius: 8, fontSize: 12, color: value !== "All" ? PRIMARY : GRAY_70, fontFamily: "inherit", fontWeight: value !== "All" ? 600 : 400, backgroundColor: value !== "All" ? PRIMARY_10 : "white", outline: "none", cursor: "pointer", appearance: "none" as const }}>
+                    {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                  <ChevronDown size={11} color={value !== "All" ? PRIMARY : GRAY_60} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <Card style={{ overflow: "hidden" }}>
+            <Table spacerGaps
+              headers={[
+                <SortableHeader k="date"   label="일시"       sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="ws"     label="워크스페이스" sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="type"   label="구분"       sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                "내역",
+                "담당자",
+                <SortableHeader k="amount" label="크레딧"     sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+              ]}
+              rows={histFiltered.map(r => {
+                const meta = typeMeta[r.type];
+                return [
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, whiteSpace: "nowrap" }}>{r.date}</div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1, whiteSpace: "nowrap" }}>{r.time}</div>
+                  </div>,
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{r.wsName}</div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1, whiteSpace: "nowrap" }}>{r.wsId}</div>
+                  </div>,
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, backgroundColor: meta.bg, color: meta.color, borderRadius: 20, padding: "3px 9px 3px 6px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
+                    {meta.icon}{r.type}
+                  </div>,
+                  <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{r.desc}</span>,
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, whiteSpace: "nowrap" }}>{r.by}</div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1, whiteSpace: "nowrap" }}>{r.byEmail ?? "—"}</div>
+                  </div>,
+                  <span style={{ fontSize: 13, fontWeight: 700, color: r.amount > 0 ? GREEN : RED, whiteSpace: "nowrap" }}>
+                    {r.amount > 0 ? "+" : ""}{r.amount.toLocaleString()} cr
+                  </span>,
+                ];
+              })}
+            />
+            {histFiltered.length === 0 && (
+              <div style={{ padding: "32px", textAlign: "center" as const, color: GRAY_60, fontSize: 13 }}>검색 결과가 없습니다.</div>
+            )}
+          </Card>
+        </>
+      )}
     </PageContainer>
   );
 }
@@ -2156,7 +2490,7 @@ function SortableHeader({ k, label, sortKey, sortDir, onSort }: {
 }) {
   const active = sortKey === k;
   return (
-    <button onClick={() => onSort(k)} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 12, fontWeight: 600, color: active ? PRIMARY : GRAY_60 }}>
+    <button type="button" onClick={() => onSort(k)} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 12, fontWeight: 600, color: active ? PRIMARY : GRAY_60 }}>
       {label}
       <span style={{ display: "flex", flexDirection: "column", gap: 1, opacity: active ? 1 : 0.35 }}>
         <ChevronUp size={10} color={active && sortDir === "asc" ? PRIMARY : GRAY_60} />
@@ -2180,10 +2514,10 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
     { name: "pytorch-dev-01-local", type: "Local", workspace: "My Workspace", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", capacity: 10, used: 6.8, status: "Normal", mountServer: "pytorch-dev-01", mountWorkspace: "My Workspace" },
     { name: "llm-finetuning-local", type: "Local", workspace: "Team Alpha", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc", capacity: 100, used: 67.3, status: "Normal", mountServer: "llm-finetuning", mountWorkspace: "Team Alpha" },
     { name: "ml-research-local", type: "Local", workspace: "ML Research Lab", owner: "김태민", ownerEmail: "taemin.kim@sdt.inc", capacity: 50, used: 31.4, status: "Normal", mountServer: "abuse-server-01", mountWorkspace: "ML Research Lab" },
-    { name: "old-project-local", type: "Local", workspace: "Old Project", owner: "최유진", ownerEmail: "yujin.choi@sdt.inc", capacity: 10, used: 0, status: "Normal", mountServer: null, mountWorkspace: null },
+    { name: "old-project-local", type: "Local", workspace: "Old Project", owner: "최유진", ownerEmail: "yujin.choi@sdt.inc", capacity: 10, used: 0, status: "Normal", mountServer: "old-project-01", mountWorkspace: "Old Project" },
     { name: "data-preprocess-local", type: "Local", workspace: "Team Alpha", owner: "장민준", ownerEmail: "minjun.jang@sdt.inc", capacity: 30, used: 8.2, status: "Normal", mountServer: "data-preprocess", mountWorkspace: "Team Alpha" },
-    { name: "team-shared-01", type: "Shared", workspace: "My Workspace", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", capacity: 500, used: 287, status: "Normal", mountServer: null, mountWorkspace: null },
-    { name: "dataset-archive", type: "Shared", workspace: "Team Alpha", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc", capacity: 1000, used: 435, status: "Normal", mountServer: null, mountWorkspace: null },
+    { name: "team-shared-01", type: "Shared", workspace: "My Workspace", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", capacity: 500, used: 287, status: "Normal", mountServer: null, mountWorkspace: null, unmountedAt: "2026-07-10 18:42" },
+    { name: "dataset-archive", type: "Shared", workspace: "Team Alpha", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc", capacity: 1000, used: 435, status: "Normal", mountServer: null, mountWorkspace: null, unmountedAt: "2026-06-25 09:11" },
     { name: "pytorch-dev-01-temp", type: "Temporary", workspace: "My Workspace", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", capacity: 20, used: 14.2, status: "Healthy", mountServer: "pytorch-dev-01", mountWorkspace: "My Workspace" },
   ];
 
@@ -2211,8 +2545,8 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
     });
 
   return (
-    <PageContainer title="Storage Management" subtitle="전체 스토리지 목록을 조회하고 관리합니다.">
-      <TabBar tabs={["Storage", "Storage Pricing"]} active={tab} onChange={setTab} />
+    <PageContainer title="Storage Management" subtitle={tab === "Storage Policy" ? "서버 생성 시 스토리지 용량 산정 방식을 설정합니다." : "전체 스토리지 목록을 조회하고 관리합니다."}>
+      <TabBar tabs={["Storage", "Storage Pricing", "Storage Policy"]} active={tab} onChange={setTab} />
       {tab === "Storage" && (
         <>
           {/* Toolbar */}
@@ -2264,7 +2598,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
             ]}
               rows={filtered.map(s => {
                 const pct = Math.round(s.used / s.capacity * 100);
-                const pctColor = pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_90;
+                const pctColor = pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN;
                 const typeColor = s.type === "Local" ? PRIMARY : s.type === "Shared" ? GREEN : BLUE;
                 const typeBg = s.type === "Local" ? "rgba(99,90,220,0.1)" : s.type === "Shared" ? "rgba(34,197,94,0.1)" : "rgba(36,142,213,0.1)";
                 const typeIcon = <Database size={13} color={typeColor} />;
@@ -2282,7 +2616,14 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                   /* 마운트 */
                   s.mountServer
                     ? <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, whiteSpace: "nowrap" }}>{s.mountServer}</span>
-                    : <span style={{ fontSize: 13, color: GRAY_40, whiteSpace: "nowrap" }}>—</span>,
+                    : <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        <span style={{ fontSize: 13, color: GRAY_40, whiteSpace: "nowrap" }}>—</span>
+                        {"unmountedAt" in s && (s as any).unmountedAt && (
+                          <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 8px", backgroundColor: "rgb(242,242,242)", borderRadius: 6, fontSize: 11, color: GRAY_60, whiteSpace: "nowrap" }}>
+                            마지막 해제: {(s as any).unmountedAt}
+                          </div>
+                        )}
+                      </div>,
                   /* User / Workspace */
                   <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{s.owner}</span>
@@ -2295,7 +2636,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                       <span style={{ fontSize: 13, fontWeight: 600, color: pctColor }}>{pct}%</span>
                     </div>
                     <div style={{ height: 5, backgroundColor: GRAY_10, borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pct >= 90 ? RED : pct >= 70 ? YELLOW : PRIMARY, borderRadius: 3, transition: "width 0.3s ease" }} />
+                      <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, borderRadius: 3, transition: "width 0.3s ease" }} />
                     </div>
                   </div>,
                   /* 액션 */
@@ -2313,171 +2654,360 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
         </>
       )}
       {tab === "Storage Pricing" && <StoragePricingPolicy />}
-    </PageContainer>
-  );
-}
 
-// ─── Payment History ──────────────────────────────────────────────────────────
-export function AdminPaymentHistory({ initialTab = "결제 내역" }: { initialTab?: string }) {
-  const [tab, setTab] = useState(initialTab);
-  useEffect(() => { setTab(initialTab); }, [initialTab]);
-  const payments = [
-    { date: "2026-07-08 14:22", workspace: "Team Alpha", owner: "이지현", product: "프로 패키지 (100,000 cr)", amount: "900,000원", status: "성공" },
-    { date: "2026-07-08 11:05", workspace: "My Workspace", owner: "지염염", product: "스타터 패키지 (50,000 cr)", amount: "480,000원", status: "성공" },
-    { date: "2026-07-07 18:30", workspace: "ML Research Lab", owner: "김태민", product: "기본 패키지 (10,000 cr)", amount: "100,000원", status: "실패" },
-    { date: "2026-07-07 09:11", workspace: "Team Alpha", owner: "이지현", product: "스타터 패키지 (50,000 cr)", amount: "480,000원", status: "환불" },
-  ];
-  const refunds = [
-    { date: "2026-07-07 21:00", workspace: "Team Alpha", owner: "이지현", amount: "480,000원", reason: "이중 결제 확인", status: "처리 완료" },
-    { date: "2026-07-05 13:44", workspace: "Old Project", owner: "최유진", amount: "100,000원", reason: "서비스 불만족", status: "검토 중" },
-  ];
-  return (
-    <PageContainer title="Payment History" subtitle="전체 결제 및 환불 내역을 관리합니다.">
-      <TabBar tabs={["결제 내역", "환불 관리"]} active={tab} onChange={setTab} />
-      {tab === "결제 내역" && (
-        <Card style={{ overflow: "hidden" }}>
-          <Table headers={["일시", "워크스페이스", "Owner", "상품", "결제금액", "상태"]}
-            rows={payments.map(p => [
-              <span style={{ fontSize: 12, color: GRAY_60, fontFamily: "'Roboto Mono', monospace" }}>{p.date}</span>,
-              <span>{p.workspace}</span>,
-              <span style={{ fontSize: 12, color: GRAY_60 }}>{p.owner}</span>,
-              <span style={{ fontSize: 12 }}>{p.product}</span>,
-              <span style={{ fontWeight: 600, fontFamily: "'Roboto Mono', monospace" }}>{p.amount}</span>,
-              <Badge color={p.status === "성공" ? "success" : p.status === "실패" ? "danger" : "warning"}>{p.status}</Badge>,
-            ])}
-          />
-        </Card>
-      )}
-      {tab === "환불 관리" && (
-        <Card style={{ overflow: "hidden" }}>
-          <Table headers={["신청일", "워크스페이스", "Owner", "환불금액", "사유", "상태", "액션"]}
-            rows={refunds.map(r => [
-              <span style={{ fontSize: 12, color: GRAY_60, fontFamily: "'Roboto Mono', monospace" }}>{r.date}</span>,
-              <span>{r.workspace}</span>,
-              <span style={{ fontSize: 12, color: GRAY_60 }}>{r.owner}</span>,
-              <span style={{ fontWeight: 600, fontFamily: "'Roboto Mono', monospace" }}>{r.amount}</span>,
-              <span style={{ fontSize: 12, color: GRAY_70 }}>{r.reason}</span>,
-              <Badge color={r.status === "처리 완료" ? "success" : "warning"}>{r.status}</Badge>,
-              r.status === "검토 중"
-                ? <div style={{ display: "flex", gap: 6 }}>
-                    <button style={{ fontSize: 11, color: GREEN, background: "rgb(240,253,244)", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}>승인</button>
-                    <button style={{ fontSize: 11, color: RED, background: "rgb(254,242,242)", border: "none", borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}>거절</button>
-                  </div>
-                : <span style={{ fontSize: 12, color: GRAY_40 }}>—</span>,
-            ])}
-          />
-        </Card>
+      {tab === "Storage Policy" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 680 }}>
+          <Card style={{ padding: "24px" }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Storage Policy</div>
+            <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>서버 생성 시 스토리지 용량 산정 방식을 설정합니다.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid rgb(242,242,242)` }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90 }}>Local Storage Buffer</div>
+                <div style={{ fontSize: 12, color: GRAY_60, marginTop: 2 }}>이미지 최소 용량에 추가되는 여유 공간으로, 전체 서버 생성에 일괄 적용됩니다.</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <input
+                  type="number"
+                  min={1}
+                  defaultValue={5}
+                  style={{ width: 80, height: 36, padding: "0 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, textAlign: "right" }}
+                />
+                <span style={{ fontSize: 13, color: GRAY_60 }}>GB</span>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+              <PrimaryBtn size="small">Apply</PrimaryBtn>
+            </div>
+          </Card>
+        </div>
       )}
     </PageContainer>
   );
 }
 
-// ─── Notification Management ──────────────────────────────────────────────────
-type AdminAlertKey = "credit_low" | "gpu_util_high" | "storage_high" | "gpu_node_error" | "server_force_stop";
-type AdminAlertCfg = { threshold: number | null; channels: { inapp: boolean; email: boolean } };
 
-const adminAlertDefs: { key: AdminAlertKey; label: string; desc: string; hasThreshold: boolean; unit?: string }[] = [
-  { key: "credit_low",        label: "Low Credit Balance",       desc: "Sent when a workspace's credit balance falls below the configured threshold.",  hasThreshold: true,  unit: "% below" },
-  { key: "gpu_util_high",     label: "High GPU Utilization",     desc: "Sent when overall platform GPU utilization exceeds the configured threshold.",  hasThreshold: true,  unit: "% above" },
-  { key: "storage_high",      label: "High Storage Usage",       desc: "Sent when overall platform storage usage exceeds the configured threshold.",    hasThreshold: true,  unit: "% above" },
-  { key: "gpu_node_error",    label: "GPU Node Error",           desc: "Sent when a hardware fault is detected on a GPU node.",                        hasThreshold: false },
-  { key: "server_force_stop", label: "Server Force-Stopped",     desc: "Sent to the affected workspace when an admin force-stops a server.",           hasThreshold: false },
+// ─── Credit History ───────────────────────────────────────────────────────────
+type PlatformCreditType = "관리자 지급" | "관리자 회수" | "서버 사용" | "볼륨 스토리지 사용" | "공유 스토리지 사용";
+
+const platformCreditHistory: {
+  date: string; time: string; wsId: string; wsName: string;
+  type: PlatformCreditType; desc: string; amount: number; by: string; byEmail?: string;
+}[] = [
+  { date: "2026-07-09", time: "10:15:02", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "서비스 장애 보상",              amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-07-08", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "서버 사용",        desc: "pytorch-dev-01 서버 실행",      amount:   -240, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-08", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "llm-finetuning 서버 실행",      amount:   -576, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-08", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "stable-diffusion 서버 실행",    amount:   -120, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "볼륨 스토리지 사용", desc: "local-vol-01 유지비",            amount:    -32, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "볼륨 스토리지 사용", desc: "pytorch-data 유지비",            amount:    -16, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "볼륨 스토리지 사용", desc: "local-vol-02 유지비",            amount:    -16, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "공유 스토리지 사용", desc: "shared-team-01 유지비",          amount:    -96, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "서버 사용",        desc: "bert-finetune 서버 실행",        amount:   -480, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
+  { date: "2026-07-06", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "공유 스토리지 사용", desc: "shared-team-01 유지비",          amount:    -96, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
+  { date: "2026-07-05", time: "17:58:30", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "관리자 회수",      desc: "어뷰징 확인",                    amount:  -2000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-07-03", time: "09:22:11", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "베타 테스트 보상",               amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc"     },
+  { date: "2026-07-02", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "data-preprocess 서버 실행",      amount:   -360, by: "최유진", byEmail: "yujin.choi@sdt.inc"       },
+  { date: "2026-07-01", time: "08:30:19", wsId: "ws-b6a9c7d4", wsName: "Old Project",     type: "관리자 회수",      desc: "서비스 해지 정산",               amount:  -1000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
 ];
 
-export function AdminNotificationManagement() {
+// ─── Notification List ────────────────────────────────────────────────────────
+type NotifLevel = "info" | "warning" | "critical";
+
+const adminNotifications: {
+  id: string; date: string; time: string; level: NotifLevel;
+  title: string; desc: string; target: string; targetId?: string; channel: "in-app" | "email" | "both";
+}[] = [
+  { id: "n01", date: "2026-07-09", time: "10:15:02", level: "warning",  title: "크레딧 잔액 부족",           desc: "My Workspace 크레딧 잔액이 5,000 cr 이하로 감소했습니다.",               target: "My Workspace",    targetId: "ws-a3f8b2c1", channel: "both"   },
+  { id: "n02", date: "2026-07-08", time: "23:01:05", level: "critical", title: "비정상 사용량 감지",          desc: "ML Research Lab의 크레딧 소비가 롤링 기준 대비 200% 초과했습니다.",       target: "ML Research Lab", targetId: "ws-c2f4d8e3", channel: "both"   },
+  { id: "n03", date: "2026-07-08", time: "18:42:31", level: "info",     title: "신규 사용자 가입",            desc: "park.jiwon@sdt.inc 계정이 신규 가입했습니다.",                            target: "System",                           channel: "in-app" },
+  { id: "n04", date: "2026-07-07", time: "09:05:14", level: "warning",  title: "클러스터 용량 경고",          desc: "전체 GPU 클러스터 사용률이 85%를 초과했습니다.",                          target: "System",                           channel: "both"   },
+  { id: "n05", date: "2026-07-07", time: "08:30:00", level: "info",     title: "신규 워크스페이스 생성",      desc: "새로운 워크스페이스 'Team Beta'가 생성되었습니다.",                       target: "Team Beta",       targetId: "ws-e8f1b3c6", channel: "in-app" },
+  { id: "n06", date: "2026-07-06", time: "14:20:55", level: "critical", title: "이미지 레지스트리 동기화 실패", desc: "Image Repository와의 카탈로그 동기화가 실패했습니다. 재시도 중입니다.",    target: "System",                           channel: "both"   },
+  { id: "n07", date: "2026-07-05", time: "17:58:30", level: "warning",  title: "서버 장시간 실행 감지",       desc: "abuse-server-01이 72시간 이상 연속 실행 중입니다.",                       target: "ML Research Lab", targetId: "ws-c2f4d8e3", channel: "in-app" },
+  { id: "n08", date: "2026-07-04", time: "11:00:00", level: "info",     title: "플랫폼 스토리지 용량 경고",   desc: "플랫폼 전체 스토리지 사용량이 90%를 초과했습니다.",                       target: "System",                           channel: "email"  },
+  { id: "n09", date: "2026-07-03", time: "09:22:11", level: "info",     title: "크레딧 대량 지급",            desc: "My Workspace에 20,000 cr이 지급되었습니다. (베타 테스트 보상)",            target: "My Workspace",    targetId: "ws-a3f8b2c1", channel: "in-app" },
+  { id: "n10", date: "2026-07-02", time: "16:45:00", level: "warning",  title: "크레딧 잔액 소진 임박",       desc: "Old Project 크레딧 잔액이 1,000 cr 미만입니다.",                          target: "Old Project",     targetId: "ws-b6a9c7d4", channel: "both"   },
+  { id: "n11", date: "2026-07-01", time: "08:30:19", level: "info",     title: "워크스페이스 강제 비활성화",  desc: "Old Project가 서비스 해지 정산으로 비활성화 처리되었습니다.",                target: "Old Project",     targetId: "ws-b6a9c7d4", channel: "email"  },
+  { id: "n12", date: "2026-06-30", time: "22:10:00", level: "critical", title: "GPU 타입 전체 점유",          desc: "RTX A6000 GPU 타입 전체 슬롯이 점유되어 신규 서버 배포가 불가합니다.",    target: "System",                           channel: "both"   },
+];
+
+// ─── Notification Management ──────────────────────────────────────────────────
+type AdminAlertKey =
+  | "user_new_signup" | "user_inactive" | "user_force_deactivated"
+  | "ws_new" | "ws_credit_low" | "ws_credit_exhausted" | "ws_force_deactivated" | "ws_owner_changed"
+  | "server_abuse" | "server_creating_stuck" | "server_long_running" | "server_force_stopped"
+  | "storage_capacity" | "storage_idle"
+  | "registry_sync_fail"
+  | "gpu_type_full"
+  | "credit_abnormal_spike" | "credit_large_transaction";
+type AdminAlertCfg = { threshold: number | null; severity: NotifLevel; channels: { inapp: boolean; email: boolean } };
+
+type AdminAlertDef = { key: AdminAlertKey; label: string; desc: string; hasThreshold: boolean; unit?: string };
+const adminAlertGroups: { title: string; defs: AdminAlertDef[] }[] = [
+  {
+    title: "사용자",
+    defs: [
+      { key: "user_new_signup",        label: "신규 사용자 가입",               desc: "새로운 사용자가 플랫폼에 가입할 때 발송됩니다.",                                          hasThreshold: false },
+      { key: "user_inactive",          label: "장기 미접속 사용자 발생",         desc: "마지막 로그인 이후 설정한 기간 이상 접속하지 않은 사용자가 발생할 때 발송됩니다.",       hasThreshold: true, unit: "일 이상" },
+      { key: "user_force_deactivated", label: "사용자 강제 비활성화 처리됨",     desc: "관리자가 사용자를 강제 비활성화 처리했을 때 발송됩니다.",                               hasThreshold: false },
+    ],
+  },
+  {
+    title: "워크스페이스",
+    defs: [
+      { key: "ws_new",               label: "신규 워크스페이스 생성",           desc: "새로운 워크스페이스가 생성될 때 발송됩니다.",                                            hasThreshold: false },
+      { key: "ws_credit_low",        label: "크레딧 잔액 임계값 이하 도달",     desc: "워크스페이스의 크레딧 잔액이 설정한 임계값 이하로 떨어질 때 발송됩니다.",               hasThreshold: true, unit: "cr 이하" },
+      { key: "ws_credit_exhausted",  label: "크레딧 전액 소진",                desc: "워크스페이스 크레딧이 0에 도달하여 실행 중인 서버가 자동 중지될 때 발송됩니다.",         hasThreshold: false },
+      { key: "ws_force_deactivated", label: "워크스페이스 강제 비활성화 처리됨", desc: "관리자가 워크스페이스를 강제 비활성화 처리했을 때 발송됩니다.",                         hasThreshold: false },
+      { key: "ws_owner_changed",     label: "Owner 강제 변경 처리됨",           desc: "관리자가 워크스페이스 Owner를 강제 변경했을 때 발송됩니다.",                            hasThreshold: false },
+    ],
+  },
+  {
+    title: "서버",
+    defs: [
+      { key: "server_abuse",           label: "어뷰징 플래그 감지",             desc: "서버의 자원 사용 패턴이 어뷰징으로 판단될 때 발송됩니다. 강제 중지 여부를 검토하세요.", hasThreshold: false },
+      { key: "server_creating_stuck",  label: "서버 생성 장기 지연",             desc: "서버가 creating 상태에서 설정한 시간 이상 진행되지 않을 때 발송됩니다.",               hasThreshold: true, unit: "분 이상" },
+      { key: "server_long_running",    label: "장기 실행 서버 감지",             desc: "서버가 설정한 기간 이상 연속으로 실행 중일 때 발송됩니다.",                            hasThreshold: true, unit: "일 이상" },
+      { key: "server_force_stopped",   label: "서버 강제 중지 처리됨",           desc: "관리자가 서버를 강제 중지 처리했을 때 발송됩니다.",                                     hasThreshold: false },
+    ],
+  },
+  {
+    title: "스토리지",
+    defs: [
+      { key: "storage_capacity", label: "스토리지 용량 임계값 초과",        desc: "특정 스토리지 인스턴스의 사용량이 설정한 임계값을 초과할 때 발송됩니다.",                  hasThreshold: true, unit: "% 이상" },
+      { key: "storage_idle",     label: "마운트 없는 스토리지 장기 방치",   desc: "마운트되지 않은 스토리지가 설정한 기간 이상 유지될 때 발송됩니다.",                       hasThreshold: true, unit: "일 이상" },
+    ],
+  },
+  {
+    title: "이미지",
+    defs: [
+      { key: "registry_sync_fail", label: "Image Repository 동기화 실패", desc: "Image Repository와의 카탈로그 동기화가 실패하거나 타임아웃될 때 발송됩니다.", hasThreshold: false },
+    ],
+  },
+  {
+    title: "GPU Type",
+    defs: [
+      { key: "gpu_type_full", label: "GPU 타입 전체 점유", desc: "특정 GPU 타입의 가용 수량이 0이 되어 신규 서버 생성이 불가할 때 발송됩니다.", hasThreshold: false },
+    ],
+  },
+  {
+    title: "크레딧",
+    defs: [
+      { key: "credit_abnormal_spike",    label: "크레딧 이상 소비 급증",          desc: "워크스페이스의 크레딧 소비가 직전 7일 평균 대비 설정한 임계값 이상으로 급증할 때 발송됩니다.", hasThreshold: true, unit: "% 초과" },
+      { key: "credit_large_transaction", label: "대규모 크레딧 단건 지급·회수",   desc: "단일 트랜잭션으로 설정한 금액 이상의 크레딧이 지급 또는 회수될 때 발송됩니다.",           hasThreshold: true, unit: "cr 이상" },
+    ],
+  },
+];
+
+export function AdminNotificationManagement({ initialTab = "Notification" }: { initialTab?: string }) {
+  const [tab, setTab] = useState(initialTab);
+  useEffect(() => { setTab(initialTab); }, [initialTab]);
+
+  // ── Notification list state ──
+  const [notifSearch, setNotifSearch] = useState("");
+  const [notifFilterLevel, setNotifFilterLevel] = useState("All");
+  const [notifFilterChannel, setNotifFilterChannel] = useState("All");
+  const [notifSortKey, setNotifSortKey] = useState<"date" | "level">("date");
+  const [notifSortDir, setNotifSortDir] = useState<"asc" | "desc">("desc");
+
+  const levelMeta: Record<NotifLevel, { label: string; color: string; bg: string }> = {
+    info:     { label: "Info",     color: BLUE,    bg: "rgba(36,142,213,0.1)"  },
+    warning:  { label: "Warning",  color: YELLOW,  bg: "rgba(234,179,8,0.1)"   },
+    critical: { label: "Critical", color: RED,     bg: "rgba(239,68,68,0.1)"   },
+  };
+  const levelOrder: Record<NotifLevel, number> = { info: 0, warning: 1, critical: 2 };
+
+  const notifFiltered = adminNotifications
+    .filter(n => {
+      if (notifSearch && !n.title.includes(notifSearch) && !n.desc.includes(notifSearch) && !n.target.includes(notifSearch)) return false;
+      if (notifFilterLevel !== "All" && n.level !== notifFilterLevel.toLowerCase()) return false;
+      if (notifFilterChannel !== "All" && n.channel !== notifFilterChannel) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const dir = notifSortDir === "asc" ? 1 : -1;
+      if (notifSortKey === "date") return (`${a.date} ${a.time}` < `${b.date} ${b.time}` ? -1 : 1) * dir;
+      return (levelOrder[a.level] - levelOrder[b.level]) * dir;
+    });
+
+  const handleNotifSort = (key: "date" | "level") => {
+    if (notifSortKey === key) setNotifSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setNotifSortKey(key); setNotifSortDir("desc"); }
+  };
+
+  const notifTdBase: React.CSSProperties = { padding: "0 12px", height: 48, width: "1px", whiteSpace: "nowrap" };
+
+  // ── Alert settings state ──
   const [alertConfig, setAlertConfig] = useState<Record<AdminAlertKey, AdminAlertCfg>>({
-    credit_low:        { threshold: 20,   channels: { inapp: true,  email: true  } },
-    gpu_util_high:     { threshold: 85,   channels: { inapp: true,  email: false } },
-    storage_high:      { threshold: 90,   channels: { inapp: true,  email: false } },
-    gpu_node_error:    { threshold: null, channels: { inapp: true,  email: true  } },
-    server_force_stop: { threshold: null, channels: { inapp: true,  email: false } },
+    user_new_signup:          { threshold: null, severity: "info",     channels: { inapp: true,  email: false } },
+    user_inactive:            { threshold: 30,   severity: "warning",  channels: { inapp: true,  email: false } },
+    user_force_deactivated:   { threshold: null, severity: "warning",  channels: { inapp: true,  email: false } },
+    ws_new:                   { threshold: null, severity: "info",     channels: { inapp: true,  email: false } },
+    ws_credit_low:            { threshold: 1000, severity: "warning",  channels: { inapp: true,  email: true  } },
+    ws_credit_exhausted:      { threshold: null, severity: "critical", channels: { inapp: true,  email: true  } },
+    ws_force_deactivated:     { threshold: null, severity: "warning",  channels: { inapp: true,  email: false } },
+    ws_owner_changed:         { threshold: null, severity: "info",     channels: { inapp: true,  email: false } },
+    server_abuse:             { threshold: null, severity: "critical", channels: { inapp: true,  email: true  } },
+    server_creating_stuck:    { threshold: 10,   severity: "warning",  channels: { inapp: true,  email: false } },
+    server_long_running:      { threshold: 7,    severity: "warning",  channels: { inapp: true,  email: false } },
+    server_force_stopped:     { threshold: null, severity: "info",     channels: { inapp: true,  email: false } },
+    storage_capacity:         { threshold: 90,   severity: "warning",  channels: { inapp: true,  email: false } },
+    storage_idle:             { threshold: 14,   severity: "info",     channels: { inapp: true,  email: false } },
+    registry_sync_fail:       { threshold: null, severity: "critical", channels: { inapp: true,  email: true  } },
+    gpu_type_full:            { threshold: null, severity: "critical", channels: { inapp: true,  email: false } },
+    credit_abnormal_spike:    { threshold: 200,  severity: "critical", channels: { inapp: true,  email: true  } },
+    credit_large_transaction: { threshold: 5000, severity: "warning",  channels: { inapp: true,  email: true  } },
   });
   const toggleChannel = (key: AdminAlertKey, ch: "inapp" | "email") =>
     setAlertConfig(p => ({ ...p, [key]: { ...p[key], channels: { ...p[key].channels, [ch]: !p[key].channels[ch] } } }));
   const setThreshold = (key: AdminAlertKey, v: number) =>
     setAlertConfig(p => ({ ...p, [key]: { ...p[key], threshold: v } }));
+  const setSeverity = (key: AdminAlertKey, v: NotifLevel) =>
+    setAlertConfig(p => ({ ...p, [key]: { ...p[key], severity: v } }));
 
   return (
-    <PageContainer title="Notification Management" subtitle="Configure system alert thresholds and delivery channels.">
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 680 }}>
-        <SectionCard title="Alert Settings" bodyStyle={{ padding: "6px 20px" }}>
-          {adminAlertDefs.map((def, i) => {
-            const cfg = alertConfig[def.key];
-            return (
-              <div key={def.key} style={{ padding: "14px 0", borderBottom: i < adminAlertDefs.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{def.label}</div>
-                    <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{def.desc}</div>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, minWidth: 120 }}>
-                    {def.hasThreshold && cfg.threshold !== null ? (
-                      <>
-                        <input
-                          type="number" min={1} max={99}
-                          value={cfg.threshold}
-                          onChange={e => setThreshold(def.key, Number(e.target.value))}
-                          style={{ width: 46, fontSize: 13, fontWeight: 600, border: `1px solid ${GRAY_30}`, borderRadius: 6, padding: "3px 6px", textAlign: "center", color: GRAY_90, outline: "none" }}
-                        />
-                        <span style={{ fontSize: 11, color: GRAY_60 }}>{def.unit}</span>
-                      </>
-                    ) : (
-                      <span style={{ fontSize: 11, color: GRAY_40 }}>—</span>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-                    {(["inapp", "email"] as Array<"inapp" | "email">).map(ch => (
-                      <div key={ch} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ fontSize: 11, color: GRAY_60 }}>{ch === "inapp" ? "Console" : "Email"}</span>
-                        <button
-                          onClick={() => toggleChannel(def.key, ch)}
-                          style={{ width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer", backgroundColor: cfg.channels[ch] ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s" }}>
-                          <span style={{ position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: cfg.channels[ch] ? 18 : 2 }} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+    <PageContainer title="Notification Management" subtitle="알림 이력을 조회하고 발송 설정을 관리합니다.">
+      <TabBar tabs={["Notification", "Notification Settings"]} active={tab} onChange={setTab} />
+
+      {tab === "Notification" && (
+        <>
+          {/* Toolbar */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
+            <span style={{ fontSize: 13, color: GRAY_60 }}>총 {notifFiltered.length}건</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ position: "relative" }}>
+                <Search size={14} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", color: GRAY_40, pointerEvents: "none" }} />
+                <input
+                  type="text" placeholder="검색어를 입력하세요."
+                  value={notifSearch} onChange={e => setNotifSearch(e.target.value)}
+                  style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, outline: "none", color: GRAY_90, boxSizing: "border-box" as const }}
+                />
               </div>
-            );
-          })}
-        </SectionCard>
-      </div>
+              {[
+                { value: notifFilterLevel, onChange: (v: string) => setNotifFilterLevel(v), options: [["All", "레벨"], ["Info", "Info"], ["Warning", "Warning"], ["Critical", "Critical"]] as [string, string][] },
+                { value: notifFilterChannel, onChange: (v: string) => setNotifFilterChannel(v), options: [["All", "채널"], ["in-app", "Console"], ["email", "Email"], ["both", "Both"]] as [string, string][] },
+              ].map(({ value, onChange, options }) => (
+                <select key={options[0][1]} value={value} onChange={e => onChange(e.target.value)}
+                  style={{ height: 34, paddingLeft: 10, paddingRight: 8, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, color: GRAY_90, outline: "none", cursor: "pointer", boxSizing: "border-box" as const }}>
+                  {options.map(([val, label]) => <option key={val} value={val}>{label}</option>)}
+                </select>
+              ))}
+            </div>
+          </div>
+
+          <Card style={{ overflow: "hidden" }}>
+            <Table
+              spacerGaps
+              headers={[
+                <SortableHeader k="level" label="Severity"  sortKey={notifSortKey} sortDir={notifSortDir} onSort={handleNotifSort} />,
+                <SortableHeader k="date"  label="Timestamp" sortKey={notifSortKey} sortDir={notifSortDir} onSort={handleNotifSort} />,
+                "Target",
+                "Message",
+                "Channel",
+              ]}
+              rows={notifFiltered.map(n => {
+                const meta = levelMeta[n.level];
+                const channelLabel = n.channel === "in-app" ? "Console" : n.channel === "email" ? "Email" : "Both";
+                return [
+                  <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600, color: meta.color, backgroundColor: meta.bg, whiteSpace: "nowrap" }}>
+                    {meta.label}
+                  </span>,
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{n.date}</span>
+                    <span style={{ fontSize: 11, color: GRAY_60, whiteSpace: "nowrap" }}>{n.time}</span>
+                  </div>,
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{n.target}</span>
+                    {n.targetId && <span style={{ fontSize: 11, color: GRAY_60, whiteSpace: "nowrap" }}>{n.targetId}</span>}
+                  </div>,
+                  <span style={{ fontSize: 13, color: GRAY_70, display: "inline-block", minWidth: 320 }}>{n.desc}</span>,
+                  <span style={{ fontSize: 13, color: GRAY_70, whiteSpace: "nowrap" }}>{channelLabel}</span>,
+                ];
+              })}
+            />
+            {notifFiltered.length === 0 && (
+              <div style={{ textAlign: "center", padding: "32px 0", fontSize: 13, color: GRAY_40 }}>검색 결과가 없습니다.</div>
+            )}
+          </Card>
+        </>
+      )}
+
+      {tab === "Notification Settings" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {adminAlertGroups.map(group => (
+            <SectionCard key={group.title} title={group.title} bodyStyle={{ padding: "6px 20px" }}>
+              {group.defs.map((def, i) => {
+                const cfg = alertConfig[def.key];
+                return (
+                  <div key={def.key} style={{ padding: "14px 0", borderBottom: i < group.defs.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{def.label}</div>
+                        <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{def.desc}</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, minWidth: 130 }}>
+                        {def.hasThreshold && cfg.threshold !== null ? (
+                          <>
+                            <input
+                              type="number" min={1}
+                              value={cfg.threshold}
+                              onChange={e => setThreshold(def.key, Number(e.target.value))}
+                              style={{ width: 68, fontSize: 13, fontWeight: 600, border: `1px solid ${GRAY_30}`, borderRadius: 6, padding: "3px 6px", textAlign: "center", color: GRAY_90, outline: "none" }}
+                            />
+                            <span style={{ fontSize: 11, color: GRAY_60 }}>{def.unit}</span>
+                          </>
+                        ) : (
+                          <span style={{ fontSize: 11, color: GRAY_40 }}>—</span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                        {(["info", "warning", "critical"] as NotifLevel[]).map(lv => {
+                          const lvMeta = { info: { label: "Info", color: BLUE, bg: "rgba(36,142,213,0.1)" }, warning: { label: "Warning", color: YELLOW, bg: "rgba(234,179,8,0.1)" }, critical: { label: "Critical", color: RED, bg: "rgba(239,68,68,0.1)" } }[lv];
+                          const active = cfg.severity === lv;
+                          return (
+                            <button key={lv} type="button" onClick={() => setSeverity(def.key, lv)}
+                              style={{ padding: "2px 8px", borderRadius: 20, fontSize: 11, fontWeight: 600, cursor: "pointer", border: `1.5px solid ${active ? lvMeta.color : GRAY_10}`, color: active ? lvMeta.color : GRAY_40, backgroundColor: active ? lvMeta.bg : "transparent", transition: "all 0.1s" }}>
+                              {lvMeta.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+                        {(["inapp", "email"] as Array<"inapp" | "email">).map(ch => (
+                          <div key={ch} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ fontSize: 11, color: GRAY_60 }}>{ch === "inapp" ? "Console" : "Email"}</span>
+                            <button type="button"
+                              onClick={() => toggleChannel(def.key, ch)}
+                              style={{ width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer", backgroundColor: cfg.channels[ch] ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s" }}>
+                              <span style={{ position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: cfg.channels[ch] ? 18 : 2 }} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </SectionCard>
+          ))}
+        </div>
+      )}
     </PageContainer>
   );
 }
 
 // ─── System Settings ──────────────────────────────────────────────────────────
 export function AdminSystemSettings() {
-  const [authItems, setAuthItems] = useState([
-    { key: "email-verify", label: "Email Verification on Sign-up", enabled: true },
-    { key: "google-login", label: "Google Social Login", enabled: false },
-    { key: "github-login", label: "GitHub Social Login", enabled: false },
-  ]);
-  const toggleAuth = (key: string) => setAuthItems(prev => prev.map(a => a.key === key ? { ...a, enabled: !a.enabled } : a));
-
   return (
-    <PageContainer title="System Settings" subtitle="Manage authentication, email delivery, and storage integration settings.">
+    <PageContainer title="System Settings" subtitle="Configure SMTP relay and Image Repository integration for the platform.">
       <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 680 }}>
         <Card style={{ padding: "24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Authentication</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Configure sign-up and login methods available to users.</div>
-          {authItems.map((s, idx) => (
-            <div key={s.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: idx < authItems.length - 1 ? `1px solid rgb(242,242,242)` : "none" }}>
-              <span style={{ fontSize: 14, color: s.enabled ? GRAY_90 : GRAY_40, fontWeight: 500 }}>{s.label}</span>
-              <LabelToggle on={s.enabled} labelOn="On" labelOff="Off" width={52} onToggle={() => toggleAuth(s.key)} />
-            </div>
-          ))}
-        </Card>
-
-        <Card style={{ padding: "24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Email Delivery</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>SMTP configuration used for all outbound system notifications.</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>SMTP Relay Configuration</div>
+          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Outbound mail relay settings applied to all transactional and alert notifications.</div>
           {[
-            { label: "Sender Name",  value: "NeuroStack GPUaaS" },
-            { label: "Sender Email", value: "noreply@neurostack.sdt.inc" },
-            { label: "SMTP Host",    value: "smtp.sdt.inc" },
-            { label: "SMTP Port",    value: "587" },
+            { label: "Display Name",        value: "NeuroStack GPUaaS" },
+            { label: "Envelope From",       value: "noreply@neurostack.sdt.inc" },
+            { label: "Relay Host",          value: "smtp.sdt.inc" },
+            { label: "Relay Port",          value: "587" },
           ].map(({ label, value }) => (
             <div key={label} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid rgb(242,242,242)` }}>
               <div style={{ fontSize: 13, color: GRAY_60, width: 140 }}>{label}</div>
@@ -2485,24 +3015,25 @@ export function AdminSystemSettings() {
             </div>
           ))}
           <div style={{ marginTop: 16, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <PrimaryBtn size="small" variant="secondary">Send Test Email</PrimaryBtn>
-            <PrimaryBtn size="small">Save Changes</PrimaryBtn>
+            <PrimaryBtn size="small" variant="secondary">Verify Relay</PrimaryBtn>
+            <PrimaryBtn size="small">Apply</PrimaryBtn>
           </div>
         </Card>
 
         <Card style={{ padding: "24px" }}>
-          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Internal Storage Integration</div>
-          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Connect to the internal storage system for automatic image discovery and registration.</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Image Repository Integration</div>
+          <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Configure the Image Repository endpoint for automated catalog synchronization and image lifecycle management.</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
-              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>API Endpoint</div>
-              <input type="text" defaultValue="https://internal-storage.sdt.inc/api/v1" style={{ width: "100%", height: 40, padding: "0 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13, boxSizing: "border-box" }} />
+              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>Registry Endpoint</div>
+              <input type="text" defaultValue="https://registry.sdt.inc/api/v1" style={{ width: "100%", height: 40, padding: "0 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 13, boxSizing: "border-box" }} />
             </div>
           </div>
           <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-            <PrimaryBtn size="small">Save Changes</PrimaryBtn>
+            <PrimaryBtn size="small">Apply</PrimaryBtn>
           </div>
         </Card>
+
       </div>
     </PageContainer>
   );
@@ -2513,8 +3044,8 @@ function StoragePricingPolicy() {
   type Unit = "h" | "m" | "d";
   type PolicyRow = { id: string; type: string; color: string; ratePerGB: string; unit: Unit; billingStop: string };
   const [policies, setPolicies] = useState<PolicyRow[]>([
-    { id: "tmp",    type: "Temporary Storage", color: BLUE,    ratePerGB: "0.05", unit: "h", billingStop: "서버 중지 시" },
-    { id: "local",  type: "Local Storage",     color: PRIMARY, ratePerGB: "0.10", unit: "h", billingStop: "없음" },
+    { id: "tmp",    type: "Local Storage", color: BLUE,    ratePerGB: "0.05", unit: "h", billingStop: "서버 중지 시" },
+    { id: "local",  type: "Volume Storage",     color: PRIMARY, ratePerGB: "0.10", unit: "h", billingStop: "없음" },
     { id: "shared", type: "Shared Storage",    color: GREEN,   ratePerGB: "0.15", unit: "h", billingStop: "없음" },
   ]);
   const [draft, setDraft] = useState<PolicyRow | null>(null);
@@ -2540,9 +3071,9 @@ function StoragePricingPolicy() {
   return (
     <>
       {/* Info banner */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", backgroundColor: "rgb(218,235,255)", borderRadius: 10, marginBottom: 12 }}>
-        <AlertTriangle size={14} color={BLUE} />
-        <span style={{ fontSize: 13, color: GRAY_90 }}>가격 정책 변경은 즉시 적용됩니다. 변경 전 충분히 검토하세요.</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(255,251,235)", borderRadius: 10, marginBottom: 12 }}>
+        <AlertTriangle size={12} color={YELLOW} />
+        <span style={{ fontSize: 12, color: GRAY_70 }}>가격 정책 변경은 즉시 적용됩니다. 변경 전 충분히 검토하세요.</span>
       </div>
 
       <Card style={{ overflow: "hidden" }}>
@@ -2587,7 +3118,7 @@ function StoragePricingPolicy() {
                     <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>가격 정책 편집</div>
                   </div>
                 </div>
-                <button onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
+                <button type="button" onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
                   <X size={16} />
@@ -2619,7 +3150,7 @@ function StoragePricingPolicy() {
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 단위</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["h", "m", "d"] as Unit[]).map(u => (
-                    <button key={u} onClick={() => setDraft(d => d ? { ...d, unit: u } : d)} style={{
+                    <button type="button" key={u} onClick={() => setDraft(d => d ? { ...d, unit: u } : d)} style={{
                       flex: 1, height: 40, fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
                       border: `1.5px solid ${draft.unit === u ? PRIMARY : GRAY_30}`,
                       backgroundColor: draft.unit === u ? `rgba(99,90,220,0.07)` : "white",
@@ -2635,7 +3166,7 @@ function StoragePricingPolicy() {
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 중단 조건</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["서버 중지 시", "없음", "서버 삭제 시"] as const).map(opt => (
-                    <button key={opt} onClick={() => setDraft(d => d ? { ...d, billingStop: opt } : d)} style={{
+                    <button type="button" key={opt} onClick={() => setDraft(d => d ? { ...d, billingStop: opt } : d)} style={{
                       flex: 1, height: 40, fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
                       border: `1.5px solid ${draft.billingStop === opt ? PRIMARY : GRAY_30}`,
                       backgroundColor: draft.billingStop === opt ? `rgba(99,90,220,0.07)` : "white",
@@ -2710,9 +3241,9 @@ function GPUPricingContent({ prices, setPrices }: { prices: GpuPrice[]; setPrice
   return (
     <>
       {/* Info banner */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", backgroundColor: "rgb(218,235,255)", borderRadius: 10, marginBottom: 12 }}>
-        <AlertTriangle size={14} color={BLUE} />
-        <span style={{ fontSize: 13, color: GRAY_90 }}>단가 변경은 <strong>신규 서버 생성 시점</strong>부터 적용됩니다. 기존 실행 서버는 다음 결제 주기부터 적용됩니다.</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(240,248,253)", borderRadius: 10, marginBottom: 12 }}>
+        <AlertTriangle size={12} color={BLUE} />
+        <span style={{ fontSize: 12, color: GRAY_70 }}>단가 변경은 <strong>신규 서버 생성 시점</strong>부터 적용됩니다. 기존 실행 서버는 다음 정산 주기부터 적용됩니다.</span>
       </div>
 
       <Card style={{ overflow: "hidden" }}>
@@ -2758,7 +3289,7 @@ function GPUPricingContent({ prices, setPrices }: { prices: GpuPrice[]; setPrice
                     <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>VRAM {draft.vram} · 가격 정책 편집</div>
                   </div>
                 </div>
-                <button onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
+                <button type="button" onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
                   onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
                   onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
                   <X size={16} />
@@ -2789,7 +3320,7 @@ function GPUPricingContent({ prices, setPrices }: { prices: GpuPrice[]; setPrice
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 단위</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["min", "h", "day"] as GpuUnit[]).map(u => (
-                    <button key={u} onClick={() => setDraft(d => d ? { ...d, unit: u } : d)} style={{
+                    <button type="button" key={u} onClick={() => setDraft(d => d ? { ...d, unit: u } : d)} style={{
                       flex: 1, height: 40, fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
                       border: `1.5px solid ${draft.unit === u ? PRIMARY : GRAY_30}`,
                       backgroundColor: draft.unit === u ? "rgba(99,90,220,0.07)" : "white",
