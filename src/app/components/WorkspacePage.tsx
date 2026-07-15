@@ -931,7 +931,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                         onMouseLeave={e => { const t = e.currentTarget.querySelector<HTMLElement>(".expiry-tooltip"); if (t) t.style.display = "none"; }}>
                         <span style={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: GRAY_10, border: `1px solid ${GRAY_30}`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: GRAY_60, cursor: "default", userSelect: "none" as const }}>i</span>
                         <div className="expiry-tooltip" style={{ display: "none", position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)", backgroundColor: GRAY_90, color: "white", fontSize: 11, fontWeight: 500, padding: "5px 9px", borderRadius: 6, whiteSpace: "nowrap" as const, zIndex: 10, pointerEvents: "none" }}>
-                          {nearestLot.expiryDate.slice(0, 10)} {t('workspace.credit.expirySuffix')}
+                          {nearestLot.expiryDate} {t('workspace.credit.expirySuffix')}
                         </div>
                       </div>
                     </div>
