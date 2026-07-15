@@ -2586,7 +2586,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
 
 // ─── Credit Management ────────────────────────────────────────────────────────
 export function AdminCreditManagement() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const wsMap = [
     { name: "My Workspace",    wsId: "ws-a3f8b2c1", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", credits: 45230,  status: "active"   },
     { name: "Team Alpha",      wsId: "ws-d7e9a1b5", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc",   credits: 120500, status: "active"   },
@@ -2595,7 +2595,7 @@ export function AdminCreditManagement() {
   ];
   const getWs = (wsId: string) => wsMap.find(w => w.wsId === wsId) ?? wsMap[0];
 
-  const [creditDrawer, setCreditDrawer] = useState<{ form: { wsId: string; type: string; amount: string; reason: string } } | null>(null);
+  const [creditDrawer, setCreditDrawer] = useState<{ form: { wsId: string; type: string; amount: string; reason: string; expiryDate: string } } | null>(null);
   const [wsDrawerSearch, setWsDrawerSearch] = useState("");
   const [wsDrawerPage, setWsDrawerPage] = useState(0);
   const [wsDrawerSort, setWsDrawerSort] = useState<"name" | "credits">("name");
@@ -2607,7 +2607,7 @@ export function AdminCreditManagement() {
     setWsDrawerPage(0);
   };
 
-  const openCreditDrawer = (type: "지급" | "회수") => setCreditDrawer({ form: { wsId: "ws-a3f8b2c1", type, amount: "", reason: "" } });
+  const openCreditDrawer = (type: "지급" | "회수") => setCreditDrawer({ form: { wsId: "ws-a3f8b2c1", type, amount: "", reason: "", expiryDate: "" } });
   const closeCreditDrawer = () => setCreditDrawer(null);
 
   // ── Credit History state ──
@@ -2620,6 +2620,7 @@ export function AdminCreditManagement() {
   const typeMeta: Record<PlatformCreditType, { bg: string; color: string; icon: React.ReactNode }> = {
     "관리자 지급":      { bg: "rgb(230,248,237)", color: GREEN,      icon: <CreditCard size={12} color={GREEN} />       },
     "관리자 회수":      { bg: "rgb(254,242,242)", color: RED,        icon: <CreditCard size={12} color={RED} />         },
+    "크레딧 소멸":      { bg: "rgb(250,245,255)", color: "#7c3aed",  icon: <Clock size={12} color="#7c3aed" />          },
     "서버 사용":        { bg: PRIMARY_10,          color: PRIMARY,    icon: <Server size={12} color={PRIMARY} />         },
     "볼륨 스토리지 사용": { bg: "rgb(235,245,255)", color: BLUE,       icon: <Database size={12} color={BLUE} />          },
     "공유 스토리지 사용": { bg: "rgb(255,251,235)", color: YELLOW,     icon: <Database size={12} color={YELLOW} />        },
@@ -2629,10 +2630,12 @@ export function AdminCreditManagement() {
   const histWsOptions   = Array.from(new Set(platformCreditHistory.map(r => r.wsName)));
   const histTypeOptions: [string, string][] = [
     ["All", t('admin.credit.filter.typeAll')], ["관리자 지급", t('admin.credit.type.grant')], ["관리자 회수", t('admin.credit.type.revoke')],
+    ["크레딧 소멸", t('admin.credit.type.creditExpiry')],
     ["서버 사용", t('admin.credit.type.serverUsage')], ["볼륨 스토리지 사용", t('admin.credit.type.volumeUsage')], ["공유 스토리지 사용", t('admin.credit.type.sharedUsage')], ["로컬 스토리지 사용", t('admin.credit.type.localUsage')],
   ];
   const typeLabel: Record<PlatformCreditType, string> = {
     "관리자 지급": t('admin.credit.type.grant'), "관리자 회수": t('admin.credit.type.revoke'),
+    "크레딧 소멸": t('admin.credit.type.creditExpiry'),
     "서버 사용": t('admin.credit.type.serverUsage'), "볼륨 스토리지 사용": t('admin.credit.type.volumeUsage'), "공유 스토리지 사용": t('admin.credit.type.sharedUsage'), "로컬 스토리지 사용": t('admin.credit.type.localUsage'),
   };
   const histWsOptionPairs: [string, string][] = [[t('admin.credit.filter.wsAll'), t('admin.credit.filter.wsAll')], ...histWsOptions.map(w => [w, w] as [string, string])];
@@ -2665,7 +2668,7 @@ export function AdminCreditManagement() {
             const selWs = getWs(creditDrawer.form.wsId);
             const amt = parseInt(creditDrawer.form.amount || "0", 10);
             const isGrant = creditDrawer.form.type === "지급";
-            const canSubmit = amt > 0 && creditDrawer.form.reason.trim().length > 0;
+            const canSubmit = amt > 0 && creditDrawer.form.reason.trim().length > 0 && (!isGrant || creditDrawer.form.expiryDate.length > 0);
             return (
               <>
                 <div onClick={closeCreditDrawer} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.25)", zIndex: 290 }} />
@@ -2789,7 +2792,7 @@ export function AdminCreditManagement() {
                       <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.credit.drawer.typeLabel')}</div>
                       <div style={{ display: "flex", gap: 8 }}>
                         {(["지급", "회수"] as const).map(typeVal => (
-                          <button type="button" key={typeVal} onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, type: typeVal } } : d)}
+                          <button type="button" key={typeVal} onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, type: typeVal, expiryDate: "" } } : d)}
                             style={{ flex: 1, height: 42, borderRadius: 8, border: `1.5px solid ${creditDrawer.form.type === typeVal ? (typeVal === "지급" ? PRIMARY : RED) : GRAY_30}`, backgroundColor: creditDrawer.form.type === typeVal ? (typeVal === "지급" ? PRIMARY_10 : "rgb(254,242,242)") : "white", fontSize: 13, fontWeight: creditDrawer.form.type === typeVal ? 700 : 400, color: creditDrawer.form.type === typeVal ? (typeVal === "지급" ? PRIMARY : RED) : GRAY_70, cursor: "pointer", transition: "all 0.12s" }}>
                             {typeVal === "지급" ? t('admin.credit.drawer.typeGrant') : t('admin.credit.drawer.typeRevoke')}
                           </button>
@@ -2817,6 +2820,29 @@ export function AdminCreditManagement() {
                         ))}
                       </div>
                     </div>
+
+                    {/* 유효기간 (지급 시에만 표시) */}
+                    {isGrant && (
+                      <div style={{ marginBottom: 20 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>
+                          {t('admin.credit.drawer.expiryDate')} <span style={{ color: RED }}>*</span>
+                        </div>
+                        <div style={{ position: "relative", border: `1.5px solid ${creditDrawer.form.expiryDate ? GRAY_30 : (creditDrawer.form.amount ? RED : GRAY_30)}`, borderRadius: 8, height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", cursor: "pointer", boxSizing: "border-box" as const }}
+                          onFocus={e => { (e.currentTarget as HTMLElement).style.borderColor = PRIMARY; }}
+                          onBlur={e => { (e.currentTarget as HTMLElement).style.borderColor = GRAY_30; }}>
+                          <span style={{ fontSize: 13, color: creditDrawer.form.expiryDate ? GRAY_90 : GRAY_40, pointerEvents: "none", userSelect: "none" }}>
+                            {creditDrawer.form.expiryDate || t('admin.credit.drawer.expiryDatePlaceholder')}
+                          </span>
+                          <Calendar size={14} color={GRAY_60} style={{ pointerEvents: "none", flexShrink: 0 }} />
+                          <input type="date" value={creditDrawer.form.expiryDate}
+                            onChange={e => setCreditDrawer(d => d ? { ...d, form: { ...d.form, expiryDate: e.target.value } } : d)}
+                            min="2026-07-16"
+                            lang={i18n.language}
+                            style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
+                        </div>
+                        <div style={{ fontSize: 11, color: GRAY_60, marginTop: 5 }}>{t('admin.credit.drawer.expiryDateHint')}</div>
+                      </div>
+                    )}
 
                     {/* 사유 */}
                     <div style={{ marginBottom: 24 }}>
@@ -2853,6 +2879,12 @@ export function AdminCreditManagement() {
                             <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${GRAY_10}`, fontSize: 12, color: isGrant ? PRIMARY : RED, fontWeight: 600, textAlign: "center" as const }}>
                               {isGrant ? "+" : "−"}{amt.toLocaleString()} cr {isGrant ? t('admin.credit.drawer.typeGrant') : t('admin.credit.drawer.typeRevoke')}
                               {overLimit && <span style={{ fontSize: 11, color: RED, fontWeight: 400, marginLeft: 6 }}>· {t('admin.credit.drawer.overLimit')}</span>}
+                            </div>
+                          )}
+                          {isGrant && creditDrawer.form.expiryDate && (
+                            <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${GRAY_10}`, display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60 }}>
+                              <span>{t('admin.credit.drawer.expiryDate')}</span>
+                              <span style={{ color: GRAY_90, fontWeight: 600 }}>{creditDrawer.form.expiryDate}</span>
                             </div>
                           )}
                         </div>
@@ -2917,7 +2949,12 @@ export function AdminCreditManagement() {
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 5, backgroundColor: meta.bg, color: meta.color, borderRadius: 20, padding: "3px 9px 3px 6px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
                     {meta.icon}{typeLabel[r.type]}
                   </div>,
-                  <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{r.desc}</span>,
+                  <div>
+                    <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{r.desc}</span>
+                    {r.type === "관리자 지급" && r.expiryDate && (
+                      <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2, whiteSpace: "nowrap" }}>{t('workspace.credit.lot.expiryDate')}: {r.expiryDate}</div>
+                    )}
+                  </div>,
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, whiteSpace: "nowrap" }}>{r.by}</div>
                     <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1, whiteSpace: "nowrap" }}>{r.byEmail ?? "—"}</div>
@@ -3321,13 +3358,13 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
 
 
 // ─── Credit History ───────────────────────────────────────────────────────────
-type PlatformCreditType = "관리자 지급" | "관리자 회수" | "서버 사용" | "볼륨 스토리지 사용" | "공유 스토리지 사용" | "로컬 스토리지 사용";
+type PlatformCreditType = "관리자 지급" | "관리자 회수" | "크레딧 소멸" | "서버 사용" | "볼륨 스토리지 사용" | "공유 스토리지 사용" | "로컬 스토리지 사용";
 
 const platformCreditHistory: {
   date: string; time: string; wsId: string; wsName: string;
-  type: PlatformCreditType; desc: string; amount: number; by: string; byEmail?: string;
+  type: PlatformCreditType; desc: string; amount: number; by: string; byEmail?: string; expiryDate?: string;
 }[] = [
-  { date: "2026-07-09", time: "10:15:02", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "서비스 크레딧 장애 보상",               amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-07-09", time: "10:15:02", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "서비스 크레딧 장애 보상",               amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc",     expiryDate: "2026-12-31 23:59:59" },
   { date: "2026-07-08", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "서버 사용",        desc: "pytorch-dev-01 컴퓨팅 청구",            amount:   -240, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
   { date: "2026-07-08", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "llm-finetuning 컴퓨팅 청구",            amount:   -576, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
   { date: "2026-07-08", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "stable-diffusion 컴퓨팅 청구",          amount:   -120, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
@@ -3340,9 +3377,10 @@ const platformCreditHistory: {
   { date: "2026-07-07", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "서버 사용",        desc: "bert-finetune 컴퓨팅 청구",             amount:   -480, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
   { date: "2026-07-06", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "공유 스토리지 사용", desc: "shared-team-01 공유 스토리지 청구",   amount:    -96, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
   { date: "2026-07-05", time: "17:58:30", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "관리자 회수",      desc: "정책 위반 크레딧 회수",                 amount:  -2000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
-  { date: "2026-07-03", time: "09:22:11", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "프로모션 크레딧 베타 참여 보상",        amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc"     },
+  { date: "2026-07-03", time: "09:22:11", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "프로모션 크레딧 베타 참여 보상",        amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc",   expiryDate: "2026-08-31 23:59:59" },
   { date: "2026-07-02", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "data-preprocess 컴퓨팅 청구",           amount:   -360, by: "최유진", byEmail: "yujin.choi@sdt.inc"       },
   { date: "2026-07-01", time: "08:30:19", wsId: "ws-b6a9c7d4", wsName: "Old Project",     type: "관리자 회수",      desc: "계정 해지 최종 정산",                 amount:  -1000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-06-15", time: "23:59:59", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "크레딧 소멸",      desc: "사전 오픈 베타 크레딧 만료",             amount:  -5000, by: "시스템" },
 ];
 
 // ─── System Settings ──────────────────────────────────────────────────────────
@@ -3454,7 +3492,7 @@ export function AdminSystemSettings() {
 
 // ─── Storage Pricing Policy (table + drawer edit) ─────────────────────────────
 function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boolean; setShowCreate: (v: boolean) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   type Unit = "h" | "m" | "d";
   type PolicyRow = { id: string; type: string; color: string; ratePerGB: string; unit: Unit; billingStop: string };
   type HistEntry = { ver: number; at: string; applyAt: string; byName: string; by: string; ratePerGB: string; unit: Unit; billingStop: string };
@@ -3790,9 +3828,11 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                   <Calendar size={14} color={GRAY_60} style={{ pointerEvents: "none", flexShrink: 0 }} />
                   <input type="date" value={applyAt} min={tomorrowDate()}
                     onChange={e => setApplyAt(e.target.value)}
+                    lang={i18n.language}
                     style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }}
                   />
                 </div>
+                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 5 }}>{t('admin.pricing.field.applyAtHint')}</div>
               </div>
 
               {/* 미리보기 */}
@@ -3948,8 +3988,10 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                   <Calendar size={14} color={GRAY_60} style={{ pointerEvents: "none", flexShrink: 0 }} />
                   <input type="date" value={createApplyAt} min={tomorrowDate()}
                     onChange={e => setCreateApplyAt(e.target.value)}
+                    lang={i18n.language}
                     style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
                 </div>
+                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 5 }}>{t('admin.pricing.field.applyAtHint')}</div>
               </div>
               {/* 미리보기 */}
               <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>
@@ -4011,7 +4053,7 @@ const INIT_GPU_PRICES: GpuPrice[] = [
 ];
 
 function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { prices: GpuPrice[]; setPrices: React.Dispatch<React.SetStateAction<GpuPrice[]>>; showCreate: boolean; setShowCreate: (v: boolean) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   type GpuHistEntry = { ver: number; at: string; applyAt: string; byName: string; by: string; rate: string; unit: GpuUnit };
   const [histories, setHistories] = useState<Record<string, GpuHistEntry[]>>({
     h100:  [
@@ -4350,9 +4392,11 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   <Calendar size={14} color={GRAY_60} style={{ pointerEvents: "none", flexShrink: 0 }} />
                   <input type="date" value={applyAt} min={tomorrowDate()}
                     onChange={e => setApplyAt(e.target.value)}
+                    lang={i18n.language}
                     style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }}
                   />
                 </div>
+                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 5 }}>{t('admin.pricing.field.applyAtHint')}</div>
               </div>
 
               {/* 미리보기 */}
@@ -4516,8 +4560,10 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   <Calendar size={14} color={GRAY_60} style={{ pointerEvents: "none", flexShrink: 0 }} />
                   <input type="date" value={createApplyAt} min={tomorrowDate()}
                     onChange={e => setCreateApplyAt(e.target.value)}
+                    lang={i18n.language}
                     style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} />
                 </div>
+                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 5 }}>{t('admin.pricing.field.applyAtHint')}</div>
               </div>
               {/* 미리보기 */}
               <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>

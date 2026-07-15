@@ -113,7 +113,7 @@
       "serverTemplates": "Server Templates",
       "storageManagement": "Storage Management",
       "storage": "Storage",
-      "storagePricing": "Storage Pricing",
+      "storagePricing": "Storage Pricing Policy",
       "storageSettings": "Storage Settings",
       "imageManagement": "Image Management",
       "image": "Images",
@@ -121,7 +121,7 @@
       "tier": "Tier",
       "gpuManagement": "GPU Management",
       "gpu": "GPU",
-      "gpuPricing": "GPU Pricing",
+      "gpuPricing": "GPU Pricing Policy",
       "creditHistory": "Credit History",
       "systemSettings": "System Settings",
       "auditLog": "Audit Log"
@@ -200,7 +200,19 @@
       "runwayUnit": "days",
       "runwayOk": "Sufficient credit remaining",
       "runwayWarn": "Credit shortage expected ({{days}} days left)",
-      "runwayCritical": "Credit almost depleted!"
+      "runwayCritical": "Credit almost depleted!",
+      "detailBtn": "Details",
+      "detailDrawerTitle": "Credit Details",
+      "nearestExpiryLabel": "Earliest Expiry Credits",
+      "expirySuffix": "expiry",
+      "lot": {
+        "grantAmount": "Granted Amount",
+        "grantDate": "Granted At",
+        "expiryDate": "Expires At",
+        "balance": "Remaining Balance",
+        "reason": "Reason",
+        "empty": "No active credits."
+      }
     },
     "resource": {
       "servers": "Servers",
@@ -259,6 +271,7 @@
       "all": "All",
       "adminGrant": "Admin Grant",
       "adminRevoke": "Admin Revoke",
+      "creditExpiry": "Credit Expiration",
       "serverUsage": "Server Usage",
       "volumeUsage": "Volume Storage Usage",
       "sharedUsage": "Shared Storage Usage",
@@ -284,12 +297,6 @@
       "delete": "Delete Workspace",
       "deleteConfirmTitle": "Delete Workspace?",
       "deleteConfirmMsg": "This action cannot be undone. All resources will be deleted."
-    },
-    "alert": {
-      "settingsTitle": "Alert Settings",
-      "recipientsTitle": "Alert Recipients",
-      "channelConsole": "Console",
-      "channelEmail": "Email"
     },
     "createdAt": "Created At",
     "unit": {
@@ -1091,8 +1098,9 @@
         "amount": "Amount"
       },
       "type": {
-        "grant": "Grant",
-        "revoke": "Revoke",
+        "grant": "Admin Grant",
+        "revoke": "Admin Revoke",
+        "creditExpiry": "Credit Expiration",
         "serverUsage": "Server Usage",
         "sharedUsage": "Shared Storage Usage",
         "volumeUsage": "Volume Storage Usage",
@@ -1122,7 +1130,10 @@
         "execute": "Execute",
         "executeBtn": "Execute",
         "overLimit": "Exceeds credit limit.",
-        "noResults": "No results found."
+        "noResults": "No results found.",
+        "expiryDate": "Expiry Date",
+        "expiryDatePlaceholder": "YYYY-MM-DD",
+        "expiryDateHint": "Valid until 23:59:59 on the selected date."
       },
       "typeFilter": {
         "all": "All",
@@ -1275,7 +1286,8 @@
         "version": "Version Name",
         "price": "Price",
         "billingUnit": "Billing Unit",
-        "applyAt": "Apply Date"
+        "applyAt": "Apply Date",
+        "applyAtHint": "Policy takes effect at 00:00:00 on the selected date. Must be tomorrow or later."
       },
       "history": {
         "empty": "No change history.",

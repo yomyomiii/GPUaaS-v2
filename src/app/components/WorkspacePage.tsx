@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import {
   Plus, Crown, Shield, User, CreditCard, Mail, Smartphone,
-  Server, Zap, Layers, MoreHorizontal, Clock,
+  Server, Zap, Layers, MoreHorizontal, Clock, Calendar,
   UserPlus, Database, Info, ChevronUp, ChevronDown, Search, X,
 } from "lucide-react";
 import {
@@ -19,10 +19,10 @@ const members = [
   { name: "장민준", email: "minjun.jang@sdt.inc", role: "workspace.user", avatar: "장", joined: "2026-05-22", online: false, usedCr: 730, activeServers: [], inactiveServers: ["data-analysis-01"], localStorages: [], sharedStorages: [] },
 ];
 
-type CreditType = "adminGrant" | "adminRevoke" | "serverUsage" | "volumeUsage" | "sharedUsage" | "localUsage";
+type CreditType = "adminGrant" | "adminRevoke" | "creditExpiry" | "serverUsage" | "volumeUsage" | "sharedUsage" | "localUsage";
 
-const creditHistory: { date: string; time: string; desc: string; type: CreditType; amount: number; by: string; byEmail?: string }[] = [
-  { date: "2026-07-09", time: "10:15:02", desc: "서비스 크레딧 장애 보상",             type: "adminGrant",   amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+const creditHistory: { date: string; time: string; desc: string; type: CreditType; amount: number; by: string; byEmail?: string; expiryDate?: string }[] = [
+  { date: "2026-07-09", time: "10:15:02", desc: "서비스 크레딧 장애 보상",             type: "adminGrant",   amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc",     expiryDate: "2026-12-31 23:59:59" },
   { date: "2026-07-08", time: "23:00:00", desc: "pytorch-dev-01 컴퓨팅 청구",        type: "serverUsage",  amount:   -240, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
   { date: "2026-07-08", time: "23:00:00", desc: "llm-finetuning 컴퓨팅 청구",        type: "serverUsage",  amount:   -576, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
   { date: "2026-07-07", time: "23:00:00", desc: "stable-diffusion 컴퓨팅 청구",      type: "serverUsage",  amount:   -120, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
@@ -31,11 +31,17 @@ const creditHistory: { date: string; time: string; desc: string; type: CreditTyp
   { date: "2026-07-07", time: "23:00:00", desc: "local-vol-02 볼륨 스토리지 청구",   type: "volumeUsage",  amount:    -16, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
   { date: "2026-07-07", time: "23:00:00", desc: "shared-team-01 공유 스토리지 청구",  type: "sharedUsage",  amount:    -96, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
   { date: "2026-07-07", time: "23:00:00", desc: "pytorch-dev-01 로컬 스토리지 청구",  type: "localUsage",   amount:     -5, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-03", time: "09:22:11", desc: "프로모션 크레딧 베타 참여 보상",     type: "adminGrant",   amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc"     },
+  { date: "2026-07-03", time: "09:22:11", desc: "프로모션 크레딧 베타 참여 보상",     type: "adminGrant",   amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc",   expiryDate: "2026-08-31 23:59:59" },
   { date: "2026-06-30", time: "14:05:33", desc: "정책 위반 크레딧 회수",              type: "adminRevoke",  amount:  -2000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-06-15", time: "23:59:59", desc: "사전 오픈 베타 크레딧 만료",         type: "creditExpiry", amount:  -5000, by: "시스템" },
 ];
 
 const CREDIT_NOW = 45230;
+
+const creditLots: { id: string; grantAmount: number; grantDate: string; expiryDate: string; balance: number; desc: string }[] = [
+  { id: "lot-1", grantAmount: 20000, grantDate: "2026-07-03 09:22:11", expiryDate: "2026-08-31 23:59:59", balance: 18230, desc: "프로모션 크레딧 베타 참여 보상" },
+  { id: "lot-2", grantAmount: 30000, grantDate: "2026-07-09 10:15:02", expiryDate: "2026-12-31 23:59:59", balance: 27000, desc: "서비스 크레딧 장애 보상" },
+];
 
 
 const memberHistory = [
@@ -49,12 +55,6 @@ const memberHistory = [
 const SPEND_TOTAL = 12450;
 const SPEND_PREV = 11100;
 
-const settingsHistory = [
-  { date: "2026-07-01 09:15:30", desc: "크레딧 잔액 경고 알림 활성화", by: "지염염", type: "임계값" },
-  { date: "2026-06-20 16:42:08", desc: "이메일 알림 채널 등록", by: "지염염", type: "채널" },
-  { date: "2026-05-10 11:30:55", desc: "멤버 변동 알림 비활성화", by: "이지현", type: "임계값" },
-  { date: "2026-02-15 14:20:33", desc: "크레딧 부족 알림 활성화", by: "지염염", type: "임계값" },
-];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type MemberSortField = "name" | "email" | "role" | "servers" | "inactive" | "local" | "shared" | "credits" | "joined" | null;
@@ -329,6 +329,77 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
   );
 }
 
+// ─── Credit Detail Drawer ─────────────────────────────────────────────────────
+function CreditDetailDrawer({ lots, onClose }: { lots: typeof creditLots; onClose: () => void }) {
+  const { t } = useTranslation();
+  const today = new Date("2026-07-15");
+
+  const dDayColor = (expiryDate: string) => {
+    const diff = Math.floor((new Date(expiryDate.replace(' ', 'T')).getTime() - today.getTime()) / 86400000);
+    if (diff <= 7) return RED;
+    if (diff <= 30) return YELLOW;
+    return GREEN;
+  };
+  const dDayLabel = (expiryDate: string) => {
+    const diff = Math.floor((new Date(expiryDate.replace(' ', 'T')).getTime() - today.getTime()) / 86400000);
+    return diff <= 0 ? "D-Day" : `D-${diff}`;
+  };
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
+      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 460, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Calendar size={16} color={PRIMARY} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('workspace.credit.detailDrawerTitle')}</span>
+          </div>
+          <button type="button" onClick={onClose}
+            style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>
+            {t('common.action.close')}
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
+          {lots.length === 0 ? (
+            <div style={{ fontSize: 13, color: GRAY_40, textAlign: "center", marginTop: 40 }}>
+              {t('workspace.credit.lot.empty')}
+            </div>
+          ) : lots.map((lot, i) => {
+            const color = dDayColor(lot.expiryDate);
+            const label = dDayLabel(lot.expiryDate);
+            return (
+              <div key={lot.id} style={{ position: "relative", paddingLeft: 22, paddingBottom: i < lots.length - 1 ? 24 : 0 }}>
+                <div style={{ position: "absolute", left: 0, top: 5, width: 8, height: 8, borderRadius: "50%", backgroundColor: color }} />
+                {i < lots.length - 1 && <div style={{ position: "absolute", left: 3, top: 13, bottom: 0, width: 2, backgroundColor: GRAY_10 }} />}
+                {/* D-day 태그 */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, backgroundColor: color, color: "white" }}>{label}</span>
+                </div>
+                {/* 잔액 — 메인 값 */}
+                <div style={{ fontSize: 18, fontWeight: 800, color: GRAY_90, marginBottom: 6 }}>
+                  {lot.balance.toLocaleString()} <span style={{ fontSize: 12, fontWeight: 400, color: GRAY_60 }}>cr</span>
+                </div>
+                {/* 메타 */}
+                <div style={{ display: "grid", gridTemplateColumns: "64px 1fr", rowGap: 5, columnGap: 16 }}>
+                  <span style={{ fontSize: 11, color: GRAY_40 }}>{t('workspace.credit.lot.reason')}</span>
+                  <span style={{ fontSize: 11, color: GRAY_60 }}>{lot.desc}</span>
+                  <span style={{ fontSize: 11, color: GRAY_40 }}>{t('workspace.credit.lot.expiryDate')}</span>
+                  <span style={{ fontSize: 11, color, fontWeight: 600 }}>{lot.expiryDate}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Confirm Modal ────────────────────────────────────────────────────────────
 function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
   title: string;
@@ -422,6 +493,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
     if (type === "volumeUsage")  return t('workspace.creditType.volumeUsage');
     if (type === "sharedUsage")  return t('workspace.creditType.sharedUsage');
     if (type === "localUsage")   return t('workspace.creditType.localUsage');
+    if (type === "creditExpiry") return t('workspace.creditType.creditExpiry');
     return type;
   };
   const [tab, setTab] = useState(initialTab);
@@ -436,6 +508,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
   const [detailMember, setDetailMember] = useState<typeof members[0] | null>(null);
   const [deletingMember, setDeletingMember] = useState<typeof members[0] | null>(null);
   const [deletedEmails, setDeletedEmails] = useState<Set<string>>(new Set());
+  const [showCreditDetail, setShowCreditDetail] = useState(false);
 
   useEffect(() => { setTab(initialTab); }, [initialTab]);
   const handleTabChange = (t: string) => { setTab(t); onTabChange?.(t); };
@@ -693,12 +766,13 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {creditHistory.slice(0, 3).map((r, i, arr) => {
                   const meta = {
-                    "adminGrant":  { bg: "rgb(230,248,237)", color: GREEN,      node: <CreditCard size={12} color={GREEN} />        },
-                    "adminRevoke": { bg: "rgb(254,242,242)", color: RED,        node: <CreditCard size={12} color={RED} />          },
-                    "serverUsage": { bg: PRIMARY_10,          color: PRIMARY,    node: <Server size={11} color={PRIMARY} />          },
-                    "volumeUsage": { bg: "rgb(235,245,255)", color: BLUE,       node: <Database size={11} color={BLUE} />           },
-                    "sharedUsage": { bg: "rgb(255,251,235)", color: YELLOW,     node: <Database size={11} color={YELLOW} />         },
-                    "localUsage":  { bg: "rgb(236,252,250)", color: "#0d9488",  node: <Database size={11} color="#0d9488" />        },
+                    "adminGrant":   { bg: "rgb(230,248,237)", color: GREEN,      node: <CreditCard size={12} color={GREEN} />        },
+                    "adminRevoke":  { bg: "rgb(254,242,242)", color: RED,        node: <CreditCard size={12} color={RED} />          },
+                    "creditExpiry": { bg: "rgb(250,245,255)", color: "#7c3aed",  node: <Clock size={11} color="#7c3aed" />           },
+                    "serverUsage":  { bg: PRIMARY_10,          color: PRIMARY,    node: <Server size={11} color={PRIMARY} />          },
+                    "volumeUsage":  { bg: "rgb(235,245,255)", color: BLUE,       node: <Database size={11} color={BLUE} />           },
+                    "sharedUsage":  { bg: "rgb(255,251,235)", color: YELLOW,     node: <Database size={11} color={YELLOW} />         },
+                    "localUsage":   { bg: "rgb(236,252,250)", color: "#0d9488",  node: <Database size={11} color="#0d9488" />        },
                   }[r.type];
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 44, borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_10}` : "none" }}>
@@ -720,7 +794,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{t('common.status.all')} {filteredMembers.length}{t('workspace.credit.runwayUnit')}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{t('common.status.all')} {filteredMembers.length}{t('workspace.unit.person')}</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ position: "relative" }}>
                 <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
@@ -800,18 +874,86 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
 
       {tab === "Credit" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {/* 상단 통합 카드 */}
+          {(() => {
+            const today = new Date("2026-07-15");
+            const monthUsed = creditHistory
+              .filter(r => r.date.startsWith("2026-07") && r.amount < 0 && r.type !== "adminRevoke" && r.type !== "creditExpiry")
+              .reduce((s, r) => s + Math.abs(r.amount), 0);
+            const nearestLot = [...creditLots].sort((a, b) =>
+              new Date(a.expiryDate.replace(' ', 'T')).getTime() - new Date(b.expiryDate.replace(' ', 'T')).getTime()
+            )[0];
+            const nearestDiff = nearestLot
+              ? Math.floor((new Date(nearestLot.expiryDate.replace(' ', 'T')).getTime() - today.getTime()) / 86400000)
+              : null;
+            const nearestColor = nearestDiff !== null ? (nearestDiff <= 7 ? RED : nearestDiff <= 30 ? YELLOW : GREEN) : GRAY_60;
+            return (
+              <Card style={{ padding: "18px 24px", display: "flex", alignItems: "center", gap: 0 }}>
+                {/* 잔액 */}
+                <div style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 24 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{t('workspace.credit.balance')}</div>
+                    <div style={{ fontSize: 26, fontWeight: 900, color: PRIMARY, lineHeight: 1 }}>
+                      {CREDIT_NOW.toLocaleString()}
+                      <span style={{ fontSize: 12, fontWeight: 500, color: GRAY_60, marginLeft: 5 }}>cr</span>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setShowCreditDetail(true)}
+                    style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>
+                    {t('workspace.credit.detailBtn')}
+                  </button>
+                </div>
+                {/* 구분선 */}
+                <div style={{ width: 1, alignSelf: "stretch", backgroundColor: GRAY_10 }} />
+                {/* 이달 사용 */}
+                <div style={{ flex: 1, padding: "0 24px" }}>
+                  <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{t('workspace.credit.used')}</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: RED, lineHeight: 1 }}>
+                    −{monthUsed.toLocaleString()}
+                    <span style={{ fontSize: 12, fontWeight: 500, color: GRAY_60, marginLeft: 4 }}>cr</span>
+                  </div>
+                </div>
+                {/* 구분선 */}
+                <div style={{ width: 1, alignSelf: "stretch", backgroundColor: GRAY_10 }} />
+                {/* 가장 빠른 만료 */}
+                {nearestLot && nearestDiff !== null && (
+                  <div style={{ flex: 1, paddingLeft: 24 }}>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{t('workspace.credit.nearestExpiryLabel')}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, lineHeight: 1 }}>
+                      <span style={{ fontSize: 20, fontWeight: 800, color: nearestColor }}>
+                        {nearestLot.balance.toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: GRAY_60 }}>cr</span>
+                      <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}
+                        onMouseEnter={e => { const t = e.currentTarget.querySelector<HTMLElement>(".expiry-tooltip"); if (t) t.style.display = "block"; }}
+                        onMouseLeave={e => { const t = e.currentTarget.querySelector<HTMLElement>(".expiry-tooltip"); if (t) t.style.display = "none"; }}>
+                        <span style={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: GRAY_10, border: `1px solid ${GRAY_30}`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: GRAY_60, cursor: "default", userSelect: "none" as const }}>i</span>
+                        <div className="expiry-tooltip" style={{ display: "none", position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)", backgroundColor: GRAY_90, color: "white", fontSize: 11, fontWeight: 500, padding: "5px 9px", borderRadius: 6, whiteSpace: "nowrap" as const, zIndex: 10, pointerEvents: "none" }}>
+                          {nearestLot.expiryDate.slice(0, 10)} {t('workspace.credit.expirySuffix')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            );
+          })()}
+
           {/* 크레딧 이력 */}
           {(() => {
-            const typeFilters: (CreditType | "all")[] = ["all", "adminGrant", "adminRevoke", "serverUsage", "volumeUsage", "sharedUsage", "localUsage"];
+            const typeFilters: (CreditType | "all")[] = ["all", "adminGrant", "adminRevoke", "creditExpiry", "serverUsage", "volumeUsage", "sharedUsage", "localUsage"];
             const typeMeta: Record<CreditType, { bg: string; color: string; icon: React.ReactNode }> = {
-              "adminGrant":  { bg: "rgb(230,248,237)", color: GREEN,      icon: <CreditCard size={12} color={GREEN} />        },
-              "adminRevoke": { bg: "rgb(254,242,242)", color: RED,        icon: <CreditCard size={12} color={RED} />          },
-              "serverUsage": { bg: PRIMARY_10,          color: PRIMARY,    icon: <Server size={12} color={PRIMARY} />          },
-              "volumeUsage": { bg: "rgb(235,245,255)", color: BLUE,       icon: <Database size={12} color={BLUE} />           },
-              "sharedUsage": { bg: "rgb(255,251,235)", color: YELLOW,     icon: <Database size={12} color={YELLOW} />         },
-              "localUsage":  { bg: "rgb(236,252,250)", color: "#0d9488",  icon: <Database size={12} color="#0d9488" />        },
+              "adminGrant":   { bg: "rgb(230,248,237)", color: GREEN,      icon: <CreditCard size={12} color={GREEN} />        },
+              "adminRevoke":  { bg: "rgb(254,242,242)", color: RED,        icon: <CreditCard size={12} color={RED} />          },
+              "creditExpiry": { bg: "rgb(250,245,255)", color: "#7c3aed",  icon: <Clock size={12} color="#7c3aed" />           },
+              "serverUsage":  { bg: PRIMARY_10,          color: PRIMARY,    icon: <Server size={12} color={PRIMARY} />          },
+              "volumeUsage":  { bg: "rgb(235,245,255)", color: BLUE,       icon: <Database size={12} color={BLUE} />           },
+              "sharedUsage":  { bg: "rgb(255,251,235)", color: YELLOW,     icon: <Database size={12} color={YELLOW} />         },
+              "localUsage":   { bg: "rgb(236,252,250)", color: "#0d9488",  icon: <Database size={12} color="#0d9488" />        },
             };
-            const isAdmin = (type: CreditType) => type === "adminGrant" || type === "adminRevoke";
+            const isAdmin = (type: CreditType) => type === "adminGrant" || type === "adminRevoke" || type === "creditExpiry";
             const filtered = creditHistory
               .filter(r => creditTypeFilter === "all" || r.type === creditTypeFilter)
               .filter(r => !creditSearch || r.desc.includes(creditSearch) || r.by.includes(creditSearch));
@@ -868,6 +1010,9 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                           {/* Description */}
                           <td style={{ ...tdBase, padding: "12px 12px 12px 0", borderBottom: brd }}>
                             <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_90 }}>{r.desc}</span>
+                            {r.type === "adminGrant" && r.expiryDate && (
+                              <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{t('workspace.credit.lot.expiryDate')}: {r.expiryDate}</div>
+                            )}
                           </td>
                           {/* Actor */}
                           <td style={{ ...tdBase, padding: "12px 12px 12px 0", borderBottom: brd }}>
@@ -905,6 +1050,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
 
     </PageContainer>
     {detailMember && <MemberDetailDrawer m={detailMember} onClose={() => setDetailMember(null)} />}
+    {showCreditDetail && <CreditDetailDrawer lots={creditLots} onClose={() => setShowCreditDetail(false)} />}
     </>
   );
 }

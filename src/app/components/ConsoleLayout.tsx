@@ -149,7 +149,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
       {/* Language */}
       <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
         {(["ko", "en"] as const).map(lang => (
-          <button key={lang} onClick={() => { i18n.changeLanguage(lang); localStorage.setItem("i18nextLng", lang); }}
+          <button key={lang} onClick={() => { i18n.changeLanguage(lang); localStorage.setItem("i18nextLng", lang); document.documentElement.lang = lang; }}
             style={{ background: "none", border: "none", cursor: "pointer", padding: "3px 7px", borderRadius: 4,
               color: i18n.language === lang ? "white" : "rgba(255,255,255,0.5)",
               fontSize: 11, fontWeight: i18n.language === lang ? 700 : 400,

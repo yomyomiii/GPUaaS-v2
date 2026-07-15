@@ -10,12 +10,15 @@ declare module 'i18next' {
   }
 }
 
+const initialLng = localStorage.getItem('i18nextLng') ?? 'ko';
+document.documentElement.lang = initialLng;
+
 i18n.use(initReactI18next).init({
   resources: {
     ko: { translation: ko },
     en: { translation: en },
   },
-  lng: localStorage.getItem('i18nextLng') ?? 'ko',
+  lng: initialLng,
   fallbackLng: 'ko',
   interpolation: { escapeValue: false },
 });

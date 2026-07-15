@@ -113,7 +113,7 @@
       "serverTemplates": "서버 템플릿",
       "storageManagement": "스토리지 관리",
       "storage": "스토리지",
-      "storagePricing": "스토리지 요금 정책",
+      "storagePricing": "스토리지 가격 정책",
       "storageSettings": "스토리지 설정",
       "imageManagement": "이미지 관리",
       "image": "이미지",
@@ -121,7 +121,7 @@
       "tier": "티어",
       "gpuManagement": "GPU 관리",
       "gpu": "GPU",
-      "gpuPricing": "GPU 요금 정책",
+      "gpuPricing": "GPU 가격 정책",
       "creditHistory": "크레딧 이력",
       "systemSettings": "시스템 설정",
       "auditLog": "감사 로그"
@@ -200,7 +200,19 @@
       "runwayUnit": "일",
       "runwayOk": "잔여 크레딧 충분",
       "runwayWarn": "크레딧 부족 예상 ({{days}}일 남음)",
-      "runwayCritical": "크레딧 소진 임박!"
+      "runwayCritical": "크레딧 소진 임박!",
+      "detailBtn": "상세 내역",
+      "detailDrawerTitle": "크레딧 상세 내역",
+      "nearestExpiryLabel": "가장 빠른 만료 크레딧",
+      "expirySuffix": "만료",
+      "lot": {
+        "grantAmount": "지급 금액",
+        "grantDate": "지급 일시",
+        "expiryDate": "만료 일시",
+        "balance": "잔액",
+        "reason": "사유",
+        "empty": "활성 크레딧이 없습니다."
+      }
     },
     "resource": {
       "servers": "서버",
@@ -259,6 +271,7 @@
       "all": "전체",
       "adminGrant": "관리자 지급",
       "adminRevoke": "관리자 회수",
+      "creditExpiry": "크레딧 소멸",
       "serverUsage": "서버 사용",
       "volumeUsage": "볼륨 스토리지 사용",
       "sharedUsage": "공유 스토리지 사용",
@@ -284,12 +297,6 @@
       "delete": "워크스페이스 삭제",
       "deleteConfirmTitle": "워크스페이스를 삭제하시겠습니까?",
       "deleteConfirmMsg": "이 작업은 되돌릴 수 없습니다. 모든 리소스가 삭제됩니다."
-    },
-    "alert": {
-      "settingsTitle": "알림 설정",
-      "recipientsTitle": "알림 수신자",
-      "channelConsole": "콘솔",
-      "channelEmail": "이메일"
     },
     "createdAt": "생성일",
     "unit": {
@@ -1091,8 +1098,9 @@
         "amount": "수량"
       },
       "type": {
-        "grant": "지급",
-        "revoke": "회수",
+        "grant": "관리자 지급",
+        "revoke": "관리자 회수",
+        "creditExpiry": "크레딧 소멸",
         "serverUsage": "서버 사용",
         "sharedUsage": "공유 스토리지 사용",
         "volumeUsage": "볼륨 스토리지 사용",
@@ -1122,7 +1130,10 @@
         "execute": "실행",
         "executeBtn": "실행",
         "overLimit": "크레딧 한도를 초과했습니다.",
-        "noResults": "검색 결과 없음"
+        "noResults": "검색 결과 없음",
+        "expiryDate": "유효기간",
+        "expiryDatePlaceholder": "YYYY-MM-DD",
+        "expiryDateHint": "해당일 23:59:59까지 유효합니다."
       },
       "typeFilter": {
         "all": "전체",
@@ -1275,7 +1286,8 @@
         "version": "버전명",
         "price": "가격",
         "billingUnit": "과금 단위",
-        "applyAt": "변경 적용일"
+        "applyAt": "변경 적용일",
+        "applyAtHint": "선택한 날짜 00:00:00부터 자동 적용됩니다. 내일 이후 날짜만 선택 가능합니다."
       },
       "history": {
         "empty": "변경 이력이 없습니다.",
