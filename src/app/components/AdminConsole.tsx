@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import { WorkspacePage } from "./WorkspacePage";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -51,6 +52,7 @@ const storageDist = [
 
 // ─── SVG Donut for storage distribution (no recharts clipping) ───────────────
 function StorageDonut({ data, total, size }: { data: { name: string; value: number; color: string }[]; total: number; size: number }) {
+  const { t } = useTranslation();
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.37;
@@ -78,7 +80,7 @@ function StorageDonut({ data, total, size }: { data: { name: string; value: numb
           ))}
         </svg>
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-          <div style={{ fontSize: size * 0.1, color: GRAY_60 }}>전체</div>
+          <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>{t('common.label.total')}</div>
           <div style={{ fontSize: size * 0.15, fontWeight: 800, color: GRAY_90, lineHeight: 1.1 }}>{(total / 1000).toFixed(1)}</div>
           <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>TB</div>
         </div>
@@ -95,50 +97,53 @@ const adminAlerts: { msg: string; time: string; level: "info" | "warning" | "cri
 ];
 
 const CreditUsageTooltip = ({ active, payload, label }: any) => {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "white", border: `1px solid ${GRAY_30}`, borderRadius: 10, padding: "10px 14px", fontSize: 12 }}>
       <div style={{ color: GRAY_60, marginBottom: 4 }}>{label}</div>
-      <div style={{ color: GREEN, fontWeight: 700 }}>크레딧 사용: {payload[0]?.value.toLocaleString()} cr</div>
+      <div style={{ color: GREEN, fontWeight: 700 }}>{t('admin.dashboard.tooltip.creditUsage', { value: payload[0]?.value.toLocaleString() })}</div>
     </div>
   );
 };
 
 const ServerTooltip = ({ active, payload, label }: any) => {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "white", border: `1px solid ${GRAY_30}`, borderRadius: 10, padding: "10px 14px", fontSize: 12 }}>
       <div style={{ color: GRAY_60, marginBottom: 4 }}>{label}</div>
-      <div style={{ color: PRIMARY, fontWeight: 700 }}>활성: {payload[0]?.value}개</div>
-      <div style={{ color: GRAY_40, fontWeight: 600 }}>정지: {payload[1]?.value}개</div>
+      <div style={{ color: PRIMARY, fontWeight: 700 }}>{t('admin.dashboard.tooltip.activeServers', { count: payload[0]?.value })}</div>
+      <div style={{ color: GRAY_40, fontWeight: 600 }}>{t('admin.dashboard.tooltip.stoppedServers', { count: payload[1]?.value })}</div>
     </div>
   );
 };
 
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 export function AdminDashboard() {
+  const { t } = useTranslation();
   const totalStorage = storageDist.reduce((s, d) => s + d.value, 0);
 
   return (
     <PageContainer
       title="Admin Dashboard"
-      subtitle="서비스 전체 현황을 실시간 모니터링합니다."
+      subtitle={t('admin.dashboard.subtitle')}
       actions={
-        <span style={{ fontSize: 12, color: GRAY_60 }}>마지막 업데이트 · 2026년 7월 13일 14:32</span>
+        <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.dashboard.lastUpdated')}</span>
       }
     >
       {/* ── KPI 4종 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }}>
-        <MetricCard label="활성 사용자" value="284" icon={<Users size={18} />} color={YELLOW} trend={{ up: true, text: "전일 대비 +4명" }} />
-        <MetricCard label="활성 서버" value="47" icon={<Server size={18} />} color={PRIMARY} trend={{ up: true, text: "전일 대비 +3개" }} />
-        <MetricCard label="GPU 점유율" value="73%" icon={<Cpu size={18} />} color={BLUE} trend={{ up: true, text: "전일 대비 +5%p" }} />
-        <MetricCard label="오늘 크레딧 사용" value="84,000 cr" icon={<CreditCard size={18} />} color={GREEN} trend={{ up: true, text: "전일 대비 +10%" }} />
+        <MetricCard label={t('admin.dashboard.kpi.activeUsers.label')} value="284" icon={<Users size={18} />} color={YELLOW} trend={{ up: true, text: t('admin.dashboard.kpi.activeUsers.trend') }} />
+        <MetricCard label={t('admin.dashboard.kpi.activeServers.label')} value="47" icon={<Server size={18} />} color={PRIMARY} trend={{ up: true, text: t('admin.dashboard.kpi.activeServers.trend') }} />
+        <MetricCard label={t('admin.dashboard.kpi.gpuOccupancy.label')} value="73%" icon={<Cpu size={18} />} color={BLUE} trend={{ up: true, text: t('admin.dashboard.kpi.gpuOccupancy.trend') }} />
+        <MetricCard label={t('admin.dashboard.kpi.todayCredit.label')} value="84,000 cr" icon={<CreditCard size={18} />} color={GREEN} trend={{ up: true, text: t('admin.dashboard.kpi.todayCredit.trend') }} />
       </div>
 
       {/* ── Row 1: 서버 추이 + 매출 추이 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         {/* 서버 수 추이 */}
-        <SectionCard title="서버 수 추이" subtitle="최근 7일 활성/정지 서버 현황">
+        <SectionCard title={t('admin.dashboard.card.serverTrend.title')} subtitle={t('admin.dashboard.card.serverTrend.subtitle')}>
           <ResponsiveContainer width="100%" height={170}>
             <AreaChart data={serverTrend} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <defs>
@@ -151,21 +156,21 @@ export function AdminDashboard() {
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: GRAY_60 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: GRAY_60 }} axisLine={false} tickLine={false} />
               <Tooltip content={<ServerTooltip />} />
-              <Area type="monotone" dataKey="active" stroke={PRIMARY} strokeWidth={2} fill="url(#activeGrad)" name="활성" />
-              <Area type="monotone" dataKey="stopped" stroke={GRAY_40} strokeWidth={1.5} fill="none" strokeDasharray="4 2" name="정지" />
+              <Area type="monotone" dataKey="active" stroke={PRIMARY} strokeWidth={2} fill="url(#activeGrad)" name={t('admin.dashboard.series.active')} />
+              <Area type="monotone" dataKey="stopped" stroke={GRAY_40} strokeWidth={1.5} fill="none" strokeDasharray="4 2" name={t('admin.dashboard.series.stopped')} />
             </AreaChart>
           </ResponsiveContainer>
         </SectionCard>
 
         {/* 크레딧 사용 추이 */}
-        <SectionCard title="일별 크레딧 사용 추이" subtitle="최근 7일 크레딧 사용 현황">
+        <SectionCard title={t('admin.dashboard.card.creditTrend.title')} subtitle={t('admin.dashboard.card.creditTrend.subtitle')}>
           <ResponsiveContainer width="100%" height={170}>
             <BarChart data={creditUsageTrend} margin={{ top: 4, right: 4, bottom: 0, left: -10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" vertical={false} />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: GRAY_60 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: GRAY_60 }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
               <Tooltip content={<CreditUsageTooltip />} />
-              <Bar dataKey="used" fill={GREEN} radius={[4, 4, 0, 0]} name="크레딧 사용" />
+              <Bar dataKey="used" fill={GREEN} radius={[4, 4, 0, 0]} name={t('admin.dashboard.series.creditUsage')} />
             </BarChart>
           </ResponsiveContainer>
         </SectionCard>
@@ -174,7 +179,7 @@ export function AdminDashboard() {
       {/* ── Row 2: GPU 점유율 (가로 바) + 사용자 성장 추이 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         {/* GPU 점유율 */}
-        <SectionCard title="GPU 유형별 점유율" subtitle="전체 가용 GPU 128개">
+        <SectionCard title={t('admin.dashboard.card.gpuOccupancy.title')} subtitle={t('admin.dashboard.card.gpuOccupancy.subtitle')}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {gpuOccupancy.map(gpu => {
               const pct = Math.round(gpu.occupied / gpu.total * 100);
@@ -195,9 +200,9 @@ export function AdminDashboard() {
                     <div style={{ height: "100%", width: `${pct}%`, backgroundColor: barColor, borderRadius: 5, transition: "width 0.4s" }} />
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginTop: 3, fontSize: 10, color: GRAY_60 }}>
-                    <span>{pct}% 점유 · 여유 {gpu.free}개</span>
+                    <span>{t('admin.dashboard.gpu.occupancyText', { pct, free: gpu.free })}</span>
                     <span style={{ color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_60 }}>
-                      {pct >= 90 ? "⚠ 포화 임박" : pct === 0 ? "비활성" : ""}
+                      {pct >= 90 ? t('admin.dashboard.gpu.nearSaturation') : pct === 0 ? t('admin.dashboard.gpu.inactive') : ""}
                     </span>
                   </div>
                 </div>
@@ -207,17 +212,17 @@ export function AdminDashboard() {
         </SectionCard>
 
         {/* 사용자 & 워크스페이스 성장 */}
-        <SectionCard title="사용자 · 워크스페이스 성장" subtitle="최근 6개월 누적 기준">
+        <SectionCard title={t('admin.dashboard.card.userGrowth.title')} subtitle={t('admin.dashboard.card.userGrowth.subtitle')}>
           <div style={{ display: "flex", gap: 16, fontSize: 12, marginBottom: 12 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: PRIMARY, display: "inline-block" }} />사용자</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: GREEN, display: "inline-block" }} />워크스페이스</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: PRIMARY, display: "inline-block" }} />{t('admin.dashboard.series.users')}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: GREEN, display: "inline-block" }} />{t('admin.dashboard.series.workspaces')}</span>
           </div>
           <ResponsiveContainer width="100%" height={170}>
             <LineChart data={userGrowth} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: GRAY_60 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: GRAY_60 }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v: number, name: string) => [v, name === "users" ? "사용자" : "워크스페이스"]} />
+              <Tooltip formatter={(v: number, name: string) => [v, name === "users" ? t('admin.dashboard.series.users') : t('admin.dashboard.series.workspaces')]} />
               <Line type="monotone" dataKey="users" stroke={PRIMARY} strokeWidth={2.5} dot={{ r: 4, fill: PRIMARY }} activeDot={{ r: 6 }} />
               <Line type="monotone" dataKey="ws" stroke={GREEN} strokeWidth={2} dot={{ r: 3, fill: GREEN }} activeDot={{ r: 5 }} strokeDasharray="4 2" />
             </LineChart>
@@ -228,12 +233,12 @@ export function AdminDashboard() {
       {/* ── Row 3: 알림 + 스토리지 분포 + 결제 현황 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 14 }}>
         {/* 알림 피드 */}
-        <ListCard title="최근 알림" action={<Badge color="danger">2 Critical</Badge>}>
+        <ListCard title={t('admin.dashboard.card.recentAlerts')} action={<Badge color="danger">2 Critical</Badge>}>
           {adminAlerts.map((a, i) => {
             const lvMeta = {
-              info:     { label: "Info",     color: BLUE,    bg: "rgba(36,142,213,0.1)"  },
-              warning:  { label: "Warning",  color: YELLOW,  bg: "rgba(234,179,8,0.1)"   },
-              critical: { label: "Critical", color: RED,     bg: "rgba(239,68,68,0.1)"   },
+              info:     { label: t('admin.dashboard.alertLevel.info'),     color: BLUE,    bg: "rgba(36,142,213,0.1)"  },
+              warning:  { label: t('admin.dashboard.alertLevel.warning'),  color: YELLOW,  bg: "rgba(234,179,8,0.1)"   },
+              critical: { label: t('admin.dashboard.alertLevel.critical'), color: RED,     bg: "rgba(239,68,68,0.1)"   },
             }[a.level];
             return (
               <div key={i} style={{
@@ -258,7 +263,7 @@ export function AdminDashboard() {
         </ListCard>
 
         {/* 스토리지 분포 */}
-        <SectionCard title="스토리지 분포" subtitle={`총 ${(totalStorage / 1000).toFixed(1)} TB`}>
+        <SectionCard title={t('admin.dashboard.card.storageDist.title')} subtitle={t('admin.dashboard.card.storageDist.subtitle', { total: (totalStorage / 1000).toFixed(1) })}>
           {/* SVG donut — no recharts clipping */}
           <StorageDonut data={storageDist} total={totalStorage} size={110} />
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
@@ -275,10 +280,10 @@ export function AdminDashboard() {
         </SectionCard>
 
         {/* 오늘 크레딧 현황 */}
-        <SectionCard title="오늘 크레딧 현황">
+        <SectionCard title={t('admin.dashboard.card.todayCredit')}>
           {[
-            { label: "관리자 지급", value: "3건", amount: "+32,000 cr", color: GREEN, icon: "↑" },
-            { label: "관리자 회수", value: "1건", amount: "-5,000 cr",  color: RED,   icon: "↓" },
+            { label: t('admin.credit.type.grant'), value: t('common.count.n', { count: 3 }), amount: "+32,000 cr", color: GREEN, icon: "↑" },
+            { label: t('admin.credit.type.revoke'), value: t('common.count.n', { count: 1 }), amount: "-5,000 cr",  color: RED,   icon: "↓" },
           ].map(({ label, value, amount, color, icon }) => (
             <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: `1px solid rgb(248,248,248)` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -292,7 +297,7 @@ export function AdminDashboard() {
             </div>
           ))}
           <div style={{ marginTop: 14, padding: "10px 14px", backgroundColor: PRIMARY_10, borderRadius: 8 }}>
-            <div style={{ fontSize: 11, color: GRAY_60 }}>순 지급 (지급 - 회수)</div>
+            <div style={{ fontSize: 11, color: GRAY_60 }}>{t('admin.dashboard.credit.netGrant')}</div>
             <div style={{ fontSize: 20, fontWeight: 700, color: PRIMARY, marginTop: 2 }}>+27,000 cr</div>
           </div>
         </SectionCard>
@@ -306,6 +311,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
   title: string; message: React.ReactNode; confirmLabel: string;
   onConfirm: () => void; onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ backgroundColor: "white", borderRadius: 14, padding: "28px 32px", width: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
@@ -315,7 +321,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button type="button" onClick={onCancel} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>취소</button>
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.cancel')}</button>
           <button type="button" onClick={onConfirm} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", backgroundColor: RED, color: "white", cursor: "pointer", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>{confirmLabel}</button>
@@ -348,6 +354,7 @@ function WsTooltip({ names }: { names: string[] }) {
 
 // ─── User Management ──────────────────────────────────────────────────────────
 export function AdminUserManagement() {
+  const { t } = useTranslation();
   const allUsers = [
     { name: "지염염", email: "yeomeyeom.ji@sdt.inc", joined: "2026-01-15", workspaces: 2, workspaceNames: ["My Workspace", "ML Research Lab"], servers: 2, status: "active", lastLogin: "오늘 09:42", usedCr: 12450, totalCr: 45230, role: "owner" },
     { name: "이지현", email: "jihyun.lee@sdt.inc", joined: "2026-02-20", workspaces: 1, workspaceNames: ["Team Alpha"], servers: 5, status: "active", lastLogin: "어제 18:30", usedCr: 28600, totalCr: 120500, role: "admin" },
@@ -384,6 +391,7 @@ export function AdminUserManagement() {
       else if (sortKey === "servers")    { va = a.servers;      vb = b.servers; }
       else if (sortKey === "credits")    { va = a.totalCr;      vb = b.totalCr; }
       else if (sortKey === "joined")     { va = a.joined;       vb = b.joined; }
+      else if (sortKey === "lastLogin")  { va = a.lastLogin;    vb = b.lastLogin; }
       const cmp = va < vb ? -1 : va > vb ? 1 : 0;
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -394,23 +402,23 @@ export function AdminUserManagement() {
 
   return (
     <>
-    <PageContainer title="User Management" subtitle="전체 사용자 목록을 조회하고 관리합니다." actions={<PrimaryBtn size="small"><Plus size={14} /> 사용자 초대</PrimaryBtn>}>
+    <PageContainer title="User Management" subtitle={t('admin.user.subtitle')} actions={<PrimaryBtn size="small"><Plus size={14} /> {t('admin.user.invite')}</PrimaryBtn>}>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-          전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{users.length}</span>명
-          {(filterStatus !== "All" || search) && <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {allUsers.length}명 중</span>}
+          {t('common.count.total', { count: users.length })}
+          {(filterStatus !== "All" || search) && <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('common.count.outOf', { total: allUsers.length })}</span>}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <div style={{ position: "relative" }}>
             <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-            <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder={t('common.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
               style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${search ? PRIMARY : GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }} />
           </div>
           <div style={{ position: "relative" }}>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
               style={{ height: 34, paddingLeft: 10, paddingRight: 26, border: `1px solid ${filterStatus !== "All" ? PRIMARY : GRAY_30}`, borderRadius: 8, fontSize: 12, color: filterStatus !== "All" ? PRIMARY : GRAY_70, fontFamily: "inherit", fontWeight: filterStatus !== "All" ? 600 : 400, backgroundColor: filterStatus !== "All" ? PRIMARY_10 : "white", outline: "none", cursor: "pointer", appearance: "none" as const }}>
-              {[["All", "상태"], ["active", "활성"], ["inactive", "비활성"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {[["All", t('admin.user.filter.status')], ["active", t('admin.user.filter.active')], ["inactive", t('admin.user.filter.inactive')]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
             <ChevronDown size={11} color={filterStatus !== "All" ? PRIMARY : GRAY_60} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           </div>
@@ -422,12 +430,12 @@ export function AdminUserManagement() {
         <Table
           spacerGaps
           headers={[
-            <SortableHeader k="name" label="Name / Email" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="status" label="Status" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="workspaces" label="Workspaces" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="credits" label="Credit Usage" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            "Last Login",
-            <SortableHeader k="joined" label="Joined" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="name" label={t('admin.user.col.nameEmail')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="status" label={t('admin.user.col.status')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="workspaces" label={t('admin.user.col.workspaces')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="credits" label={t('admin.user.col.creditUsage')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="lastLogin" label={t('admin.user.drawer.lastLogin')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="joined" label={t('admin.user.col.joined')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             "Actions",
           ]}
           rows={users.map(u => {
@@ -444,7 +452,7 @@ export function AdminUserManagement() {
                 </div>
               </div>,
               /* 상태 */
-              <Badge color={u.status === "active" ? "success" : "neutral"}>{u.status === "active" ? "활성" : "비활성"}</Badge>,
+              <Badge color={u.status === "active" ? "success" : "neutral"}>{u.status === "active" ? t('common.status.active') : t('common.status.inactive')}</Badge>,
               /* 워크스페이스 */
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <Layers size={12} color={GRAY_40} />
@@ -459,14 +467,14 @@ export function AdminUserManagement() {
               <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{u.joined}</span>,
               /* 액션 */
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <button type="button" onClick={() => setSelectedUser(u)} style={{ height: 36, padding: "0 14px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                <button type="button" onClick={() => setSelectedUser(u)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.user.viewDetail')}</button>
                 <div style={{ position: "relative" }}>
                   {openMenuId === u.email && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                   <button type="button" onClick={(e) => { if (openMenuId !== u.email) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === u.email ? null : u.email); }}
-                    style={{ height: 36, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === u.email ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                    style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === u.email ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                     onMouseEnter={e => { if (openMenuId !== u.email) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                     onMouseLeave={e => { if (openMenuId !== u.email) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                    <span style={{ padding: "0 10px 0 12px" }}>관리</span>
+                    <span style={{ padding: "0 10px 0 12px" }}>{t('admin.user.manage')}</span>
                     <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === u.email ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 8px", borderLeft: `1px solid ${openMenuId === u.email ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                       <ChevronDown size={12} color={PRIMARY} style={{ transform: openMenuId === u.email ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                     </span>
@@ -474,8 +482,8 @@ export function AdminUserManagement() {
                   {openMenuId === u.email && menuAnchor && (
                     <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
                       {effectiveUserStatus(u) === "active"
-                        ? <button type="button" onClick={() => { setOpenMenuId(null); setDeactivatingUser(u); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>비활성화</button>
-                        : <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>활성화</button>
+                        ? <button type="button" onClick={() => { setOpenMenuId(null); setDeactivatingUser(u); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.user.deactivate')}</button>
+                        : <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.user.activate')}</button>
                       }
                     </div>
                   )}
@@ -490,24 +498,24 @@ export function AdminUserManagement() {
           <div onClick={() => setSelectedUser(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedUser.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.user.detail.title', { name: selectedUser.name })}</span>
+              <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {[
-                    { label: "이름", value: selectedUser.name },
-                    { label: "이메일", value: selectedUser.email },
-                    { label: "역할", value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: roleBgColor(selectedUser.role), color: roleTextColor(selectedUser.role) }}>{roleLabel(selectedUser.role)}</span> },
-                    { label: "상태", value: <Badge color={selectedUser.status === "active" ? "success" : "neutral"}>{selectedUser.status === "active" ? "활성" : "비활성"}</Badge> },
-                    { label: "가입일", value: selectedUser.joined },
-                    { label: "최근 로그인", value: selectedUser.lastLogin },
-                    { label: "워크스페이스", value: `${selectedUser.workspaces}개` },
-                    { label: "서버", value: `${selectedUser.servers}개` },
-                    { label: "이달 사용 크레딧", value: `${selectedUser.usedCr.toLocaleString()} cr` },
-                    { label: "보유 크레딧", value: `${selectedUser.totalCr.toLocaleString()} cr` },
+                    { label: t('admin.user.drawer.name'), value: selectedUser.name },
+                    { label: t('admin.user.drawer.email'), value: selectedUser.email },
+                    { label: t('admin.user.drawer.role'), value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: roleBgColor(selectedUser.role), color: roleTextColor(selectedUser.role) }}>{roleLabel(selectedUser.role)}</span> },
+                    { label: t('admin.user.drawer.status'), value: <Badge color={selectedUser.status === "active" ? "success" : "neutral"}>{selectedUser.status === "active" ? t('common.status.active') : t('common.status.inactive')}</Badge> },
+                    { label: t('admin.user.drawer.joinedAt'), value: selectedUser.joined },
+                    { label: t('admin.user.drawer.lastLogin'), value: selectedUser.lastLogin },
+                    { label: t('admin.user.drawer.workspaces'), value: `${selectedUser.workspaces}개` },
+                    { label: t('admin.user.drawer.servers'), value: `${selectedUser.servers}개` },
+                    { label: t('admin.user.drawer.monthlyUsage'), value: `${selectedUser.usedCr.toLocaleString()} cr` },
+                    { label: t('admin.user.drawer.creditBalance'), value: `${selectedUser.totalCr.toLocaleString()} cr` },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontSize: 11, color: GRAY_40, marginBottom: 4 }}>{label}</div>
@@ -518,7 +526,7 @@ export function AdminUserManagement() {
               </section>
               {selectedUser.workspaceNames.length > 0 && (
                 <section>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>소속 워크스페이스</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.user.drawer.workspaces')}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {selectedUser.workspaceNames.map(name => (
                       <span key={name} style={{ fontSize: 12, fontWeight: 500, padding: "4px 12px", borderRadius: 8, backgroundColor: PRIMARY_10, color: PRIMARY }}>{name}</span>
@@ -527,11 +535,11 @@ export function AdminUserManagement() {
                 </section>
               )}
               <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {selectedUser.status === "active"
-                    ? <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>비활성화</button>
-                    : <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>활성화</button>
+                    ? <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.user.deactivate')}</button>
+                    : <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.user.activate')}</button>
                   }
                 </div>
               </section>
@@ -542,9 +550,9 @@ export function AdminUserManagement() {
     </PageContainer>
     {deactivatingUser && (
       <ConfirmModal
-        title="사용자 비활성화 확인"
-        message={<span>사용자 <strong style={{ color: GRAY_90 }}>{deactivatingUser.name}</strong> ({deactivatingUser.email}) 계정을 비활성화하시겠습니까?<br /><br />비활성화 즉시 로그인이 차단되며, 운영 중인 모든 서버가 일시 중지됩니다. 비활성화는 언제든 관리자가 되돌릴 수 있습니다.</span>}
-        confirmLabel="비활성화"
+        title={t('admin.user.deactivateModal.title')}
+        message={<span>{t('admin.user.deactivateModal.message', { name: deactivatingUser.name, email: deactivatingUser.email })}<br /><br />{t('admin.user.deactivateModal.warning')}</span>}
+        confirmLabel={t('admin.user.deactivate')}
         onConfirm={() => { setDeactivatedEmails(prev => new Set([...prev, deactivatingUser.email])); setDeactivatingUser(null); }}
         onCancel={() => setDeactivatingUser(null)}
       />
@@ -555,6 +563,7 @@ export function AdminUserManagement() {
 
 // ─── Workspace Management ─────────────────────────────────────────────────────
 export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [sortKey, setSortKey] = useState("name");
@@ -597,23 +606,23 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
 
   return (
     <>
-    <PageContainer title="Workspace Management" subtitle="전체 워크스페이스를 조회하고 관리합니다.">
+    <PageContainer title="Workspace Management" subtitle={t('admin.workspace.subtitle')}>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-          전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{workspaces.length}</span>개
-          {(filterStatus !== "All" || search) && <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {allWorkspaces.length}개 중</span>}
+          {t('common.count.total', { count: workspaces.length })}
+          {(filterStatus !== "All" || search) && <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('common.count.outOf', { total: allWorkspaces.length })}</span>}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <div style={{ position: "relative" }}>
             <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-            <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder={t('common.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
               style={{ width: 240, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${search ? PRIMARY : GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }} />
           </div>
           <div style={{ position: "relative" }}>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
               style={{ height: 34, paddingLeft: 10, paddingRight: 26, border: `1px solid ${filterStatus !== "All" ? PRIMARY : GRAY_30}`, borderRadius: 8, fontSize: 12, color: filterStatus !== "All" ? PRIMARY : GRAY_70, fontFamily: "inherit", fontWeight: filterStatus !== "All" ? 600 : 400, backgroundColor: filterStatus !== "All" ? PRIMARY_10 : "white", outline: "none", cursor: "pointer", appearance: "none" as const }}>
-              {[["All", "상태"], ["active", "활성"], ["inactive", "비활성"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {[["All", t('common.status.all')], ["active", t('common.status.active')], ["inactive", t('common.status.inactive')]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
             <ChevronDown size={11} color={filterStatus !== "All" ? PRIMARY : GRAY_60} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           </div>
@@ -625,13 +634,13 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
         <Table
           spacerGaps
           headers={[
-            <SortableHeader k="name" label="Workspace" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="status" label="Status" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="owner" label="Owner" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="members" label="Members" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="credits" label="Credit Balance" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="createdAt" label="생성 일시" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            <SortableHeader k="lastActivity" label="Last Activity" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="name" label={t('admin.workspace.col.name')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="status" label={t('admin.workspace.col.status')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="owner" label={t('admin.workspace.col.owner')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="members" label={t('admin.workspace.col.members')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="credits" label={t('admin.workspace.col.creditBalance')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="createdAt" label={t('admin.workspace.column.createdAt')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+            <SortableHeader k="lastActivity" label={t('admin.workspace.col.lastActivity')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             "Actions",
           ]}
           rows={workspaces.map(w => {
@@ -648,7 +657,7 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
                 </div>
               </div>,
               /* 상태 */
-              <Badge color={w.status === "active" ? "success" : "neutral"}>{w.status === "active" ? "활성" : "비활성"}</Badge>,
+              <Badge color={w.status === "active" ? "success" : "neutral"}>{w.status === "active" ? t('common.status.active') : t('common.status.inactive')}</Badge>,
               /* Owner */
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{w.owner}</div>
@@ -667,25 +676,25 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
               <span style={{ fontSize: 12, color: w.status === "inactive" ? GRAY_40 : GRAY_70, whiteSpace: "nowrap" as const }}>{w.lastActivity}</span>,
               /* 액션 */
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <button type="button" onClick={onDetail} style={{ height: 36, padding: "0 14px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                <button type="button" onClick={onDetail} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                 <div style={{ position: "relative" }}>
                   {openMenuId === w.wsId && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                   <button type="button" onClick={(e) => { if (openMenuId !== w.wsId) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === w.wsId ? null : w.wsId); }}
-                    style={{ height: 36, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === w.wsId ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                    style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === w.wsId ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                     onMouseEnter={e => { if (openMenuId !== w.wsId) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                     onMouseLeave={e => { if (openMenuId !== w.wsId) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                    <span style={{ padding: "0 10px 0 12px" }}>관리</span>
+                    <span style={{ padding: "0 10px 0 12px" }}>{t('common.action.manage')}</span>
                     <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === w.wsId ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 8px", borderLeft: `1px solid ${openMenuId === w.wsId ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                       <ChevronDown size={12} color={PRIMARY} style={{ transform: openMenuId === w.wsId ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                     </span>
                   </button>
                   {openMenuId === w.wsId && menuAnchor && (
                     <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 140, padding: "4px 0" }}>
-                      <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>크레딧 관리</button>
+                      <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.workspace.creditManagement')}</button>
                       <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
                       {effectiveWsStatus(w) === "active"
-                        ? <button type="button" onClick={() => { setOpenMenuId(null); setDeactivatingWs({ name: w.name, wsId: w.wsId }); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>비활성화</button>
-                        : <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>활성화</button>
+                        ? <button type="button" onClick={() => { setOpenMenuId(null); setDeactivatingWs({ name: w.name, wsId: w.wsId }); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.workspace.deactivate')}</button>
+                        : <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.workspace.activate')}</button>
                       }
                     </div>
                   )}
@@ -698,9 +707,9 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
     </PageContainer>
     {deactivatingWs && (
       <ConfirmModal
-        title="워크스페이스 비활성화 확인"
-        message={<span>워크스페이스 <strong style={{ color: GRAY_90 }}>{deactivatingWs.name}</strong>을(를) 비활성화하시겠습니까?<br /><br />비활성화 즉시 모든 멤버의 접근이 차단되며, 운영 중인 서버가 일시 중지됩니다. 비활성화는 언제든 관리자가 되돌릴 수 있습니다.</span>}
-        confirmLabel="비활성화"
+        title={t('admin.workspace.deactivateModal.title')}
+        message={<span>{t('admin.workspace.deactivateModal.message', { name: deactivatingWs.name })}<br /><br />{t('admin.workspace.deactivateModal.warning')}</span>}
+        confirmLabel={t('admin.workspace.deactivate')}
         onConfirm={() => { setDeactivatedWsIds(prev => new Set([...prev, deactivatingWs.wsId])); setDeactivatingWs(null); }}
         onCancel={() => setDeactivatingWs(null)}
       />
@@ -716,6 +725,7 @@ export function AdminWorkspaceDetail({ onBack }: { onBack: () => void }) {
 
 // ─── Server Management ────────────────────────────────────────────────────────
 export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?: string }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [sortKey, setSortKey] = useState("createdAt");
@@ -762,6 +772,9 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
   // ── Server Templates state ──
   const [view, setView] = useState<"list" | "create-template" | "edit-template">("list");
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [tplSortKey, setTplSortKey] = useState("name");
+  const [tplSortDir, setTplSortDir] = useState<"asc" | "desc">("asc");
+  const handleTplSort = (key: string) => { if (tplSortKey === key) setTplSortDir(d => d === "asc" ? "desc" : "asc"); else { setTplSortKey(key); setTplSortDir("asc"); } };
   const [templates, setTemplates] = useState([
     { id: "t1", name: "PyTorch LLM 학습", desc: "LLM 학습에 최적화된 PyTorch 기반 템플릿", image: "PyTorch 2.1 + CUDA 12.1", recVram: "80GB+", tmp: 30, hasLocal: true, local: 100, hasShared: false, shared: "", envVars: "WANDB_API_KEY=\nHF_TOKEN=", status: "Public", used: 312, createdAt: "2026-01-20 11:14:33" },
     { id: "t2", name: "Stable Diffusion 생성", desc: "이미지 생성을 위한 Stable Diffusion 템플릿", image: "Stable Diffusion WebUI", recVram: "24GB+", tmp: 20, hasLocal: true, local: 50, hasShared: false, shared: "", envVars: "", status: "Public", used: 198, createdAt: "2026-02-08 09:45:02" },
@@ -782,19 +795,19 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
   const renderTemplateForm = (isEdit: boolean) => (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
       <div style={{ maxWidth: 700 }}>
-        <button type="button" onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← Server Management</button>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: "0 0 24px" }}>{isEdit ? "서버 템플릿 수정" : "서버 템플릿 생성"}</h1>
+        <button type="button" onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>{t('admin.server.backBtn')}</button>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: "0 0 24px" }}>{isEdit ? t('admin.server.template.edit') : t('admin.server.template.create')}</h1>
 
         {/* 기본 정보 */}
         <Card style={{ padding: "24px 28px", marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 16 }}>기본 정보</div>
-          <FormRow label="템플릿 이름" required>
-            <input style={fldStyle} placeholder="예: PyTorch LLM 학습" value={tplForm.name} onChange={e => setTplForm(f => ({ ...f, name: e.target.value }))} />
+          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 16 }}>{t('admin.server.template.section.basic')}</div>
+          <FormRow label={t('admin.server.template.field.name')} required>
+            <input style={fldStyle} placeholder={t('admin.server.template.field.namePlaceholder')} value={tplForm.name} onChange={e => setTplForm(f => ({ ...f, name: e.target.value }))} />
           </FormRow>
-          <FormRow label="설명">
-            <textarea style={{ ...txaStyle, minHeight: 64 }} placeholder="이 템플릿의 용도를 간단히 설명하세요." value={tplForm.desc} onChange={e => setTplForm(f => ({ ...f, desc: e.target.value }))} />
+          <FormRow label={t('admin.image.field.desc')}>
+            <textarea style={{ ...txaStyle, minHeight: 64 }} placeholder={t('admin.server.template.field.descPlaceholder')} value={tplForm.desc} onChange={e => setTplForm(f => ({ ...f, desc: e.target.value }))} />
           </FormRow>
-          <FormRow label="기반 이미지" required>
+          <FormRow label={t('admin.server.template.field.baseImage')} required>
             <select style={{ ...fldStyle, cursor: "pointer" }} value={tplForm.image} onChange={e => setTplForm(f => ({ ...f, image: e.target.value }))}>
               {IMAGE_NAMES.map(name => <option key={name}>{name}</option>)}
             </select>
@@ -803,8 +816,8 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
 
         {/* 권장 리소스 */}
         <Card style={{ padding: "24px 28px", marginBottom: 24 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 16 }}>권장 리소스</div>
-          <FormRow label="권장 vRAM" required>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 16 }}>{t('admin.server.template.section.recommended')}</div>
+          <FormRow label={t('admin.server.template.field.vram')} required>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <div style={{ display: "flex", gap: 6 }}>
                 {["24GB+", "48GB+", "80GB+", "160GB+"].map(v => (
@@ -813,36 +826,36 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
                   </button>
                 ))}
               </div>
-              <input style={{ ...fldStyle, width: 120, marginBottom: 0 }} placeholder="직접 입력 (예: 40GB+)" value={tplForm.recVram} onChange={e => setTplForm(f => ({ ...f, recVram: e.target.value }))} />
+              <input style={{ ...fldStyle, width: 120, marginBottom: 0 }} placeholder={t('admin.server.template.field.vramPlaceholder')} value={tplForm.recVram} onChange={e => setTplForm(f => ({ ...f, recVram: e.target.value }))} />
             </div>
           </FormRow>
-          <FormRow label="권장 Local 스토리지 (GB)">
+          <FormRow label={t('admin.server.template.field.localStorage')}>
             <input type="number" style={fldStyle} min={10} step={10} value={tplForm.tmp} onChange={e => setTplForm(f => ({ ...f, tmp: Number(e.target.value) }))} />
           </FormRow>
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: tplForm.hasLocal ? 10 : 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>권장 Volume 스토리지</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{t('admin.server.template.field.volumeStorage')}</div>
               <button type="button" onClick={() => setTplForm(f => ({ ...f, hasLocal: !f.hasLocal }))} style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: tplForm.hasLocal ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                 <span style={{ position: "absolute", top: 3, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: tplForm.hasLocal ? 21 : 3 }} />
               </button>
             </div>
-            {tplForm.hasLocal && <input type="number" style={fldStyle} min={10} step={10} placeholder="용량 (GB)" value={tplForm.local} onChange={e => setTplForm(f => ({ ...f, local: Number(e.target.value) }))} />}
+            {tplForm.hasLocal && <input type="number" style={fldStyle} min={10} step={10} placeholder={t('admin.server.template.field.capacityPlaceholder')} value={tplForm.local} onChange={e => setTplForm(f => ({ ...f, local: Number(e.target.value) }))} />}
           </div>
         </Card>
 
         {/* 하단 버튼 */}
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <PrimaryBtn variant="secondary" onClick={() => setView("list")}>취소</PrimaryBtn>
+          <PrimaryBtn variant="secondary" onClick={() => setView("list")}>{t('common.action.cancel')}</PrimaryBtn>
           <PrimaryBtn onClick={() => {
             if (isEdit && editingTemplateId) {
-              setTemplates(ts => ts.map(t => t.id === editingTemplateId ? { ...t, ...tplForm } : t));
+              setTemplates(ts => ts.map(tpl => tpl.id === editingTemplateId ? { ...tpl, ...tplForm } : tpl));
             } else {
               const now = new Date(); const p = (n: number) => String(n).padStart(2, "0");
               const nowStr = `${now.getFullYear()}-${p(now.getMonth()+1)}-${p(now.getDate())} ${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())}`;
               setTemplates(ts => [...ts, { id: `t${Date.now()}`, ...tplForm, used: 0, createdAt: nowStr }]);
             }
             setView("list");
-          }}>{isEdit ? "변경 저장" : "템플릿 생성"}</PrimaryBtn>
+          }}>{isEdit ? t('admin.server.template.action.save') : t('admin.server.template.action.create')}</PrimaryBtn>
         </div>
       </div>
     </div>
@@ -854,28 +867,28 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
   return (
     <>
     <PageContainer
-      title="Server Management"
-      subtitle={tab === "Server Templates" ? "서버 배포에 사용할 템플릿을 등록·수정·관리합니다." : "전체 서버 현황을 조회하고 필요 시 강제 중지합니다."}
-      actions={tab === "Server Templates" ? <PrimaryBtn size="small" onClick={() => { setTplForm({ ...blankTpl }); setEditingTemplateId(null); setView("create-template"); }}><Plus size={14} /> 템플릿 생성</PrimaryBtn> : undefined}
+      title={t('admin.server.pageTitle')}
+      subtitle={tab === "Server Templates" ? t('admin.server.subtitle.templates') : t('admin.server.subtitle.servers')}
+      actions={tab === "Server Templates" ? <PrimaryBtn size="small" onClick={() => { setTplForm({ ...blankTpl }); setEditingTemplateId(null); setView("create-template"); }}><Plus size={14} /> {t('admin.server.template.action.createBtn')}</PrimaryBtn> : undefined}
     >
       <TabBar tabs={["Servers", "Server Templates"]} active={tab} onChange={setTab} />
       {tab === "Servers" && <>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-          전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{servers.length}</span>개
-          {(filterStatus !== "All" || search) && <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {allServers.length}개 중</span>}
+          {t('common.count.total', { count: servers.length })}
+          {(filterStatus !== "All" || search) && <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('common.count.outOf', { total: allServers.length })}</span>}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <div style={{ position: "relative" }}>
             <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-            <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
+            <input type="text" placeholder={t('common.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
               style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }} />
           </div>
           <div style={{ position: "relative" }}>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
               style={{ height: 34, paddingLeft: 10, paddingRight: 26, border: `1px solid ${filterStatus !== "All" ? PRIMARY : GRAY_30}`, borderRadius: 8, fontSize: 12, color: filterStatus !== "All" ? PRIMARY : GRAY_70, fontFamily: "inherit", fontWeight: filterStatus !== "All" ? 600 : 400, backgroundColor: filterStatus !== "All" ? PRIMARY_10 : "white", outline: "none", cursor: "pointer", appearance: "none" as const }}>
-              {[["All", "상태"], ["running", "Running"], ["stopped", "Stopped"], ["creating", "Creating"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {[["All", t('common.status.all')], ["running", "Running"], ["stopped", "Stopped"], ["creating", "Creating"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
             <ChevronDown size={11} color={filterStatus !== "All" ? PRIMARY : GRAY_60} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           </div>
@@ -887,12 +900,12 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
         <Table
           spacerGaps
           headers={[
-            <SortableHeader k="name" label="Server" sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
-            <SortableHeader k="status" label="Status" sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
-            <SortableHeader k="workspace" label="Workspace" sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
-            <SortableHeader k="owner" label="User" sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
-            <SortableHeader k="uptime" label="Uptime" sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
-            <SortableHeader k="createdAt" label="생성 일시" sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
+            <SortableHeader k="name" label={t('admin.server.col.name')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
+            <SortableHeader k="status" label={t('admin.server.col.status')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
+            <SortableHeader k="workspace" label={t('admin.server.col.workspace')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
+            <SortableHeader k="owner" label={t('admin.server.col.user')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
+            <SortableHeader k="uptime" label={t('admin.server.col.uptime')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
+            <SortableHeader k="createdAt" label={t('common.field.createdAt')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
             "Actions",
           ]}
           rows={servers.map(s => {
@@ -934,15 +947,15 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               <span style={{ fontSize: 13, color: GRAY_70, whiteSpace: "nowrap" }}>{s.createdAt}</span>,
               /* 액션 */
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <button type="button" style={{ height: 36, padding: "0 14px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                <button type="button" style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                 {s.status !== "creating" && (
                   <div style={{ position: "relative" }}>
                     {openMenuId === s.name && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                     <button type="button" onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); setOpenMenuId(openMenuId === s.name ? null : s.name); }}
-                      style={{ height: 36, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === s.name ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                      style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === s.name ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                       onMouseEnter={e => { if (openMenuId !== s.name) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                       onMouseLeave={e => { if (openMenuId !== s.name) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                      <span style={{ padding: "0 10px 0 12px" }}>관리</span>
+                      <span style={{ padding: "0 10px 0 12px" }}>{t('common.action.manage')}</span>
                       <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === s.name ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 8px", borderLeft: `1px solid ${openMenuId === s.name ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                         <ChevronDown size={12} color={PRIMARY} style={{ transform: openMenuId === s.name ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                       </span>
@@ -950,15 +963,15 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
                     {openMenuId === s.name && menuAnchor && (
                       <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
                         {s.status === "stopped" && (
-                          <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>시작</button>
+                          <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.start')}</button>
                         )}
                         {isRunning && (
-                          <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>중지</button>
+                          <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.stop')}</button>
                         )}
                         {s.status === "stopped" && (
                           <>
                             <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                            <button type="button" onClick={() => { setOpenMenuId(null); setDeletingAdminServer(s); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                            <button type="button" onClick={() => { setOpenMenuId(null); setDeletingAdminServer(s); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                           </>
                         )}
                       </div>
@@ -977,54 +990,73 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
         <Card style={{ overflow: "hidden" }}>
           <Table
             spacerGaps
-            headers={["Template", "Visibility", "Image", "Rec. vRAM", "Rec. Storage", "Uses", "생성 일시", "Actions"]}
-            rows={templates.map(t => [
+            headers={[
+              <SortableHeader k="name" label="Template" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="visibility" label="Visibility" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="image" label="Image" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="recVram" label="Rec. vRAM" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              "Rec. Storage",
+              <SortableHeader k="uses" label="Uses" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="createdAt" label={t('admin.workspace.column.createdAt')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              "Actions",
+            ]}
+            rows={[...templates].sort((a, b) => {
+              let va: string | number = "", vb: string | number = "";
+              if (tplSortKey === "name")       { va = a.name;      vb = b.name; }
+              else if (tplSortKey === "visibility") { va = a.status;    vb = b.status; }
+              else if (tplSortKey === "image")  { va = a.image;     vb = b.image; }
+              else if (tplSortKey === "recVram") { va = parseInt(a.recVram ?? "0"); vb = parseInt(b.recVram ?? "0"); }
+              else if (tplSortKey === "uses")   { va = a.used;      vb = b.used; }
+              else if (tplSortKey === "createdAt") { va = (a as any).createdAt ?? ""; vb = (b as any).createdAt ?? ""; }
+              if (typeof va === "number" && typeof vb === "number") return tplSortDir === "asc" ? va - vb : vb - va;
+              return tplSortDir === "asc" ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+            }).map(tpl => [
               /* Template */
               <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 280 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: t.status === "Public" ? PRIMARY_10 : GRAY_10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Layers size={13} color={t.status === "Public" ? PRIMARY : GRAY_40} />
+                <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: tpl.status === "Public" ? PRIMARY_10 : GRAY_10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Layers size={13} color={tpl.status === "Public" ? PRIMARY : GRAY_40} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{t.name}</div>
-                  <div style={{ fontSize: 11, color: GRAY_60 }}>{t.desc}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{tpl.name}</div>
+                  <div style={{ fontSize: 11, color: GRAY_60 }}>{tpl.desc}</div>
                 </div>
               </div>,
               /* Visibility */
-              <Badge color={t.status === "Public" ? "primary" : "neutral"}>{t.status === "Public" ? "Public" : "Private"}</Badge>,
+              <Badge color={tpl.status === "Public" ? "primary" : "neutral"}>{tpl.status === "Public" ? "Public" : "Private"}</Badge>,
               /* Image */
-              <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{t.image}</span>,
+              <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{tpl.image}</span>,
               /* Rec. vRAM */
-              <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{t.recVram}</span>,
+              <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{tpl.recVram}</span>,
               /* Storage */
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span style={{ fontSize: 11, color: GRAY_70, whiteSpace: "nowrap" }}>Local <strong style={{ color: GRAY_90 }}>{t.tmp}GB</strong></span>
-                {t.hasLocal && <span style={{ fontSize: 11, color: GRAY_70, whiteSpace: "nowrap" }}>Volume <strong style={{ color: GRAY_90 }}>{t.local}GB</strong></span>}
+                <span style={{ fontSize: 11, color: GRAY_70, whiteSpace: "nowrap" }}>Local <strong style={{ color: GRAY_90 }}>{tpl.tmp}GB</strong></span>
+                {tpl.hasLocal && <span style={{ fontSize: 11, color: GRAY_70, whiteSpace: "nowrap" }}>Volume <strong style={{ color: GRAY_90 }}>{tpl.local}GB</strong></span>}
               </div>,
               /* Uses */
-              <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{t.used.toLocaleString()}</span>,
+              <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{tpl.used.toLocaleString()}</span>,
               /* 생성 일시 */
-              <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{(t as any).createdAt ?? "—"}</span>,
+              <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{(tpl as any).createdAt ?? "—"}</span>,
               /* Actions */
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <button type="button" onClick={() => setSelectedTemplate(t)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                <button type="button" onClick={() => setSelectedTemplate(tpl)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                 <div style={{ position: "relative" }}>
-                  {openMenuId === t.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
-                  <button type="button" onClick={(e) => { if (openMenuId !== t.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === t.id ? null : t.id); }}
-                    style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === t.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
-                    onMouseEnter={e => { if (openMenuId !== t.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
-                    onMouseLeave={e => { if (openMenuId !== t.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                    <span style={{ padding: "0 8px 0 10px" }}>관리</span>
-                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === t.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === t.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
-                      <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === t.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  {openMenuId === tpl.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
+                  <button type="button" onClick={(e) => { if (openMenuId !== tpl.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === tpl.id ? null : tpl.id); }}
+                    style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === tpl.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                    onMouseEnter={e => { if (openMenuId !== tpl.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                    onMouseLeave={e => { if (openMenuId !== tpl.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                    <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === tpl.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === tpl.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                      <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === tpl.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                     </span>
                   </button>
-                  {openMenuId === t.id && menuAnchor && (
+                  {openMenuId === tpl.id && menuAnchor && (
                     <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
-                      <button type="button" onClick={() => { setTplForm({ name: t.name, desc: t.desc, image: t.image, recVram: t.recVram, tmp: t.tmp, hasLocal: t.hasLocal, local: t.local, hasShared: t.hasShared, shared: t.shared, envVars: t.envVars, status: t.status }); setEditingTemplateId(t.id); setView("edit-template"); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>수정</button>
-                      {t.status === "Private" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === t.id ? { ...x, status: "Public" } : x)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>공개</button>}
-                      {t.status === "Public" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === t.id ? { ...x, status: "Private" } : x)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>비공개</button>}
+                      <button type="button" onClick={() => { setTplForm({ name: tpl.name, desc: tpl.desc, image: tpl.image, recVram: tpl.recVram, tmp: tpl.tmp, hasLocal: tpl.hasLocal, local: tpl.local, hasShared: tpl.hasShared, shared: tpl.shared, envVars: tpl.envVars, status: tpl.status }); setEditingTemplateId(tpl.id); setView("edit-template"); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
+                      {tpl.status === "Private" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === tpl.id ? { ...x, status: "Public" } : x)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.server.template.action.publish')}</button>}
+                      {tpl.status === "Public" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === tpl.id ? { ...x, status: "Private" } : x)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.server.template.action.unpublish')}</button>}
                       <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                      <button type="button" onClick={() => { setOpenMenuId(null); setDeletingTemplate(t); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                      <button type="button" onClick={() => { setOpenMenuId(null); setDeletingTemplate(tpl); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                     </div>
                   )}
                 </div>
@@ -1039,20 +1071,20 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
           <div onClick={() => setSelectedTemplate(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedTemplate.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedTemplate(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.server.template.detail.title', { name: selectedTemplate.name })}</span>
+              <button type="button" onClick={() => setSelectedTemplate(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
-                    { label: "템플릿 이름", value: selectedTemplate.name },
-                    { label: "가시성", value: <Badge color={selectedTemplate.status === "Public" ? "primary" : "neutral"}>{selectedTemplate.status}</Badge> },
-                    { label: "기반 이미지", value: selectedTemplate.image },
-                    { label: "권장 vRAM", value: selectedTemplate.recVram },
-                    { label: "생성 일시", value: (selectedTemplate as any).createdAt ?? "—" },
-                    { label: "사용 횟수", value: `${selectedTemplate.used.toLocaleString()}회` },
+                    { label: t('admin.server.template.field.name'), value: selectedTemplate.name },
+                    { label: t('admin.server.template.field.visibility'), value: <Badge color={selectedTemplate.status === "Public" ? "primary" : "neutral"}>{selectedTemplate.status}</Badge> },
+                    { label: t('admin.server.template.field.baseImage'), value: selectedTemplate.image },
+                    { label: t('admin.server.template.field.recVram'), value: selectedTemplate.recVram },
+                    { label: t('admin.server.template.field.createdAt'), value: (selectedTemplate as any).createdAt ?? "—" },
+                    { label: t('admin.server.template.field.usageCount'), value: t('common.unit.times', { count: selectedTemplate.used.toLocaleString() }) },
                   ] as { label: string; value: React.ReactNode }[]).map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontSize: 11, color: GRAY_40, marginBottom: 4 }}>{label}</div>
@@ -1063,26 +1095,26 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               </section>
               {selectedTemplate.desc && (
                 <section>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>설명</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.field.desc')}</div>
                   <div style={{ fontSize: 13, color: GRAY_70, lineHeight: 1.6 }}>{selectedTemplate.desc}</div>
                 </section>
               )}
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>스토리지 설정</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.server.template.field.storageConfig')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, color: GRAY_60 }}>Local 스토리지</span>
+                    <span style={{ fontSize: 13, color: GRAY_60 }}>{t('admin.server.template.storage.local')}</span>
                     <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{selectedTemplate.tmp} GB</span>
                   </div>
                   {selectedTemplate.hasLocal && (
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 13, color: GRAY_60 }}>Volume 스토리지</span>
+                      <span style={{ fontSize: 13, color: GRAY_60 }}>{t('admin.server.template.storage.volume')}</span>
                       <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{selectedTemplate.local} GB</span>
                     </div>
                   )}
                   {selectedTemplate.hasShared && (
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 13, color: GRAY_60 }}>공유 스토리지</span>
+                      <span style={{ fontSize: 13, color: GRAY_60 }}>{t('admin.server.template.storage.shared')}</span>
                       <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{selectedTemplate.shared}</span>
                     </div>
                   )}
@@ -1090,17 +1122,17 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               </section>
               {selectedTemplate.envVars && (
                 <section>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>환경변수</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.server.template.field.envVars')}</div>
                   <pre style={{ fontSize: 12, color: GRAY_70, backgroundColor: GRAY_5, borderRadius: 8, padding: "12px 16px", margin: 0, fontFamily: "'Roboto Mono', monospace", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{selectedTemplate.envVars}</pre>
                 </section>
               )}
               <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                  <button type="button" onClick={() => { setTplForm({ name: selectedTemplate.name, desc: selectedTemplate.desc, image: selectedTemplate.image, recVram: selectedTemplate.recVram, tmp: selectedTemplate.tmp, hasLocal: selectedTemplate.hasLocal, local: selectedTemplate.local, hasShared: selectedTemplate.hasShared, shared: selectedTemplate.shared, envVars: selectedTemplate.envVars, status: selectedTemplate.status }); setEditingTemplateId(selectedTemplate.id); setView("edit-template"); setSelectedTemplate(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>수정</button>
-                  {selectedTemplate.status === "Private" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Public" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Public" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>공개</button>}
-                  {selectedTemplate.status === "Public" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Private" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Private" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>비공개</button>}
-                  <button type="button" onClick={() => setDeletingTemplate(selectedTemplate)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>삭제</button>
+                  <button type="button" onClick={() => { setTplForm({ name: selectedTemplate.name, desc: selectedTemplate.desc, image: selectedTemplate.image, recVram: selectedTemplate.recVram, tmp: selectedTemplate.tmp, hasLocal: selectedTemplate.hasLocal, local: selectedTemplate.local, hasShared: selectedTemplate.hasShared, shared: selectedTemplate.shared, envVars: selectedTemplate.envVars, status: selectedTemplate.status }); setEditingTemplateId(selectedTemplate.id); setView("edit-template"); setSelectedTemplate(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
+                  {selectedTemplate.status === "Private" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Public" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Public" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.server.template.action.publish')}</button>}
+                  {selectedTemplate.status === "Public" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Private" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Private" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.server.template.action.unpublish')}</button>}
+                  <button type="button" onClick={() => setDeletingTemplate(selectedTemplate)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
                 </div>
               </section>
             </div>
@@ -1110,18 +1142,18 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
     </PageContainer>
     {deletingAdminServer && (
       <ConfirmModal
-        title="서버 삭제"
-        message={<>서버 <strong>{deletingAdminServer.name}</strong>을(를) 삭제하시겠습니까?<br /><br />삭제 즉시 서버가 종료되며, 로컬 스토리지(임시)의 모든 데이터가 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</>}
-        confirmLabel="삭제"
+        title={t('admin.server.delete.serverTitle')}
+        message={<>{t('admin.server.delete.serverMessage', { name: deletingAdminServer.name })}</>}
+        confirmLabel={t('common.action.delete')}
         onConfirm={() => setDeletingAdminServer(null)}
         onCancel={() => setDeletingAdminServer(null)}
       />
     )}
     {deletingTemplate && (
       <ConfirmModal
-        title="템플릿 삭제"
-        message={<>서버 템플릿 <strong>{deletingTemplate.name}</strong>을(를) 삭제하시겠습니까?<br /><br />이 템플릿을 사용하는 서버 배포가 영향을 받을 수 있습니다. 이 작업은 되돌릴 수 없습니다.</>}
-        confirmLabel="삭제"
+        title={t('admin.server.delete.templateTitle')}
+        message={<>{t('admin.server.delete.templateMessage', { name: deletingTemplate.name })}</>}
+        confirmLabel={t('common.action.delete')}
         onConfirm={() => { setTemplates(ts => ts.filter(x => x.id !== deletingTemplate.id)); if (selectedTemplate?.id === deletingTemplate.id) setSelectedTemplate(null); setDeletingTemplate(null); }}
         onCancel={() => setDeletingTemplate(null)}
       />
@@ -1145,6 +1177,7 @@ function LabelToggle({ on, labelOn, labelOff, width, onToggle }: { on: boolean; 
 }
 
 function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
+  const { t } = useTranslation();
   const gpuTypes = [
     { name: "H100 SXM5", vram: "80GB", occupied: 24, total: 32, capacity: "High",   on: true,  pub: true  },
     { name: "A100 SXM4", vram: "80GB", occupied: 36, total: 48, capacity: "Medium", on: true,  pub: true  },
@@ -1153,8 +1186,16 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
   ];
 
   const [gpuList, setGpuList] = useState(gpuTypes);
-  const toggleOn  = (name: string) => setGpuList(ts => ts.map(t => t.name === name ? { ...t, on:  !t.on  } : t));
-  const togglePub = (name: string) => setGpuList(ts => ts.map(t => t.name === name ? { ...t, pub: !t.pub } : t));
+  const toggleOn  = (name: string) => setGpuList(ts => ts.map(g => g.name === name ? { ...g, on:  !g.on  } : g));
+  const togglePub = (name: string) => setGpuList(ts => ts.map(g => g.name === name ? { ...g, pub: !g.pub } : g));
+  const [gpuSort, setGpuSort] = useState<{ col: string; dir: "asc" | "desc" }>({ col: "name", dir: "asc" });
+  const cycleGpuSort = (col: string) => setGpuSort(s => s.col === col ? { col, dir: s.dir === "asc" ? "desc" : "asc" } : { col, dir: "asc" });
+  const gpuSortIcon2 = (col: string) => {
+    if (gpuSort.col !== col) return <ChevronUp size={11} color={GRAY_40} style={{ marginLeft: 3, flexShrink: 0 }} />;
+    return gpuSort.dir === "asc"
+      ? <ChevronUp size={11} color={PRIMARY} style={{ marginLeft: 3, flexShrink: 0 }} />
+      : <ChevronDown size={11} color={PRIMARY} style={{ marginLeft: 3, flexShrink: 0 }} />;
+  };
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<{ top: number; right: number } | null>(null);
   const [selectedGpu, setSelectedGpu] = useState<typeof gpuList[0] | null>(null);
@@ -1162,12 +1203,12 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
 
   // spacerGaps-style helpers
   const brd = (light?: boolean) => `1px solid ${light ? "rgb(238,238,238)" : GRAY_10}`;
-  const thBase: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", width: "1px", borderBottom: `1px solid ${GRAY_10}` };
+  const thBase: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", width: "1px", maxWidth: "max-content", borderBottom: `1px solid ${GRAY_10}` };
   const thSp: React.CSSProperties = { borderBottom: `1px solid ${GRAY_10}` };
-  const tdBase: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", width: "1px", whiteSpace: "nowrap" };
+  const tdBase: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", width: "1px", maxWidth: "max-content", whiteSpace: "nowrap" };
   const td = (pos: "first"|"mid"|"last", light?: boolean, extra?: React.CSSProperties): React.CSSProperties => ({
     ...tdBase,
-    padding: pos === "first" ? "14px 0 14px 16px" : pos === "last" ? "14px 20px 14px 0" : "14px 0",
+    padding: pos === "first" ? "14px 0 14px 16px" : pos === "last" ? "14px 16px 14px 0" : "14px 0",
     borderBottom: brd(light), ...extra,
   });
   const sp = (light?: boolean, bg?: string): React.CSSProperties => ({ borderBottom: brd(light), backgroundColor: bg });
@@ -1178,21 +1219,35 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ backgroundColor: GRAY_5 }}>
-            <th style={{ ...thBase, padding: "10px 0 10px 16px" }}>GPU</th>
+            <th style={{ ...thBase, padding: "10px 0 10px 16px", cursor: "pointer" }} onClick={() => cycleGpuSort("name")}>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>GPU{gpuSortIcon2("name")}</span>
+            </th>
             <th style={thSp} />
-            <th style={{ ...thBase, padding: "10px 0" }}>GPU Usage</th>
+            <th style={{ ...thBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleGpuSort("usage")}>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>GPU Usage{gpuSortIcon2("usage")}</span>
+            </th>
             <th style={thSp} />
             <th style={{ ...thBase, padding: "10px 0" }}>Rate</th>
             <th style={thSp} />
-            <th style={{ ...thBase, padding: "10px 0" }}>Visibility</th>
+            <th style={{ ...thBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleGpuSort("visibility")}>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>Visibility{gpuSortIcon2("visibility")}</span>
+            </th>
             <th style={thSp} />
-            <th style={{ ...thBase, padding: "10px 0" }}>Status</th>
+            <th style={{ ...thBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleGpuSort("status")}>
+              <span style={{ display: "inline-flex", alignItems: "center" }}>Status{gpuSortIcon2("status")}</span>
+            </th>
             <th style={thSp} />
-            <th style={{ ...thBase, padding: "10px 20px 10px 0" }}>Actions</th>
+            <th style={{ ...thBase, padding: "10px 16px 10px 0" }}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {gpuList.map(gpu => {
+          {[...gpuList].sort((a, b) => {
+          if (gpuSort.col === "name") return gpuSort.dir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+          if (gpuSort.col === "usage") { const pa = Math.round(a.occupied / a.total * 100); const pb = Math.round(b.occupied / b.total * 100); return gpuSort.dir === "asc" ? pa - pb : pb - pa; }
+          if (gpuSort.col === "visibility") return gpuSort.dir === "asc" ? String(a.pub).localeCompare(String(b.pub)) : String(b.pub).localeCompare(String(a.pub));
+          if (gpuSort.col === "status") return gpuSort.dir === "asc" ? String(a.on).localeCompare(String(b.on)) : String(b.on).localeCompare(String(a.on));
+          return 0;
+        }).map(gpu => {
             const pct = Math.round(gpu.occupied / gpu.total * 100);
             return (
               <tr key={gpu.name}
@@ -1216,7 +1271,7 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                 <td style={{ ...td("mid"), minWidth: 160 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                     <span style={{ fontSize: 12, color: GRAY_70 }}>{gpu.occupied} / {gpu.total} GPU</span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_90 }}>{pct}%</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN }}>{pct}%</span>
                   </div>
                   <div style={{ height: 5, backgroundColor: GRAY_10, borderRadius: 3, overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, borderRadius: 3 }} />
@@ -1231,7 +1286,7 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                       {p ? (
                         <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{p.rate} cr / GB / {p.unit}</span>
                       ) : (
-                        <Badge color="neutral">미설정</Badge>
+                        <Badge color="neutral">{t('admin.gpu.status.unset')}</Badge>
                       )}
                     </td>
                   );
@@ -1250,25 +1305,25 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                 {/* Actions */}
                 <td style={{ ...td("last") }}>
                   <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <button type="button" onClick={() => setSelectedGpu(gpu)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                    <button type="button" onClick={() => setSelectedGpu(gpu)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                     <div style={{ position: "relative" }}>
                       {openMenuId === gpu.name && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                       <button type="button" onClick={(e) => { if (openMenuId !== gpu.name) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === gpu.name ? null : gpu.name); }}
                         style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === gpu.name ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                         onMouseEnter={e => { if (openMenuId !== gpu.name) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                         onMouseLeave={e => { if (openMenuId !== gpu.name) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                        <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                        <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
                         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === gpu.name ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === gpu.name ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                           <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === gpu.name ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                         </span>
                       </button>
                       {openMenuId === gpu.name && menuAnchor && (
                         <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
-                          {!gpu.pub && <button type="button" onClick={() => { togglePub(gpu.name); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>공개</button>}
-                          {gpu.pub && <button type="button" onClick={() => { togglePub(gpu.name); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>비공개</button>}
+                          {!gpu.pub && <button type="button" onClick={() => { togglePub(gpu.name); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.publish')}</button>}
+                          {gpu.pub && <button type="button" onClick={() => { togglePub(gpu.name); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.unpublish')}</button>}
                           <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                          {gpu.on && <button type="button" onClick={() => { setOpenMenuId(null); setDeactivatingGpu(gpu); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>비활성화</button>}
-                          {!gpu.on && <button type="button" onClick={() => { toggleOn(gpu.name); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>활성화</button>}
+                          {gpu.on && <button type="button" onClick={() => { setOpenMenuId(null); setDeactivatingGpu(gpu); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.deactivate')}</button>}
+                          {!gpu.on && <button type="button" onClick={() => { toggleOn(gpu.name); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.activate')}</button>}
                         </div>
                       )}
                     </div>
@@ -1285,24 +1340,24 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
           <div onClick={() => setSelectedGpu(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedGpu.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedGpu(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.gpu.detail.drawerTitle', { name: selectedGpu.name })}</span>
+              <button type="button" onClick={() => setSelectedGpu(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.gpu.detail.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {((): { label: string; value: React.ReactNode }[] => {
                     const p = prices.find(p => p.name === selectedGpu.name);
                     return [
-                      { label: "GPU 모델", value: selectedGpu.name },
-                      { label: "VRAM", value: selectedGpu.vram },
-                      { label: "총 수량", value: `${selectedGpu.total}대` },
-                      { label: "점유 중", value: `${selectedGpu.occupied}대` },
-                      { label: "가시성", value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: selectedGpu.pub ? PRIMARY_10 : GRAY_10, color: selectedGpu.pub ? PRIMARY : GRAY_60 }}>{selectedGpu.pub ? "Public" : "Private"}</span> },
-                      { label: "상태", value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: selectedGpu.on ? "rgba(34,197,94,0.1)" : GRAY_10, color: selectedGpu.on ? GREEN : GRAY_60 }}>{selectedGpu.on ? "활성" : "비활성"}</span> },
-                      { label: "단가", value: p ? `${p.rate} cr / GPU / ${p.unit}` : "미설정" },
-                      { label: "용량", value: selectedGpu.capacity },
+                      { label: t('admin.gpu.detail.model'), value: selectedGpu.name },
+                      { label: t('admin.gpu.detail.vram'), value: selectedGpu.vram },
+                      { label: t('admin.gpu.detail.total'), value: `${selectedGpu.total}대` },
+                      { label: t('admin.gpu.detail.occupied'), value: `${selectedGpu.occupied}대` },
+                      { label: t('admin.gpu.detail.visibility'), value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: selectedGpu.pub ? PRIMARY_10 : GRAY_10, color: selectedGpu.pub ? PRIMARY : GRAY_60 }}>{selectedGpu.pub ? "Public" : "Private"}</span> },
+                      { label: t('admin.gpu.detail.status'), value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: selectedGpu.on ? "rgba(34,197,94,0.1)" : GRAY_10, color: selectedGpu.on ? GREEN : GRAY_60 }}>{selectedGpu.on ? t('admin.gpu.statusLabel.active') : t('admin.gpu.statusLabel.inactive')}</span> },
+                      { label: t('admin.gpu.detail.price'), value: p ? `${p.rate} cr / GPU / ${p.unit}` : t('admin.gpu.status.unset') },
+                      { label: t('admin.gpu.detail.capacity'), value: selectedGpu.capacity },
                     ];
                   })().map(({ label, value }) => (
                     <div key={label}>
@@ -1313,7 +1368,7 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                 </div>
               </section>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>GPU 사용 현황</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.gpu.detail.usageTitle')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 20px" }}>
                   {(() => {
                     const pct = Math.round(selectedGpu.occupied / selectedGpu.total * 100);
@@ -1328,8 +1383,8 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                           <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pctColor, borderRadius: 4 }} />
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-                          <span style={{ fontSize: 11, color: GRAY_60 }}>점유: {selectedGpu.occupied}대</span>
-                          <span style={{ fontSize: 11, color: GRAY_60 }}>여유: {selectedGpu.total - selectedGpu.occupied}대</span>
+                          <span style={{ fontSize: 11, color: GRAY_60 }}>{t('admin.gpu.detail.occupiedLabel')}: {selectedGpu.occupied}대</span>
+                          <span style={{ fontSize: 11, color: GRAY_60 }}>{t('admin.gpu.detail.freeLabel')}: {selectedGpu.total - selectedGpu.occupied}대</span>
                         </div>
                       </>
                     );
@@ -1337,12 +1392,12 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                 </div>
               </section>
               <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.gpu.detail.manageSection')}</div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                  {!selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: true } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>공개</button>}
-                  {selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: false } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>비공개</button>}
-                  {selectedGpu.on && <button type="button" onClick={() => setDeactivatingGpu(selectedGpu)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>비활성화</button>}
-                  {!selectedGpu.on && <button type="button" onClick={() => { toggleOn(selectedGpu.name); setSelectedGpu(g => g ? { ...g, on: true } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>활성화</button>}
+                  {!selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: true } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.gpu.action.publish')}</button>}
+                  {selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: false } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.gpu.action.unpublish')}</button>}
+                  {selectedGpu.on && <button type="button" onClick={() => setDeactivatingGpu(selectedGpu)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.gpu.action.deactivate')}</button>}
+                  {!selectedGpu.on && <button type="button" onClick={() => { toggleOn(selectedGpu.name); setSelectedGpu(g => g ? { ...g, on: true } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.gpu.action.activate')}</button>}
                 </div>
               </section>
             </div>
@@ -1351,9 +1406,9 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
       )}
     {deactivatingGpu && (
       <ConfirmModal
-        title="GPU Type 비활성화"
-        message={<>GPU Type <strong>{deactivatingGpu.name}</strong>을(를) 비활성화하시겠습니까?<br /><br />비활성화 즉시 신규 서버 생성에서 해당 GPU가 표시되지 않습니다. 기존 운영 중인 서버에는 영향을 주지 않습니다. 비활성화는 언제든 관리자가 되돌릴 수 있습니다.</>}
-        confirmLabel="비활성화"
+        title={t('admin.gpu.deactivate.title')}
+        message={<>{t('admin.gpu.deactivate.message', { name: deactivatingGpu.name })}</>}
+        confirmLabel={t('admin.gpu.action.deactivate')}
         onConfirm={() => { toggleOn(deactivatingGpu.name); if (selectedGpu?.name === deactivatingGpu.name) setSelectedGpu(g => g ? { ...g, on: false } : null); setDeactivatingGpu(null); }}
         onCancel={() => setDeactivatingGpu(null)}
       />
@@ -1399,6 +1454,7 @@ function MdEditor({ value, onChange, onFocus, onBlur }: {
   onFocus?: React.FocusEventHandler<HTMLTextAreaElement>;
   onBlur?: React.FocusEventHandler<HTMLTextAreaElement>;
 }) {
+  const { t } = useTranslation();
   const ref = React.useRef<HTMLTextAreaElement>(null);
 
   const wrap = (before: string, after = before) => {
@@ -1428,20 +1484,20 @@ function MdEditor({ value, onChange, onFocus, onBlur }: {
   };
 
   const tools: ({ label: string; title: string; action: () => void; mono?: boolean; bold?: boolean; italic?: boolean } | { sep: true })[] = [
-    { label: "H1", title: "제목 1", action: () => linePrefix("# ") },
-    { label: "H2", title: "제목 2", action: () => linePrefix("## ") },
+    { label: "H1", title: t('admin.image.editor.heading1'), action: () => linePrefix("# ") },
+    { label: "H2", title: t('admin.image.editor.heading2'), action: () => linePrefix("## ") },
     { sep: true },
-    { label: "B",  title: "굵게",   action: () => wrap("**"), bold: true },
-    { label: "I",  title: "기울임", action: () => wrap("*"),  italic: true },
+    { label: "B",  title: t('admin.image.editor.bold'),   action: () => wrap("**"), bold: true },
+    { label: "I",  title: t('admin.image.editor.italic'), action: () => wrap("*"),  italic: true },
     { sep: true },
-    { label: "`",   title: "인라인 코드", action: () => wrap("`"),           mono: true },
-    { label: "</>", title: "코드 블록",   action: () => wrap("```\n", "\n```"), mono: true },
+    { label: "`",   title: t('admin.image.editor.inlineCode'), action: () => wrap("`"),           mono: true },
+    { label: "</>", title: t('admin.image.editor.codeBlock'),  action: () => wrap("```\n", "\n```"), mono: true },
     { sep: true },
-    { label: "•",  title: "목록",       action: () => linePrefix("- ") },
-    { label: "1.", title: "번호 목록",   action: () => linePrefix("1. ") },
-    { label: ">",  title: "인용",       action: () => linePrefix("> ") },
+    { label: "•",  title: t('admin.image.editor.list'),       action: () => linePrefix("- ") },
+    { label: "1.", title: t('admin.image.editor.orderedList'), action: () => linePrefix("1. ") },
+    { label: ">",  title: t('admin.image.editor.quote'),      action: () => linePrefix("> ") },
     { sep: true },
-    { label: "─",  title: "구분선",     action: () => insertAt("\n---\n") },
+    { label: "─",  title: t('admin.image.editor.divider'),    action: () => insertAt("\n---\n") },
   ];
 
   return (
@@ -1468,7 +1524,7 @@ function MdEditor({ value, onChange, onFocus, onBlur }: {
         style={{ width: "100%", minHeight: 220, padding: "12px 14px", border: "none", outline: "none",
           resize: "vertical" as const, fontSize: 13, fontFamily: "'Roboto Mono', monospace",
           color: GRAY_90, backgroundColor: "white", boxSizing: "border-box" as const, lineHeight: 1.7, display: "block" }}
-        placeholder={"## 이미지 설명\n\n주요 특징을 마크다운으로 작성하세요.\n\n- 특징 1\n- 특징 2"}
+        placeholder={t('admin.image.form.descPlaceholder')}
         value={value}
         onChange={e => onChange(e.target.value)}
         onFocus={onFocus}
@@ -1496,6 +1552,7 @@ function ImgUploadBox({ file, dragOver, onDragOver, onDragLeave, onDrop, onClick
   onDrop: (e: React.DragEvent) => void; onClick: () => void;
   hint: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       onDragOver={e => { e.preventDefault(); onDragOver(); }}
@@ -1512,12 +1569,12 @@ function ImgUploadBox({ file, dragOver, onDragOver, onDragLeave, onDrop, onClick
         <>
           <CheckCircle size={26} color={GREEN} style={{ marginBottom: 7 }} />
           <div style={{ fontSize: 13, fontWeight: 600, color: GREEN, marginBottom: 3 }}>{file}</div>
-          <div style={{ fontSize: 12, color: GRAY_60 }}>다시 클릭하면 변경할 수 있습니다.</div>
+          <div style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.image.form.fileChangeHint')}</div>
         </>
       ) : (
         <>
           <HardDriveUpload size={26} color={GRAY_40} style={{ marginBottom: 7 }} />
-          <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_70, marginBottom: 3 }}>파일을 여기에 드래그하거나 클릭하여 업로드</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_70, marginBottom: 3 }}>{t('admin.image.form.dragOrClick')}</div>
           <div style={{ fontSize: 12, color: GRAY_60 }}>{hint}</div>
         </>
       )}
@@ -1527,6 +1584,7 @@ function ImgUploadBox({ file, dragOver, onDragOver, onDragLeave, onDrop, onClick
 
 // ─── Image Management ─────────────────────────────────────────────────────────
 export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: string }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState(initialTab);
   const [view, setView] = useState<"list" | "create-image" | "edit-image">("list");
   const [editingImageId, setEditingImageId] = useState<string | null>(null);
@@ -1572,13 +1630,13 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
   const blankTierForm = { name: "", desc: "", color: "#635ADC" };
   const [tierDrawer, setTierDrawer] = useState<{ editId: string | null; form: { name: string; desc: string; color: string } } | null>(null);
   const openTierCreate = () => setTierDrawer({ editId: null, form: { ...blankTierForm } });
-  const openTierEdit = (t: typeof tiers[0]) => setTierDrawer({ editId: t.id, form: { name: t.name, desc: t.desc, color: t.color } });
+  const openTierEdit = (tier: typeof tiers[0]) => setTierDrawer({ editId: tier.id, form: { name: tier.name, desc: tier.desc, color: tier.color } });
   const closeTierDrawer = () => setTierDrawer(null);
   const saveTier = () => {
     if (!tierDrawer) return;
     const { editId, form } = tierDrawer;
     if (editId) {
-      setTiers(ts => ts.map(t => t.id === editId ? { ...t, ...form } : t));
+      setTiers(ts => ts.map(tr => tr.id === editId ? { ...tr, ...form } : tr));
     } else {
       setTiers(ts => [...ts, { id: `tier-${Date.now()}`, ...form, imgCnt: 0 }]);
     }
@@ -1665,6 +1723,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
       else if (imgSort.col === "used") { va = a.used; vb = b.used; }
       else if (imgSort.col === "access") { va = (a.access?.[0] ?? ""); vb = (b.access?.[0] ?? ""); }
       else if (imgSort.col === "status") { va = a.status; vb = b.status; }
+      else if (imgSort.col === "template") { va = (imgTemplates.find(t => t.image === a.name)?.name ?? ""); vb = (imgTemplates.find(t => t.image === b.name)?.name ?? ""); }
       if (typeof va === "number") return imgSort.dir === "asc" ? va - (vb as number) : (vb as number) - va;
       return imgSort.dir === "asc" ? va.localeCompare(vb as string) : (vb as string).localeCompare(va);
     });
@@ -1673,12 +1732,12 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
 
   // ── Image table spacerGaps helpers ──
   const imgBrd = (light?: boolean) => `1px solid ${light ? "rgb(238,238,238)" : GRAY_10}`;
-  const imgThBase: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", width: "1px", borderBottom: `1px solid ${GRAY_10}` };
+  const imgThBase: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", width: "1px", maxWidth: "max-content", borderBottom: `1px solid ${GRAY_10}` };
   const imgThSp: React.CSSProperties = { borderBottom: `1px solid ${GRAY_10}` };
-  const imgTdBase: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", width: "1px", whiteSpace: "nowrap" };
+  const imgTdBase: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", width: "1px", maxWidth: "max-content", whiteSpace: "nowrap" };
   const imgTd = (pos: "first" | "mid" | "last", light?: boolean, extra?: React.CSSProperties): React.CSSProperties => ({
     ...imgTdBase,
-    padding: pos === "first" ? "12px 0 12px 16px" : pos === "last" ? "12px 20px 12px 0" : "12px 0",
+    padding: pos === "first" ? "12px 0 12px 16px" : pos === "last" ? "12px 16px 12px 0" : "12px 0",
     borderBottom: imgBrd(light), ...extra,
   });
   const imgSp = (light?: boolean, bg?: string): React.CSSProperties => ({ borderBottom: imgBrd(light), backgroundColor: bg });
@@ -1722,15 +1781,15 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
     return (
       <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
         <div style={{ maxWidth: 720 }}>
-          <button type="button" onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← Image Management</button>
+          <button type="button" onClick={() => setView("list")} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← {t('admin.image.pageTitle')}</button>
           <div style={{ marginBottom: 24 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0 }}>{isEdit ? "이미지 수정" : "이미지 등록"}</h1>
-            <div style={{ fontSize: 13, color: GRAY_60, marginTop: 4 }}>서버 이미지 메타데이터와 접속·환경 정보를 입력하세요.</div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0 }}>{isEdit ? t('admin.image.form.editTitle') : t('admin.image.form.createTitle')}</h1>
+            <div style={{ fontSize: 13, color: GRAY_60, marginTop: 4 }}>{t('admin.image.form.subtitle')}</div>
           </div>
 
           {/* 1. 이미지 파일 (등록 시에만) */}
           {!isEdit && (
-            <ImgSecCard label="이미지 파일">
+            <ImgSecCard label={t('admin.image.form.fileSection')}>
               <div style={{ paddingBottom: 16 }}>
                 <ImgUploadBox
                   file={imgUploadFile} dragOver={imgDragOver}
@@ -1739,22 +1798,22 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                   onDrop={e => { const f = e.dataTransfer.files[0]; if (f) { setImgUploadFile(f.name); setImgForm(fm => ({ ...fm, name: fm.name || f.name.replace(/\.(tar\.gz|tar)$/, "") })); } }}
                   onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".tar,.tar.gz"; inp.onchange = (ev: any) => { const f = ev.target.files?.[0]; if (f) { setImgUploadFile(f.name); setImgForm(fm => ({ ...fm, name: fm.name || f.name.replace(/\.(tar\.gz|tar)$/, "") })); } }; inp.click(); }}
                   accept=".tar,.tar.gz"
-                  hint=".tar, .tar.gz 포맷 지원"
+                  hint={t('admin.image.form.fileHint')}
                 />
               </div>
             </ImgSecCard>
           )}
 
           {/* 2. 기본 정보: 이미지명 → 설명 → 썸네일 */}
-          <ImgSecCard label="기본 정보">
-            <FormRow label="이미지명" required>
-              <input style={fld} placeholder="예: PyTorch 2.1 + CUDA 12.1" value={imgForm.name} onChange={e => setImgForm(f => ({ ...f, name: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
-              {hint("사용자에게 노출되는 이름. 버전과 주요 특징을 포함하세요.")}
+          <ImgSecCard label={t('admin.image.form.basicSection')}>
+            <FormRow label={t('admin.image.field.name')} required>
+              <input style={fld} placeholder={t('admin.image.form.namePlaceholder')} value={imgForm.name} onChange={e => setImgForm(f => ({ ...f, name: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
+              {hint(t('admin.image.form.nameHint'))}
             </FormRow>
-            <FormRow label="설명">
+            <FormRow label={t('admin.image.field.desc')}>
               <MdEditor value={imgForm.desc} onChange={v => setImgForm(f => ({ ...f, desc: v }))} onFocus={onFoc} onBlur={onBlr} />
             </FormRow>
-            <FormRow label="썸네일 이미지">
+            <FormRow label={t('admin.image.field.thumbnail')}>
               <ImgUploadBox
                 file={imgThumbFile} dragOver={imgThumbDragOver}
                 onDragOver={() => setImgThumbDragOver(true)}
@@ -1762,52 +1821,52 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 onDrop={e => { const f = e.dataTransfer.files[0]; if (f) setImgThumbFile(f.name); }}
                 onClick={() => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; inp.onchange = (ev: any) => { const f = ev.target.files?.[0]; if (f) setImgThumbFile(f.name); }; inp.click(); }}
                 accept="image/*"
-                hint="PNG, JPG, SVG 지원 · 권장 크기 128×128px"
+                hint={t('admin.image.form.thumbnailHint')}
               />
             </FormRow>
           </ImgSecCard>
 
           {/* 3. 분류: Tier → 카테고리 → 태그 */}
-          <ImgSecCard label="분류">
-            <FormRow label="Tier">
+          <ImgSecCard label={t('admin.image.form.classSection')}>
+            <FormRow label={t('admin.image.field.tier')}>
               <div style={{ display: "flex", gap: 8 }}>
-                {tiers.map(t => (
-                  <button type="button" key={t.id} onClick={() => setImgForm(f => ({ ...f, tier: t.name }))} style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `2px solid ${imgForm.tier === t.name ? t.color : GRAY_30}`, backgroundColor: imgForm.tier === t.name ? `${t.color}15` : "white", cursor: "pointer" }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: imgForm.tier === t.name ? t.color : GRAY_70 }}>{t.name}</div>
+                {tiers.map(tier => (
+                  <button type="button" key={tier.id} onClick={() => setImgForm(f => ({ ...f, tier: tier.name }))} style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: `2px solid ${imgForm.tier === tier.name ? tier.color : GRAY_30}`, backgroundColor: imgForm.tier === tier.name ? `${tier.color}15` : "white", cursor: "pointer" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: imgForm.tier === tier.name ? tier.color : GRAY_70 }}>{tier.name}</div>
                   </button>
                 ))}
               </div>
             </FormRow>
-            <FormRow label="카테고리">
+            <FormRow label={t('admin.image.field.category')}>
               <select style={{ ...fld, cursor: "pointer" }} value={imgForm.category} onChange={e => setImgForm(f => ({ ...f, category: e.target.value }))} onFocus={onFoc} onBlur={onBlr}>
                 {catOptions.map(c => <option key={c}>{c}</option>)}
               </select>
             </FormRow>
-            <FormRow label="태그">
+            <FormRow label={t('admin.image.field.tags')}>
               <input style={fld} placeholder="PyTorch, CUDA, JupyterLab" value={imgForm.tags} onChange={e => setImgForm(f => ({ ...f, tags: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
-              {hint("쉼표(,)로 구분. 필터·검색에 활용됩니다.")}
+              {hint(t('admin.image.form.tagsHint'))}
             </FormRow>
           </ImgSecCard>
 
           {/* 4. 접속 및 런타임: 접속 방식 → 포트 → 환경변수 */}
-          <ImgSecCard label="접속 및 런타임">
-            <FormRow label="접속 방식">
+          <ImgSecCard label={t('admin.image.form.runtimeSection')}>
+            <FormRow label={t('admin.image.form.accessMethod')}>
               <div style={{ display: "flex", gap: 8, alignItems: "center", height: 40 }}>
                 <span style={{ padding: "7px 14px", borderRadius: 8, border: `2px solid ${PRIMARY}`, backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600 }}>JupyterLab</span>
               </div>
             </FormRow>
-            <FormRow label="포트 정보">
+            <FormRow label={t('admin.image.form.portInfo')}>
               <input style={fld} placeholder="8888:JupyterLab" value={imgForm.ports} onChange={e => setImgForm(f => ({ ...f, ports: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
-              {hint("포트번호:서비스명 형식으로 쉼표 구분.")}
+              {hint(t('admin.image.form.portHint'))}
             </FormRow>
-            <FormRow label="환경변수 사용자 입력용">
+            <FormRow label={t('admin.image.form.envVarLabel')}>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {envVars.map((ev, i) => (
                   <div key={i} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <input placeholder="KEY" value={ev.key} onChange={e => setEnvVars(vs => vs.map((v, j) => j === i ? { ...v, key: e.target.value } : v))}
                       style={{ ...fld, flex: 1 }} onFocus={onFoc} onBlur={onBlr} />
                     <span style={{ fontSize: 12, color: GRAY_60, flexShrink: 0 }}>=</span>
-                    <input placeholder="value (선택)" value={ev.value} onChange={e => setEnvVars(vs => vs.map((v, j) => j === i ? { ...v, value: e.target.value } : v))}
+                    <input placeholder={t('admin.image.form.envValuePlaceholder')} value={ev.value} onChange={e => setEnvVars(vs => vs.map((v, j) => j === i ? { ...v, value: e.target.value } : v))}
                       style={{ ...fld, flex: 1 }} onFocus={onFoc} onBlur={onBlr} />
                     <button type="button" onClick={() => setEnvVars(vs => vs.length > 1 ? vs.filter((_, j) => j !== i) : vs)}
                       disabled={envVars.length === 1}
@@ -1818,33 +1877,33 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 ))}
                 <div>
                   <PrimaryBtn size="small" variant="secondary" onClick={() => setEnvVars(vs => [...vs, { key: "", value: "" }])}>
-                    <Plus size={13} /> 추가
+                    <Plus size={13} /> {t('common.action.add')}
                   </PrimaryBtn>
                 </div>
               </div>
-              {hint("서버 생성 시 사용자에게 노출될 환경변수 키와 기본값.")}
+              {hint(t('admin.image.form.envVarHint'))}
             </FormRow>
           </ImgSecCard>
 
           {/* 5. 주요 패키지 */}
-          <ImgSecCard label="주요 패키지">
-            <FormRow label="패키지 목록 (줄바꿈으로 구분)">
+          <ImgSecCard label={t('admin.image.form.packagesSection')}>
+            <FormRow label={t('admin.image.form.packageListLabel')}>
               <textarea style={{ ...txa, minHeight: 100, fontFamily: "'Roboto Mono', monospace", fontSize: 12 }} placeholder={"torch==2.1.0\ntorchvision==0.16\ncuda==12.1"} value={imgForm.packages} onChange={e => setImgForm(f => ({ ...f, packages: e.target.value }))} onFocus={onFoc} onBlur={onBlr} />
             </FormRow>
           </ImgSecCard>
 
           {/* 6. 공개 여부 */}
-          <ImgSecCard label="공개 여부">
-            <FormRow label="공개 여부">
+          <ImgSecCard label={t('admin.image.field.visibility')}>
+            <FormRow label={t('admin.image.field.visibility')}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, height: 40 }}>
                 <Toggle on={imgForm.status === "Public"} onToggle={() => setImgForm(f => ({ ...f, status: f.status === "Public" ? "Private" : "Public" }))} />
-                <span style={{ fontSize: 13, color: imgForm.status === "Public" ? GREEN : GRAY_60, fontWeight: 500 }}>{imgForm.status === "Public" ? "Public (사용자 콘솔 노출)" : "Private (관리자만 접근)"}</span>
+                <span style={{ fontSize: 13, color: imgForm.status === "Public" ? GREEN : GRAY_60, fontWeight: 500 }}>{imgForm.status === "Public" ? t('admin.image.visibility.public') : t('admin.image.visibility.private')}</span>
               </div>
             </FormRow>
           </ImgSecCard>
 
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingBottom: 28, paddingTop: 8 }}>
-            <PrimaryBtn variant="secondary" onClick={() => setView("list")}>취소</PrimaryBtn>
+            <PrimaryBtn variant="secondary" onClick={() => setView("list")}>{t('common.action.cancel')}</PrimaryBtn>
             <PrimaryBtn onClick={() => {
               const envKeys = envVars.filter(ev => ev.key.trim()).map(ev => ev.key.trim()).join(", ");
               const saved = { ...imgForm, envKeys };
@@ -1854,7 +1913,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 setImages(imgs => [...imgs, { id: `i${Date.now()}`, ...saved, used: 0 }]);
               }
               setView("list");
-            }}>{isEdit ? "변경 저장" : "이미지 등록"}</PrimaryBtn>
+            }}>{isEdit ? t('admin.image.form.saveBtn') : t('admin.image.form.registerBtn')}</PrimaryBtn>
           </div>
         </div>
       </div>
@@ -1867,12 +1926,12 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
   return (
     <>
     <PageContainer
-      title="Image Management"
-      subtitle="서버 이미지·카테고리·티어를 등록·수정·관리합니다."
+      title={t('admin.image.pageTitle')}
+      subtitle={t('admin.image.subtitle')}
       actions={
-        tab === "Image"      ? <PrimaryBtn size="small" onClick={() => openCreate()}><Plus size={14} /> 이미지 등록</PrimaryBtn>
-        : tab === "Category" ? <PrimaryBtn size="small" onClick={openCatCreate}><Plus size={14} /> Category 생성</PrimaryBtn>
-        : tab === "Tier"     ? <PrimaryBtn size="small" onClick={openTierCreate}><Plus size={14} /> Tier 생성</PrimaryBtn>
+        tab === "Image"      ? <PrimaryBtn size="small" onClick={() => openCreate()}><Plus size={14} /> {t('admin.image.registerBtn')}</PrimaryBtn>
+        : tab === "Category" ? <PrimaryBtn size="small" onClick={openCatCreate}><Plus size={14} /> {t('admin.image.category.createBtn')}</PrimaryBtn>
+        : tab === "Tier"     ? <PrimaryBtn size="small" onClick={openTierCreate}><Plus size={14} /> {t('admin.image.tier.createBtn')}</PrimaryBtn>
         : null
       }
     >
@@ -1888,20 +1947,20 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                   <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-                    전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{filteredImgs.length}</span>개
-                    {hasFilter && <span style={{ color: GRAY_60, fontWeight: 400 }}> / {images.length}개</span>}
+                    {t('common.count.total', { count: filteredImgs.length })}
+                    {hasFilter && <span style={{ color: GRAY_60, fontWeight: 400 }}>{t('common.count.outOf', { total: images.length })}</span>}
                   </div>
                   {/* Image Repository 동기화 상태 — §3 인라인 상태 메시지 */}
                   {syncInfo.status === "failed"
                     ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, backgroundColor: RED_10 }}>
                         <AlertTriangle size={12} color={RED} style={{ flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: RED }}>Image Repository 동기화 실패 — 발생 시각: {syncInfo.failedAt}</span>
+                        <span style={{ fontSize: 12, color: RED }}>{t('admin.image.sync.failed', { time: syncInfo.failedAt })}</span>
                       </div>
                     ) : (
                       <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 10, backgroundColor: YELLOW_10 }}>
                         <Clock size={10} color={YELLOW} style={{ flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, color: YELLOW }}>마지막 동기화 일시: {syncInfo.lastSyncAt}</span>
+                        <span style={{ fontSize: 11, color: YELLOW }}>{t('admin.image.sync.lastSynced', { date: syncInfo.lastSyncAt })}</span>
                       </div>
                     )
                   }
@@ -1909,7 +1968,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <div style={{ position: "relative" }}>
                     <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                    <input value={imgSearch} onChange={e => setImgSearch(e.target.value)} placeholder="검색어를 입력하세요."
+                    <input value={imgSearch} onChange={e => setImgSearch(e.target.value)} placeholder={t('common.placeholder.search')}
                       style={{ height: 32, paddingLeft: 30, paddingRight: 12, borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", width: 180, fontFamily: "inherit", color: GRAY_90 }}
                       onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
                       onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }}
@@ -1948,13 +2007,15 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                     <span style={{ display: "inline-flex", alignItems: "center" }}>Category{sortIcon("category")}</span>
                   </th>
                   <th style={imgThSp} />
-                  <th style={{ ...imgThBase, padding: "10px 0" }}>Template</th>
+                  <th style={{ ...imgThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleSort("template")}>
+                    <span style={{ display: "inline-flex", alignItems: "center" }}>Template{sortIcon("template")}</span>
+                  </th>
                   <th style={imgThSp} />
                   <th style={{ ...imgThBase, padding: "10px 0", cursor: "pointer" }} onClick={() => cycleSort("used")}>
                     <span style={{ display: "inline-flex", alignItems: "center" }}>Used{sortIcon("used")}</span>
                   </th>
                   <th style={imgThSp} />
-                  <th style={{ ...imgThBase, padding: "10px 20px 10px 0" }}>Actions</th>
+                  <th style={{ ...imgThBase, padding: "10px 16px 10px 0" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -2008,25 +2069,25 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                         <td style={imgSp(isLast)} />
                         <td style={imgTd("last", isLast)}>
                           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                            <button type="button" onClick={() => setSelectedImage(img)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                            <button type="button" onClick={() => setSelectedImage(img)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                             <div style={{ position: "relative" }}>
                               {openMenuId === img.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                               <button type="button" onClick={(e) => { if (openMenuId !== img.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === img.id ? null : img.id); }}
                                 style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === img.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                                 onMouseEnter={e => { if (openMenuId !== img.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                                 onMouseLeave={e => { if (openMenuId !== img.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                                <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                                <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
                                 <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === img.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === img.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                                   <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === img.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                                 </span>
                               </button>
                               {openMenuId === img.id && menuAnchor && (
                                 <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
-                                  <button type="button" onClick={() => { setImgForm({ name: img.name, path: img.path, desc: img.desc, tier: img.tier, category: img.category, status: img.status, thumb: img.thumb, recGpu: img.recGpu, recTmp: img.recTmp, recLocal: img.recLocal, tags: img.tags, packages: img.packages, access: img.access || [], ports: img.ports || "", envKeys: img.envKeys || "" }); const parsed = (img.envKeys || "").split(",").map(k => ({ key: k.trim(), value: "" })).filter(ev => ev.key); setEnvVars(parsed.length > 0 ? parsed : [{ key: "", value: "" }]); setEditingImageId(img.id); setView("edit-image"); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>수정</button>
-                                  {img.status === "Private" && <button type="button" onClick={() => { toggleStatus(img.id); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>공개</button>}
-                                  {img.status === "Public" && <button type="button" onClick={() => { toggleStatus(img.id); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>비공개</button>}
+                                  <button type="button" onClick={() => { setImgForm({ name: img.name, path: img.path, desc: img.desc, tier: img.tier, category: img.category, status: img.status, thumb: img.thumb, recGpu: img.recGpu, recTmp: img.recTmp, recLocal: img.recLocal, tags: img.tags, packages: img.packages, access: img.access || [], ports: img.ports || "", envKeys: img.envKeys || "" }); const parsed = (img.envKeys || "").split(",").map(k => ({ key: k.trim(), value: "" })).filter(ev => ev.key); setEnvVars(parsed.length > 0 ? parsed : [{ key: "", value: "" }]); setEditingImageId(img.id); setView("edit-image"); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
+                                  {img.status === "Private" && <button type="button" onClick={() => { toggleStatus(img.id); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.image.action.publish')}</button>}
+                                  {img.status === "Public" && <button type="button" onClick={() => { toggleStatus(img.id); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.image.action.unpublish')}</button>}
                                   <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                                  <button type="button" onClick={() => { setOpenMenuId(null); setDeletingImage(img); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                                  <button type="button" onClick={() => { setOpenMenuId(null); setDeletingImage(img); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                                 </div>
                               )}
                             </div>
@@ -2047,7 +2108,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
         <>
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-              전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{categories.length}</span>개
+              {t('common.count.total', { count: categories.length })}
             </div>
           </div>
           <Card style={{ overflow: "hidden" }}>
@@ -2057,25 +2118,25 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
               rows={categories.map(cat => [
                 <span style={{ fontSize: 12, fontWeight: 600, color: cat.color, backgroundColor: `${cat.color}18`, padding: "4px 12px", borderRadius: 99, whiteSpace: "nowrap" }}>{cat.name}</span>,
                 <span style={{ fontSize: 13, color: GRAY_70, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minWidth: 280 }}>{cat.desc}</span>,
-                <span style={{ fontSize: 13, color: GRAY_90 }}>{cat.imgCnt}개</span>,
+                <span style={{ fontSize: 13, color: GRAY_90 }}>{t('common.unit.count', { count: images.filter(img => img.category === cat.name).length })}</span>,
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button type="button" onClick={() => setSelectedCategory(cat)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                  <button type="button" onClick={() => setSelectedCategory(cat)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                   <div style={{ position: "relative" }}>
                     {openMenuId === cat.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                     <button type="button" onClick={(e) => { if (openMenuId !== cat.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === cat.id ? null : cat.id); }}
                       style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === cat.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                       onMouseEnter={e => { if (openMenuId !== cat.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                       onMouseLeave={e => { if (openMenuId !== cat.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                      <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                      <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
                       <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === cat.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === cat.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                         <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === cat.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                       </span>
                     </button>
                     {openMenuId === cat.id && menuAnchor && (
                       <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 120, padding: "4px 0" }}>
-                        <button type="button" onClick={() => { openCatEdit(cat); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>수정</button>
+                        <button type="button" onClick={() => { openCatEdit(cat); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
                         <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                        <button type="button" onClick={() => { setOpenMenuId(null); setDeletingCategory(cat); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                        <button type="button" onClick={() => { setOpenMenuId(null); setDeletingCategory(cat); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                       </div>
                     )}
                   </div>
@@ -2091,7 +2152,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
               <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 420, backgroundColor: "white", boxShadow: "-4px 0 32px rgba(0,0,0,0.12)", zIndex: 300, display: "flex", flexDirection: "column" }}>
                 <div style={{ padding: "20px 24px 18px", borderBottom: `1px solid ${GRAY_10}` }}>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{catDrawer.editId ? "Category 수정" : "Category 생성"}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{catDrawer.editId ? t('admin.image.category.editTitle') : t('admin.image.category.createTitle')}</div>
                     <button type="button" onClick={closeCatDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
@@ -2101,29 +2162,29 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 </div>
                 <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>Category 이름</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.category.field.name')}</div>
                     <input
                       value={catDrawer.form.name}
                       onChange={e => setCatDrawer(d => d ? { ...d, form: { ...d.form, name: e.target.value } } : d)}
-                      placeholder="예: ML/DL"
+                      placeholder={t('admin.image.category.field.namePlaceholder')}
                       style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box" as const, fontFamily: "inherit" }}
                       onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
                       onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }}
                     />
                   </div>
                   <div style={{ marginBottom: 24 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>설명</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.field.desc')}</div>
                     <input
                       value={catDrawer.form.desc}
                       onChange={e => setCatDrawer(d => d ? { ...d, form: { ...d.form, desc: e.target.value } } : d)}
-                      placeholder="카테고리에 대한 간단한 설명"
+                      placeholder={t('admin.image.category.field.descPlaceholder')}
                       style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box" as const, fontFamily: "inherit" }}
                       onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
                       onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }}
                     />
                   </div>
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>색상</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.category.field.color')}</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
                       {CAT_COLORS.map(c => (
                         <button type="button" key={c} onClick={() => setCatDrawer(d => d ? { ...d, form: { ...d.form, color: c } } : d)}
@@ -2133,12 +2194,12 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                     </div>
                   </div>
                   <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px", marginBottom: 28 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>미리보기</div>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: catDrawer.form.color, backgroundColor: `${catDrawer.form.color}18`, padding: "5px 14px", borderRadius: 99, whiteSpace: "nowrap" }}>{catDrawer.form.name || "Category 이름"}</span>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.image.category.field.preview')}</div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: catDrawer.form.color, backgroundColor: `${catDrawer.form.color}18`, padding: "5px 14px", borderRadius: 99, whiteSpace: "nowrap" }}>{catDrawer.form.name || t('admin.image.category.field.name')}</span>
                   </div>
                   <div style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                    <PrimaryBtn size="small" onClick={saveCat}>저장</PrimaryBtn>
-                    <PrimaryBtn size="small" variant="secondary" onClick={closeCatDrawer}>취소</PrimaryBtn>
+                    <PrimaryBtn size="small" onClick={saveCat}>{t('common.action.save')}</PrimaryBtn>
+                    <PrimaryBtn size="small" variant="secondary" onClick={closeCatDrawer}>{t('common.action.cancel')}</PrimaryBtn>
                   </div>
                 </div>
               </div>
@@ -2152,35 +2213,35 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
         <>
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-              전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{tiers.length}</span>개
+              {t('common.count.total', { count: tiers.length })}
             </div>
           </div>
           <Card style={{ overflow: "hidden" }}>
             <Table
               spacerGaps
               headers={["Tier", "Description", "Images", "Actions"]}
-              rows={tiers.map(t => [
-                <span style={{ fontSize: 12, fontWeight: 600, color: t.color, backgroundColor: `${t.color}18`, padding: "4px 12px", borderRadius: 99, whiteSpace: "nowrap" }}>{t.name}</span>,
-                <span style={{ fontSize: 13, color: GRAY_70, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minWidth: 320 }}>{t.desc}</span>,
-                <span style={{ fontSize: 13, color: GRAY_90 }}>{t.imgCnt}개</span>,
+              rows={tiers.map(tier => [
+                <span style={{ fontSize: 12, fontWeight: 600, color: tier.color, backgroundColor: `${tier.color}18`, padding: "4px 12px", borderRadius: 99, whiteSpace: "nowrap" }}>{tier.name}</span>,
+                <span style={{ fontSize: 13, color: GRAY_70, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", minWidth: 320 }}>{tier.desc}</span>,
+                <span style={{ fontSize: 13, color: GRAY_90 }}>{t('common.unit.count', { count: images.filter(img => img.tier === tier.name).length })}</span>,
                 <div style={{ display: "flex", gap: 6 }}>
-                  <button type="button" onClick={() => setSelectedTier(t)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                  <button type="button" onClick={() => setSelectedTier(tier)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                   <div style={{ position: "relative" }}>
-                    {openMenuId === t.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
-                    <button type="button" onClick={(e) => { if (openMenuId !== t.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === t.id ? null : t.id); }}
-                      style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === t.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
-                      onMouseEnter={e => { if (openMenuId !== t.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
-                      onMouseLeave={e => { if (openMenuId !== t.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                      <span style={{ padding: "0 8px 0 10px" }}>관리</span>
-                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === t.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === t.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
-                        <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === t.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                    {openMenuId === tier.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
+                    <button type="button" onClick={(e) => { if (openMenuId !== tier.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === tier.id ? null : tier.id); }}
+                      style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === tier.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                      onMouseEnter={e => { if (openMenuId !== tier.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                      onMouseLeave={e => { if (openMenuId !== tier.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                      <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === tier.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === tier.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                        <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === tier.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                       </span>
                     </button>
-                    {openMenuId === t.id && menuAnchor && (
+                    {openMenuId === tier.id && menuAnchor && (
                       <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 120, padding: "4px 0" }}>
-                        <button type="button" onClick={() => { openTierEdit(t); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>수정</button>
+                        <button type="button" onClick={() => { openTierEdit(tier); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
                         <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                        <button type="button" onClick={() => { setOpenMenuId(null); setDeletingTier(t); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                        <button type="button" onClick={() => { setOpenMenuId(null); setDeletingTier(tier); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                       </div>
                     )}
                   </div>
@@ -2197,7 +2258,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 {/* Header */}
                 <div style={{ padding: "20px 24px 18px", borderBottom: `1px solid ${GRAY_10}` }}>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{tierDrawer.editId ? "Tier 수정" : "Tier 생성"}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{tierDrawer.editId ? t('admin.image.tier.editTitle') : t('admin.image.tier.createTitle')}</div>
                     <button type="button" onClick={closeTierDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_10; }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
@@ -2210,11 +2271,11 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
                   {/* 이름 */}
                   <div style={{ marginBottom: 20 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>Tier 이름</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.tier.field.name')}</div>
                     <input
                       value={tierDrawer.form.name}
                       onChange={e => setTierDrawer(d => d ? { ...d, form: { ...d.form, name: e.target.value } } : d)}
-                      placeholder="예: Official"
+                      placeholder={t('admin.image.tier.field.namePlaceholder')}
                       style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }}
                       onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
                       onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }}
@@ -2223,11 +2284,11 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
 
                   {/* 설명 */}
                   <div style={{ marginBottom: 24 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>설명</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.field.desc')}</div>
                     <input
                       value={tierDrawer.form.desc}
                       onChange={e => setTierDrawer(d => d ? { ...d, form: { ...d.form, desc: e.target.value } } : d)}
-                      placeholder="Tier에 대한 설명을 입력하세요."
+                      placeholder={t('admin.image.tier.field.descPlaceholder')}
                       style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }}
                       onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
                       onBlur={e => { e.currentTarget.style.borderColor = GRAY_30; }}
@@ -2236,7 +2297,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
 
                   {/* 컬러 */}
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>색상</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.category.field.color')}</div>
                     <div style={{ display: "flex", gap: 8 }}>
                       {TIER_COLORS.map(c => (
                         <button type="button" key={c} onClick={() => setTierDrawer(d => d ? { ...d, form: { ...d.form, color: c } } : d)}
@@ -2248,16 +2309,16 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
 
                   {/* 미리보기 */}
                   <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px", marginBottom: 28 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>미리보기</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.image.category.field.preview')}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: tierDrawer.form.color, backgroundColor: `${tierDrawer.form.color}18`, padding: "5px 14px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0 }}>{tierDrawer.form.name || "Tier 이름"}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: tierDrawer.form.color, backgroundColor: `${tierDrawer.form.color}18`, padding: "5px 14px", borderRadius: 99, whiteSpace: "nowrap", flexShrink: 0 }}>{tierDrawer.form.name || t('admin.image.tier.field.name')}</span>
                     </div>
                   </div>
 
                   {/* 버튼 */}
                   <div style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                    <PrimaryBtn size="small" onClick={saveTier}>저장</PrimaryBtn>
-                    <PrimaryBtn size="small" variant="secondary" onClick={closeTierDrawer}>취소</PrimaryBtn>
+                    <PrimaryBtn size="small" onClick={saveTier}>{t('common.action.save')}</PrimaryBtn>
+                    <PrimaryBtn size="small" variant="secondary" onClick={closeTierDrawer}>{t('common.action.cancel')}</PrimaryBtn>
                   </div>
                 </div>
               </div>
@@ -2271,22 +2332,22 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
           <div onClick={() => setSelectedImage(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedImage.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedImage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.image.detail.imageTitle', { name: selectedImage.name })}</span>
+              <button type="button" onClick={() => setSelectedImage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
-                    { label: "이미지명", value: selectedImage.name },
-                    { label: "경로", value: <span style={{ fontSize: 11, fontFamily: "'Roboto Mono', monospace", color: GRAY_70 }}>{selectedImage.path}</span> },
+                    { label: t('admin.image.field.name'), value: selectedImage.name },
+                    { label: t('admin.image.field.path'), value: <span style={{ fontSize: 11, fontFamily: "'Roboto Mono', monospace", color: GRAY_70 }}>{selectedImage.path}</span> },
                     { label: "Tier", value: <Badge color={selectedImage.tier === "Official" ? "primary" : "success"}>{selectedImage.tier}</Badge> },
                     { label: "Category", value: <span style={{ fontSize: 12, fontWeight: 600, color: catColorMap[selectedImage.category] ?? GRAY_60, backgroundColor: `${catColorMap[selectedImage.category] ?? GRAY_60}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedImage.category}</span> },
-                    { label: "공개 여부", value: <Badge color={selectedImage.status === "Public" ? "success" : "neutral"}>{selectedImage.status}</Badge> },
-                    { label: "사용 횟수", value: `${selectedImage.used.toLocaleString()}회` },
-                    { label: "권장 GPU", value: selectedImage.recGpu },
-                    { label: "권장 Local", value: `${selectedImage.recTmp} GB` },
+                    { label: t('admin.image.field.visibility'), value: <Badge color={selectedImage.status === "Public" ? "success" : "neutral"}>{selectedImage.status}</Badge> },
+                    { label: t('admin.image.field.usageCount'), value: t('common.unit.times', { count: selectedImage.used.toLocaleString() }) },
+                    { label: t('admin.image.field.recGpu'), value: selectedImage.recGpu },
+                    { label: t('admin.image.field.recLocal'), value: `${selectedImage.recTmp} GB` },
                   ] as { label: string; value: React.ReactNode }[]).map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontSize: 11, color: GRAY_40, marginBottom: 4 }}>{label}</div>
@@ -2297,13 +2358,13 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
               </section>
               {selectedImage.desc && (
                 <section>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>설명</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.field.desc')}</div>
                   <div style={{ fontSize: 13, color: GRAY_70, lineHeight: 1.6 }}>{selectedImage.desc}</div>
                 </section>
               )}
               {selectedImage.tags && (
                 <section>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>태그</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>{t('admin.image.field.tags')}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {selectedImage.tags.split(",").map(tag => tag.trim()).filter(Boolean).map(tag => (
                       <span key={tag} style={{ fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 6, backgroundColor: GRAY_10, color: GRAY_70 }}>{tag}</span>
@@ -2313,17 +2374,17 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
               )}
               {selectedImage.packages && (
                 <section>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>주요 패키지</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.field.packages')}</div>
                   <pre style={{ fontSize: 12, color: GRAY_70, backgroundColor: GRAY_5, borderRadius: 8, padding: "12px 16px", margin: 0, fontFamily: "'Roboto Mono', monospace", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word", maxHeight: 160, overflowY: "auto" }}>{selectedImage.packages}</pre>
                 </section>
               )}
               <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                  <button type="button" onClick={() => { setImgForm({ name: selectedImage.name, path: selectedImage.path, desc: selectedImage.desc, tier: selectedImage.tier, category: selectedImage.category, status: selectedImage.status, thumb: selectedImage.thumb, recGpu: selectedImage.recGpu, recTmp: selectedImage.recTmp, recLocal: selectedImage.recLocal, tags: selectedImage.tags, packages: selectedImage.packages, access: selectedImage.access || [], ports: selectedImage.ports || "", envKeys: selectedImage.envKeys || "" }); const parsed = (selectedImage.envKeys || "").split(",").map(k => ({ key: k.trim(), value: "" })).filter(ev => ev.key); setEnvVars(parsed.length > 0 ? parsed : [{ key: "", value: "" }]); setEditingImageId(selectedImage.id); setView("edit-image"); setSelectedImage(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>수정</button>
-                  {selectedImage.status === "Private" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Public" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>공개</button>}
-                  {selectedImage.status === "Public" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Private" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>비공개</button>}
-                  <button type="button" onClick={() => setDeletingImage(selectedImage)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>삭제</button>
+                  <button type="button" onClick={() => { setImgForm({ name: selectedImage.name, path: selectedImage.path, desc: selectedImage.desc, tier: selectedImage.tier, category: selectedImage.category, status: selectedImage.status, thumb: selectedImage.thumb, recGpu: selectedImage.recGpu, recTmp: selectedImage.recTmp, recLocal: selectedImage.recLocal, tags: selectedImage.tags, packages: selectedImage.packages, access: selectedImage.access || [], ports: selectedImage.ports || "", envKeys: selectedImage.envKeys || "" }); const parsed = (selectedImage.envKeys || "").split(",").map(k => ({ key: k.trim(), value: "" })).filter(ev => ev.key); setEnvVars(parsed.length > 0 ? parsed : [{ key: "", value: "" }]); setEditingImageId(selectedImage.id); setView("edit-image"); setSelectedImage(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
+                  {selectedImage.status === "Private" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Public" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.image.action.publish')}</button>}
+                  {selectedImage.status === "Public" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Private" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.image.action.unpublish')}</button>}
+                  <button type="button" onClick={() => setDeletingImage(selectedImage)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
                 </div>
               </section>
             </div>
@@ -2335,18 +2396,18 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
           <div onClick={() => setSelectedCategory(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedCategory.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedCategory(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.image.detail.categoryTitle', { name: selectedCategory.name })}</span>
+              <button type="button" onClick={() => setSelectedCategory(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
-                    { label: "이름", value: <span style={{ fontSize: 12, fontWeight: 600, color: selectedCategory.color, backgroundColor: `${selectedCategory.color}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedCategory.name}</span> },
-                    { label: "이미지 수", value: `${selectedCategory.imgCnt}개` },
-                    { label: "설명", value: selectedCategory.desc },
-                    { label: "색상", value: <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: selectedCategory.color }} /> },
+                    { label: t('common.field.name'), value: <span style={{ fontSize: 12, fontWeight: 600, color: selectedCategory.color, backgroundColor: `${selectedCategory.color}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedCategory.name}</span> },
+                    { label: t('admin.image.field.imageCount'), value: t('common.unit.count', { count: images.filter(img => img.category === selectedCategory.name).length }) },
+                    { label: t('admin.image.field.desc'), value: selectedCategory.desc },
+                    { label: t('admin.image.field.color'), value: <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: selectedCategory.color }} /> },
                   ] as { label: string; value: React.ReactNode }[]).map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontSize: 11, color: GRAY_40, marginBottom: 4 }}>{label}</div>
@@ -2356,10 +2417,10 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 </div>
               </section>
               <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => { openCatEdit(selectedCategory); setSelectedCategory(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>수정</button>
-                  <button type="button" onClick={() => setDeletingCategory(selectedCategory)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>삭제</button>
+                  <button type="button" onClick={() => { openCatEdit(selectedCategory); setSelectedCategory(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
+                  <button type="button" onClick={() => setDeletingCategory(selectedCategory)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
                 </div>
               </section>
             </div>
@@ -2371,18 +2432,18 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
           <div onClick={() => setSelectedTier(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedTier.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedTier(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.image.detail.tierTitle', { name: selectedTier.name })}</span>
+              <button type="button" onClick={() => setSelectedTier(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
-                    { label: "이름", value: <span style={{ fontSize: 12, fontWeight: 600, color: selectedTier.color, backgroundColor: `${selectedTier.color}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedTier.name}</span> },
-                    { label: "이미지 수", value: `${selectedTier.imgCnt}개` },
-                    { label: "설명", value: selectedTier.desc },
-                    { label: "색상", value: <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: selectedTier.color }} /> },
+                    { label: t('common.field.name'), value: <span style={{ fontSize: 12, fontWeight: 600, color: selectedTier.color, backgroundColor: `${selectedTier.color}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedTier.name}</span> },
+                    { label: t('admin.image.field.imageCount'), value: t('common.unit.count', { count: images.filter(img => img.tier === selectedTier.name).length }) },
+                    { label: t('admin.image.field.desc'), value: selectedTier.desc },
+                    { label: t('admin.image.field.color'), value: <div style={{ width: 20, height: 20, borderRadius: "50%", backgroundColor: selectedTier.color }} /> },
                   ] as { label: string; value: React.ReactNode }[]).map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontSize: 11, color: GRAY_40, marginBottom: 4 }}>{label}</div>
@@ -2392,10 +2453,10 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                 </div>
               </section>
               <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => { openTierEdit(selectedTier); setSelectedTier(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>수정</button>
-                  <button type="button" onClick={() => setDeletingTier(selectedTier)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>삭제</button>
+                  <button type="button" onClick={() => { openTierEdit(selectedTier); setSelectedTier(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
+                  <button type="button" onClick={() => setDeletingTier(selectedTier)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
                 </div>
               </section>
             </div>
@@ -2405,27 +2466,27 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
     </PageContainer>
     {deletingImage && (
       <ConfirmModal
-        title="이미지 삭제"
-        message={<>이미지 <strong>{deletingImage.name}</strong>을(를) 삭제하시겠습니까?<br /><br />이 이미지를 기반으로 한 서버 템플릿이 비활성화되며, 저장된 이미지 파일이 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다.</>}
-        confirmLabel="삭제"
+        title={t('admin.image.delete.imageTitle')}
+        message={<>{t('admin.image.delete.imageMessage', { name: deletingImage.name })}</>}
+        confirmLabel={t('common.action.delete')}
         onConfirm={() => { setImages(imgs => imgs.filter(x => x.id !== deletingImage.id)); if (selectedImage?.id === deletingImage.id) setSelectedImage(null); setDeletingImage(null); }}
         onCancel={() => setDeletingImage(null)}
       />
     )}
     {deletingCategory && (
       <ConfirmModal
-        title="Category 삭제"
-        message={<>Category <strong>{deletingCategory.name}</strong>을(를) 삭제하시겠습니까?<br /><br />이 Category에 속한 이미지의 분류가 해제됩니다. 이 작업은 되돌릴 수 없습니다.</>}
-        confirmLabel="삭제"
+        title={t('admin.image.delete.categoryTitle')}
+        message={<>{t('admin.image.delete.categoryMessage', { name: deletingCategory.name })}</>}
+        confirmLabel={t('common.action.delete')}
         onConfirm={() => { setCategories(cats => cats.filter(c => c.id !== deletingCategory.id)); if (selectedCategory?.id === deletingCategory.id) setSelectedCategory(null); setDeletingCategory(null); }}
         onCancel={() => setDeletingCategory(null)}
       />
     )}
     {deletingTier && (
       <ConfirmModal
-        title="Tier 삭제"
-        message={<>Tier <strong>{deletingTier.name}</strong>을(를) 삭제하시겠습니까?<br /><br />이 Tier에 속한 이미지의 등급 분류가 해제됩니다. 이 작업은 되돌릴 수 없습니다.</>}
-        confirmLabel="삭제"
+        title={t('admin.image.delete.tierTitle')}
+        message={<>{t('admin.image.delete.tierMessage', { name: deletingTier.name })}</>}
+        confirmLabel={t('common.action.delete')}
         onConfirm={() => { setTiers(ts => ts.filter(x => x.id !== deletingTier.id)); if (selectedTier?.id === deletingTier.id) setSelectedTier(null); setDeletingTier(null); }}
         onCancel={() => setDeletingTier(null)}
       />
@@ -2436,6 +2497,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
 
 // ─── Credit Management ────────────────────────────────────────────────────────
 export function AdminCreditManagement() {
+  const { t } = useTranslation();
   const wsMap = [
     { name: "My Workspace",    wsId: "ws-a3f8b2c1", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", credits: 45230,  status: "active"   },
     { name: "Team Alpha",      wsId: "ws-d7e9a1b5", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc",   credits: 120500, status: "active"   },
@@ -2476,10 +2538,14 @@ export function AdminCreditManagement() {
 
   const histWsOptions   = Array.from(new Set(platformCreditHistory.map(r => r.wsName)));
   const histTypeOptions: [string, string][] = [
-    ["All", "구분"], ["관리자 지급", "관리자 지급"], ["관리자 회수", "관리자 회수"],
-    ["서버 사용", "서버 사용"], ["볼륨 스토리지 사용", "볼륨 스토리지 사용"], ["공유 스토리지 사용", "공유 스토리지 사용"],
+    ["All", t('admin.credit.filter.typeAll')], ["관리자 지급", t('admin.credit.type.grant')], ["관리자 회수", t('admin.credit.type.revoke')],
+    ["서버 사용", t('admin.credit.type.serverUsage')], ["볼륨 스토리지 사용", t('admin.credit.type.volumeUsage')], ["공유 스토리지 사용", t('admin.credit.type.sharedUsage')],
   ];
-  const histWsOptionPairs: [string, string][] = [["All", "워크스페이스"], ...histWsOptions.map(w => [w, w] as [string, string])];
+  const typeLabel: Record<PlatformCreditType, string> = {
+    "관리자 지급": t('admin.credit.type.grant'), "관리자 회수": t('admin.credit.type.revoke'),
+    "서버 사용": t('admin.credit.type.serverUsage'), "볼륨 스토리지 사용": t('admin.credit.type.volumeUsage'), "공유 스토리지 사용": t('admin.credit.type.sharedUsage'),
+  };
+  const histWsOptionPairs: [string, string][] = [[t('admin.credit.filter.wsAll'), t('admin.credit.filter.wsAll')], ...histWsOptions.map(w => [w, w] as [string, string])];
 
   function handleHistSort(key: string) {
     if (histSortKey === key) setHistSortDir(d => d === "asc" ? "desc" : "asc");
@@ -2494,16 +2560,16 @@ export function AdminCreditManagement() {
       return !q || [r.wsName, r.desc, r.by, r.byEmail ?? ""].some(v => v.toLowerCase().includes(q));
     })
     .sort((a, b) => {
-      const va = histSortKey === "date" ? `${a.date} ${a.time}` : histSortKey === "ws" ? a.wsName : histSortKey === "amount" ? a.amount : a.type;
-      const vb = histSortKey === "date" ? `${b.date} ${b.time}` : histSortKey === "ws" ? b.wsName : histSortKey === "amount" ? b.amount : b.type;
+      const va = histSortKey === "date" ? `${a.date} ${a.time}` : histSortKey === "ws" ? a.wsName : histSortKey === "amount" ? a.amount : histSortKey === "details" ? a.desc : histSortKey === "user" ? a.by : a.type;
+      const vb = histSortKey === "date" ? `${b.date} ${b.time}` : histSortKey === "ws" ? b.wsName : histSortKey === "amount" ? b.amount : histSortKey === "details" ? b.desc : histSortKey === "user" ? b.by : b.type;
       if (va < vb) return histSortDir === "asc" ? -1 : 1;
       if (va > vb) return histSortDir === "asc" ? 1 : -1;
       return 0;
     });
 
   return (
-    <PageContainer title="Credit History" subtitle="워크스페이스의 전체 크레딧 이력을 조회하고 지급·회수를 관리합니다."
-      actions={<PrimaryBtn size="small" onClick={() => openCreditDrawer("지급")}><Plus size={14} /> 크레딧 관리</PrimaryBtn>}>
+    <PageContainer title={t('admin.credit.pageTitle')} subtitle={t('admin.credit.subtitle')}
+      actions={<PrimaryBtn size="small" onClick={() => openCreditDrawer("지급")}><Plus size={14} /> {t('admin.credit.manageBtn')}</PrimaryBtn>}>
       <>
           {creditDrawer && (() => {
             const selWs = getWs(creditDrawer.form.wsId);
@@ -2522,8 +2588,8 @@ export function AdminCreditManagement() {
                           <CreditCard size={16} color={PRIMARY} />
                         </div>
                         <div>
-                          <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>크레딧 관리</div>
-                          <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>워크스페이스에 크레딧을 지급하거나 회수합니다.</div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.credit.drawer.title')}</div>
+                          <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>{t('admin.credit.drawer.subtitle')}</div>
                         </div>
                       </div>
                       <button type="button" onClick={closeCreditDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
@@ -2538,10 +2604,10 @@ export function AdminCreditManagement() {
                   <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
                     {/* 워크스페이스 */}
                     <div style={{ marginBottom: 20 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>워크스페이스</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.credit.drawer.wsSelect')}</div>
                       <div style={{ position: "relative", marginBottom: 8 }}>
                         <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                        <input value={wsDrawerSearch} onChange={e => { setWsDrawerSearch(e.target.value); setWsDrawerPage(0); }} placeholder="검색어를 입력하세요."
+                        <input value={wsDrawerSearch} onChange={e => { setWsDrawerSearch(e.target.value); setWsDrawerPage(0); }} placeholder={t('common.placeholder.search')}
                           style={{ width: "100%", height: 34, paddingLeft: 30, paddingRight: 10, border: `1px solid ${GRAY_30}`, borderRadius: 8, fontSize: 12, outline: "none", fontFamily: "inherit", boxSizing: "border-box" as const }} />
                       </div>
                       {(() => {
@@ -2580,7 +2646,7 @@ export function AdminCreditManagement() {
                                 </thead>
                                 <tbody>
                                   {paged.length === 0
-                                    ? <tr><td colSpan={3} style={{ padding: "16px 12px", fontSize: 12, color: GRAY_40, textAlign: "center" }}>검색 결과 없음</td></tr>
+                                    ? <tr><td colSpan={3} style={{ padding: "16px 12px", fontSize: 12, color: GRAY_40, textAlign: "center" }}>{t('common.empty.searchResult')}</td></tr>
                                     : paged.map((w, idx) => {
                                       const selected = creditDrawer.form.wsId === w.wsId;
                                       const isLast = idx === paged.length - 1;
@@ -2614,12 +2680,12 @@ export function AdminCreditManagement() {
                               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                 <button type="button" onClick={() => setWsDrawerPage(p => Math.max(0, p - 1))} disabled={wsDrawerPage === 0}
                                   style={{ height: 28, padding: "0 10px", borderRadius: 6, border: `1px solid ${GRAY_30}`, backgroundColor: "white", fontSize: 12, color: wsDrawerPage === 0 ? GRAY_40 : GRAY_70, cursor: wsDrawerPage === 0 ? "default" : "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "inherit" }}>
-                                  <ChevronUp size={11} style={{ transform: "rotate(-90deg)" }} /> 이전
+                                  <ChevronUp size={11} style={{ transform: "rotate(-90deg)" }} /> {t('common.pagination.prev')}
                                 </button>
                                 <span style={{ fontSize: 12, color: GRAY_60 }}>{wsDrawerPage + 1} / {totalPages}</span>
                                 <button type="button" onClick={() => setWsDrawerPage(p => Math.min(totalPages - 1, p + 1))} disabled={wsDrawerPage === totalPages - 1}
                                   style={{ height: 28, padding: "0 10px", borderRadius: 6, border: `1px solid ${GRAY_30}`, backgroundColor: "white", fontSize: 12, color: wsDrawerPage === totalPages - 1 ? GRAY_40 : GRAY_70, cursor: wsDrawerPage === totalPages - 1 ? "default" : "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontFamily: "inherit" }}>
-                                  다음 <ChevronDown size={11} style={{ transform: "rotate(-90deg)" }} />
+                                  {t('common.pagination.next')} <ChevronDown size={11} style={{ transform: "rotate(-90deg)" }} />
                                 </button>
                               </div>
                             )}
@@ -2630,12 +2696,12 @@ export function AdminCreditManagement() {
 
                     {/* 유형 */}
                     <div style={{ marginBottom: 20 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>유형</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.credit.drawer.typeLabel')}</div>
                       <div style={{ display: "flex", gap: 8 }}>
-                        {(["지급", "회수"] as const).map(t => (
-                          <button type="button" key={t} onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, type: t } } : d)}
-                            style={{ flex: 1, height: 42, borderRadius: 8, border: `1.5px solid ${creditDrawer.form.type === t ? (t === "지급" ? PRIMARY : RED) : GRAY_30}`, backgroundColor: creditDrawer.form.type === t ? (t === "지급" ? PRIMARY_10 : "rgb(254,242,242)") : "white", fontSize: 13, fontWeight: creditDrawer.form.type === t ? 700 : 400, color: creditDrawer.form.type === t ? (t === "지급" ? PRIMARY : RED) : GRAY_70, cursor: "pointer", transition: "all 0.12s" }}>
-                            {t}
+                        {(["지급", "회수"] as const).map(typeVal => (
+                          <button type="button" key={typeVal} onClick={() => setCreditDrawer(d => d ? { ...d, form: { ...d.form, type: typeVal } } : d)}
+                            style={{ flex: 1, height: 42, borderRadius: 8, border: `1.5px solid ${creditDrawer.form.type === typeVal ? (typeVal === "지급" ? PRIMARY : RED) : GRAY_30}`, backgroundColor: creditDrawer.form.type === typeVal ? (typeVal === "지급" ? PRIMARY_10 : "rgb(254,242,242)") : "white", fontSize: 13, fontWeight: creditDrawer.form.type === typeVal ? 700 : 400, color: creditDrawer.form.type === typeVal ? (typeVal === "지급" ? PRIMARY : RED) : GRAY_70, cursor: "pointer", transition: "all 0.12s" }}>
+                            {typeVal === "지급" ? t('admin.credit.drawer.typeGrant') : t('admin.credit.drawer.typeRevoke')}
                           </button>
                         ))}
                       </div>
@@ -2643,7 +2709,7 @@ export function AdminCreditManagement() {
 
                     {/* 수량 */}
                     <div style={{ marginBottom: 20 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>수량 (cr)</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.credit.drawer.amountLabel')}</div>
                       <input type="number" value={creditDrawer.form.amount} placeholder="0"
                         onChange={e => setCreditDrawer(d => d ? { ...d, form: { ...d.form, amount: e.target.value } } : d)}
                         style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box" as const, fontFamily: "inherit" }}
@@ -2664,8 +2730,8 @@ export function AdminCreditManagement() {
 
                     {/* 사유 */}
                     <div style={{ marginBottom: 24 }}>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>사유 <span style={{ color: RED }}>*</span></div>
-                      <input type="text" value={creditDrawer.form.reason} placeholder="사유를 입력하세요"
+                      <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.credit.drawer.reasonLabel')} <span style={{ color: RED }}>*</span></div>
+                      <input type="text" value={creditDrawer.form.reason} placeholder={t('admin.credit.drawer.reasonPlaceholder')}
                         onChange={e => setCreditDrawer(d => d ? { ...d, form: { ...d.form, reason: e.target.value } } : d)}
                         style={{ width: "100%", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_30}`, fontSize: 13, outline: "none", boxSizing: "border-box" as const, fontFamily: "inherit" }}
                         onFocus={e => { e.currentTarget.style.borderColor = PRIMARY; }}
@@ -2679,15 +2745,15 @@ export function AdminCreditManagement() {
                       const overLimit = after < 0;
                       return (
                         <div style={{ backgroundColor: GRAY_5, border: `1px solid ${GRAY_10}`, borderRadius: 10, padding: "14px 16px", marginBottom: 24 }}>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>실행 미리보기</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>{t('admin.credit.drawer.previewLabel')}</div>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: 10, color: GRAY_40, marginBottom: 3 }}>변경 전</div>
+                              <div style={{ fontSize: 10, color: GRAY_40, marginBottom: 3 }}>{t('admin.credit.drawer.before')}</div>
                               <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{before.toLocaleString()} <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>cr</span></div>
                             </div>
                             <div style={{ fontSize: 13, color: GRAY_40, flexShrink: 0 }}>→</div>
                             <div style={{ flex: 1, textAlign: "right" as const }}>
-                              <div style={{ fontSize: 10, color: GRAY_40, marginBottom: 3 }}>변경 후</div>
+                              <div style={{ fontSize: 10, color: GRAY_40, marginBottom: 3 }}>{t('admin.credit.drawer.after')}</div>
                               <div style={{ fontSize: 15, fontWeight: 700, color: overLimit ? RED : isGrant ? PRIMARY : GRAY_90 }}>
                                 {overLimit ? "−" : ""}{Math.abs(after).toLocaleString()} <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>cr</span>
                               </div>
@@ -2695,8 +2761,8 @@ export function AdminCreditManagement() {
                           </div>
                           {amt > 0 && (
                             <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${GRAY_10}`, fontSize: 12, color: isGrant ? PRIMARY : RED, fontWeight: 600, textAlign: "center" as const }}>
-                              {isGrant ? "+" : "−"}{amt.toLocaleString()} cr {creditDrawer.form.type}
-                              {overLimit && <span style={{ fontSize: 11, color: RED, fontWeight: 400, marginLeft: 6 }}>· 잔액 한도 초과</span>}
+                              {isGrant ? "+" : "−"}{amt.toLocaleString()} cr {isGrant ? t('admin.credit.drawer.typeGrant') : t('admin.credit.drawer.typeRevoke')}
+                              {overLimit && <span style={{ fontSize: 11, color: RED, fontWeight: 400, marginLeft: 6 }}>· {t('admin.credit.drawer.overLimit')}</span>}
                             </div>
                           )}
                         </div>
@@ -2705,8 +2771,8 @@ export function AdminCreditManagement() {
 
                     {/* 액션 */}
                     <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                      <PrimaryBtn size="small" onClick={closeCreditDrawer} style={{ opacity: canSubmit ? 1 : 0.45, cursor: canSubmit ? "pointer" : "not-allowed" }}>실행</PrimaryBtn>
-                      <PrimaryBtn size="small" variant="secondary" onClick={closeCreditDrawer}>취소</PrimaryBtn>
+                      <PrimaryBtn size="small" onClick={closeCreditDrawer} style={{ opacity: canSubmit ? 1 : 0.45, cursor: canSubmit ? "pointer" : "not-allowed" }}>{t('admin.credit.drawer.executeBtn')}</PrimaryBtn>
+                      <PrimaryBtn size="small" variant="secondary" onClick={closeCreditDrawer}>{t('common.action.cancel')}</PrimaryBtn>
                     </div>
                   </div>
                 </div>
@@ -2715,15 +2781,15 @@ export function AdminCreditManagement() {
           })()}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
             <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-              전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{histFiltered.length}</span>건
+              {t('common.count.total', { count: histFiltered.length })}
               {(histFilterType !== "All" || histFilterWs !== "All" || histSearch) && (
-                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {platformCreditHistory.length}건 중</span>
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('common.count.outOf', { total: platformCreditHistory.length })}</span>
               )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ position: "relative" }}>
                 <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                <input type="text" placeholder="검색어를 입력하세요." value={histSearch}
+                <input type="text" placeholder={t('common.placeholder.search')} value={histSearch}
                   onChange={e => setHistSearch(e.target.value)}
                   style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }} />
               </div>
@@ -2744,12 +2810,12 @@ export function AdminCreditManagement() {
           <Card style={{ overflow: "hidden" }}>
             <Table spacerGaps
               headers={[
-                <SortableHeader k="ws"     label="Workspace" sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="ws"     label={t('admin.credit.col.workspace')} sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
                 <SortableHeader k="type"   label="Type"      sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
-                "Details",
-                "User",
+                <SortableHeader k="details" label="Details" sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="user" label={t('admin.credit.col.user')} sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
                 <SortableHeader k="amount" label="Amount"    sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
-                <SortableHeader k="date"   label="일시"      sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="date"   label={t('common.field.date')}      sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
               ]}
               rows={histFiltered.map(r => {
                 const meta = typeMeta[r.type];
@@ -2759,7 +2825,7 @@ export function AdminCreditManagement() {
                     <div style={{ fontSize: 11, color: GRAY_60, marginTop: 1, whiteSpace: "nowrap" }}>{r.wsId}</div>
                   </div>,
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 5, backgroundColor: meta.bg, color: meta.color, borderRadius: 20, padding: "3px 9px 3px 6px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
-                    {meta.icon}{r.type}
+                    {meta.icon}{typeLabel[r.type]}
                   </div>,
                   <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{r.desc}</span>,
                   <div>
@@ -2774,7 +2840,7 @@ export function AdminCreditManagement() {
               })}
             />
             {histFiltered.length === 0 && (
-              <div style={{ padding: "32px", textAlign: "center" as const, color: GRAY_60, fontSize: 13 }}>검색 결과가 없습니다.</div>
+              <div style={{ padding: "32px", textAlign: "center" as const, color: GRAY_60, fontSize: 13 }}>{t('common.empty.noResults')}</div>
             )}
           </Card>
       </>
@@ -2803,6 +2869,7 @@ function SortableHeader({ k, label, sortKey, sortDir, onSort }: {
 }
 
 export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?: string }) {
+  const { t } = useTranslation();
   const storages = [
     { name: "pytorch-dev-01-local", type: "Volume", workspace: "My Workspace", wsId: "ws-a3f8b2c1", owner: "지염염", ownerEmail: "yeomeyeom.ji@sdt.inc", capacity: 10, used: 6.8, status: "Normal", mountServer: "pytorch-dev-01", mountWorkspace: "My Workspace" },
     { name: "llm-finetuning-local", type: "Volume", workspace: "Team Alpha", wsId: "ws-d7e9a1b5", owner: "이지현", ownerEmail: "jihyun.lee@sdt.inc", capacity: 100, used: 67.3, status: "Normal", mountServer: "llm-finetuning", mountWorkspace: "Team Alpha" },
@@ -2845,6 +2912,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
       else if (sortKey === "owner") { va = a.owner; vb = b.owner; }
       else if (sortKey === "capacity") { va = a.capacity; vb = b.capacity; }
       else if (sortKey === "used") { va = a.used; vb = b.used; }
+      else if (sortKey === "mountedTo") { va = a.mountServer ?? ""; vb = b.mountServer ?? ""; }
       else { va = a.used / a.capacity; vb = b.used / b.capacity; }
       if (va < vb) return sortDir === "asc" ? -1 : 1;
       if (va > vb) return sortDir === "asc" ? 1 : -1;
@@ -2852,8 +2920,8 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
     });
 
   return (
-    <PageContainer title="Storage Management" subtitle={tab === "Storage Settings" ? "서버 생성 시 스토리지 용량 산정 방식을 설정합니다." : "전체 스토리지 목록을 조회하고 관리합니다."}
-      actions={tab === "Storage Pricing Policy" ? <PrimaryBtn size="small" onClick={() => setShowStorageCreate(true)}><Plus size={14} /> 가격 정책 등록</PrimaryBtn> : undefined}>
+    <PageContainer title={t('admin.storage.pageTitle')} subtitle={tab === "Storage Settings" ? t('admin.storage.settingsSubtitle') : t('admin.storage.subtitle')}
+      actions={tab === "Storage Pricing Policy" ? <PrimaryBtn size="small" onClick={() => setShowStorageCreate(true)}><Plus size={14} /> {t('admin.storage.pricing.registerBtn')}</PrimaryBtn> : undefined}>
       <TabBar tabs={["Storage", "Storage Pricing Policy", "Storage Settings"]} active={tab} onChange={setTab} />
       {tab === "Storage" && (
         <>
@@ -2861,9 +2929,9 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
             {/* Result count */}
             <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
-              전체 <span style={{ fontWeight: 700, color: GRAY_90 }}>{filtered.length}</span>개
+              {t('common.count.total', { count: filtered.length })}
               {(filterType !== "All" || filterStatus !== "All" || search) && (
-                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}> / {storages.length}개 중</span>
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('common.count.outOf', { total: storages.length })}</span>
               )}
             </div>
             {/* Search + Filters */}
@@ -2871,14 +2939,14 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               <div style={{ position: "relative" }}>
                 <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
                 <input
-                  type="text" placeholder="검색어를 입력하세요." value={search}
+                  type="text" placeholder={t('common.placeholder.search')} value={search}
                   onChange={e => setSearch(e.target.value)}
                   style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", boxSizing: "border-box" as const }}
                 />
               </div>
               {[
-                { value: filterType, onChange: (v: string) => setFilterType(v as typeof filterType), options: [["All", "유형"], ["Local", "Local"], ["Volume", "Volume"], ["Shared", "Shared"]] },
-                { value: filterStatus, onChange: (v: string) => setFilterStatus(v as typeof filterStatus), options: [["All", "상태"], ["Normal", "Normal"], ["Healthy", "Healthy"], ["Warning", "Warning"], ["Error", "Error"]] },
+                { value: filterType, onChange: (v: string) => setFilterType(v as typeof filterType), options: [["All", t('admin.storage.filter.type')], ["Local", "Local"], ["Volume", "Volume"], ["Shared", "Shared"]] },
+                { value: filterStatus, onChange: (v: string) => setFilterStatus(v as typeof filterStatus), options: [["All", t('admin.storage.filter.status')], ["Normal", "Normal"], ["Healthy", "Healthy"], ["Warning", "Warning"], ["Error", "Error"]] },
               ].map(({ value, onChange, options }) => (
                 <div key={options[0][1]} style={{ position: "relative" }}>
                   <select
@@ -2899,9 +2967,9 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               spacerGaps
               headers={[
               <SortableHeader k="name" label="Name" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-              "Mounted To",
-              <SortableHeader k="workspace" label="Workspace" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-              <SortableHeader k="owner" label="User" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+              <SortableHeader k="mountedTo" label="Mounted To" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+              <SortableHeader k="workspace" label={t('admin.storage.col.workspace')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+              <SortableHeader k="owner" label={t('admin.storage.col.user')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
               <SortableHeader k="usedPct" label="Usage" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
               "Actions",
             ]}
@@ -2930,7 +2998,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                         {"unmountedAt" in s && (s as any).unmountedAt && (
                           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>
                             <Clock size={10} color={YELLOW} />
-                            마지막 해제 일시: {(s as any).unmountedAt}
+                            {t('admin.storage.unmountedAt')}: {(s as any).unmountedAt}
                           </div>
                         )}
                       </div>,
@@ -2956,24 +3024,24 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                   </div>,
                   /* 액션 */
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button type="button" onClick={() => setSelectedStorage(s)} style={{ height: 36, padding: "0 14px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                    <button type="button" onClick={() => setSelectedStorage(s)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                     {s.type !== "Local" && (
                       <div style={{ position: "relative" }}>
                         {openMenuId === s.name && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                         <button type="button" onClick={(e) => { if (openMenuId !== s.name) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === s.name ? null : s.name); }}
-                          style={{ height: 36, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === s.name ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                          style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === s.name ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                           onMouseEnter={e => { if (openMenuId !== s.name) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                           onMouseLeave={e => { if (openMenuId !== s.name) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                          <span style={{ padding: "0 10px 0 12px" }}>관리</span>
+                          <span style={{ padding: "0 10px 0 12px" }}>{t('common.action.manage')}</span>
                           <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === s.name ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 8px", borderLeft: `1px solid ${openMenuId === s.name ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                             <ChevronDown size={12} color={PRIMARY} style={{ transform: openMenuId === s.name ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                           </span>
                         </button>
                         {openMenuId === s.name && menuAnchor && (
                           <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
-                            <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>용량 상향</button>
+                            <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.storage.action.expand')}</button>
                             <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                            <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                            <button type="button" onClick={() => setOpenMenuId(null)} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                           </div>
                         )}
                       </div>
@@ -2983,7 +3051,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               })}
             />
             {filtered.length === 0 && (
-              <div style={{ padding: "32px", textAlign: "center" as const, color: GRAY_60, fontSize: 13 }}>검색 결과가 없습니다.</div>
+              <div style={{ padding: "32px", textAlign: "center" as const, color: GRAY_60, fontSize: 13 }}>{t('common.empty.noResults')}</div>
             )}
           </Card>
         </>
@@ -3009,7 +3077,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               </div>
             </div>
             <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-              <PrimaryBtn size="small">Apply</PrimaryBtn>
+              <PrimaryBtn size="small">{t('common.action.apply')}</PrimaryBtn>
             </div>
           </Card>
 
@@ -3040,7 +3108,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               </div>
             </div>
             <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-              <PrimaryBtn size="small">Apply</PrimaryBtn>
+              <PrimaryBtn size="small">{t('common.action.apply')}</PrimaryBtn>
             </div>
           </Card>
 
@@ -3071,7 +3139,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               </div>
             </div>
             <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-              <PrimaryBtn size="small">Apply</PrimaryBtn>
+              <PrimaryBtn size="small">{t('common.action.apply')}</PrimaryBtn>
             </div>
           </Card>
 
@@ -3082,24 +3150,24 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
           <div onClick={() => setSelectedStorage(null)} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.3)", zIndex: 400 }} />
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{selectedStorage.name} 상세 정보</span>
-              <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>닫기</button>
+              <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.storage.detail.drawerTitle', { name: selectedStorage.name })}</span>
+              <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {((): { label: string; value: React.ReactNode }[] => {
                     const typeColor = selectedStorage.type === "Volume" ? PRIMARY : selectedStorage.type === "Shared" ? GREEN : BLUE;
                     return [
-                      { label: "이름", value: selectedStorage.name },
-                      { label: "유형", value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: `${typeColor}18`, color: typeColor }}>{selectedStorage.type}</span> },
-                      { label: "워크스페이스", value: selectedStorage.workspace },
+                      { label: t('admin.storage.detail.name'), value: selectedStorage.name },
+                      { label: t('admin.storage.detail.type'), value: <span style={{ fontSize: 12, fontWeight: 600, padding: "2px 8px", borderRadius: 99, backgroundColor: `${typeColor}18`, color: typeColor }}>{selectedStorage.type}</span> },
+                      { label: t('admin.storage.detail.workspace'), value: selectedStorage.workspace },
                       { label: "Workspace ID", value: <span style={{ fontSize: 11, fontFamily: "'Roboto Mono', monospace", color: GRAY_60 }}>{selectedStorage.wsId}</span> },
-                      { label: "소유자", value: selectedStorage.owner },
-                      { label: "이메일", value: selectedStorage.ownerEmail },
-                      { label: "마운트 서버", value: selectedStorage.mountServer ?? "—" },
-                      { label: "상태", value: <Badge color={selectedStorage.status === "Normal" || selectedStorage.status === "Healthy" ? "success" : "neutral"}>{selectedStorage.status}</Badge> },
+                      { label: t('admin.storage.detail.owner'), value: selectedStorage.owner },
+                      { label: t('admin.storage.detail.email'), value: selectedStorage.ownerEmail },
+                      { label: t('admin.storage.detail.mountServer'), value: selectedStorage.mountServer ?? "—" },
+                      { label: t('admin.storage.detail.status'), value: <Badge color={selectedStorage.status === "Normal" || selectedStorage.status === "Healthy" ? "success" : "neutral"}>{selectedStorage.status}</Badge> },
                     ];
                   })().map(({ label, value }) => (
                     <div key={label}>
@@ -3110,7 +3178,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                 </div>
               </section>
               <section>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>사용량</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.storage.detail.usage')}</div>
                 <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 20px" }}>
                   {(() => {
                     const pct = Math.round(selectedStorage.used / selectedStorage.capacity * 100);
@@ -3131,10 +3199,10 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               </section>
               {selectedStorage.type !== "Local" && (
                 <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>관리</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>용량 상향</button>
-                    <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>삭제</button>
+                    <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.storage.action.expand')}</button>
+                    <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
                   </div>
                 </section>
               )}
@@ -3218,22 +3286,22 @@ export function AdminSystemSettings() {
   };
 
   return (
-    <PageContainer title="System Settings" subtitle="Configure SMTP relay and Image Repository integration for the platform.">
+    <PageContainer title={t('admin.systemSettings.title')} subtitle={t('admin.systemSettings.subtitle')}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 680 }}>
 
         <Card style={{ padding: "24px" }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Page Settings</div>
           <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 20 }}>Upload and manage logos displayed across the platform UI.</div>
           <div style={{ display: "flex", gap: 16 }}>
-            <LogoSlot id="logo-main"    label="Main Logo" desc="Header, login screen" hint="SVG, PNG · Recommended 160×48px"
+            <LogoSlot id="logo-main"    label={t('admin.systemSettings.logo.main')}    desc={t('admin.systemSettings.logo.hintHeader')}    hint="SVG, PNG · Recommended 160×48px"
               src={mainLogo}    onUpload={f => readFile(f, setMainLogo)}    onRemove={() => setMainLogo(null)} />
-            <LogoSlot id="logo-sub"     label="Sub Logo"  desc="Collapsed sidebar"    hint="SVG, PNG · Recommended 36×36px"
+            <LogoSlot id="logo-sub"     label={t('admin.systemSettings.logo.sub')}     desc={t('admin.systemSettings.logo.hintCollapsed')} hint="SVG, PNG · Recommended 36×36px"
               src={subLogo}     onUpload={f => readFile(f, setSubLogo)}     onRemove={() => setSubLogo(null)} />
-            <LogoSlot id="logo-favicon" label="Favicon"   desc="Browser tab icon"     hint="ICO, PNG · Recommended 32×32px"
+            <LogoSlot id="logo-favicon" label={t('admin.systemSettings.logo.favicon')} desc={t('admin.systemSettings.logo.hintBrowser')}   hint="ICO, PNG · Recommended 32×32px"
               src={faviconLogo} onUpload={f => readFile(f, setFaviconLogo)} onRemove={() => setFaviconLogo(null)} />
           </div>
           <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
-            <PrimaryBtn size="small">Apply</PrimaryBtn>
+            <PrimaryBtn size="small">{t('common.action.apply')}</PrimaryBtn>
           </div>
         </Card>
 
@@ -3253,7 +3321,7 @@ export function AdminSystemSettings() {
           ))}
           <div style={{ marginTop: 16, display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <PrimaryBtn size="small" variant="secondary">Verify Relay</PrimaryBtn>
-            <PrimaryBtn size="small">Apply</PrimaryBtn>
+            <PrimaryBtn size="small">{t('common.action.apply')}</PrimaryBtn>
           </div>
         </Card>
 
@@ -3267,7 +3335,7 @@ export function AdminSystemSettings() {
             </div>
           </div>
           <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-            <PrimaryBtn size="small">Apply</PrimaryBtn>
+            <PrimaryBtn size="small">{t('common.action.apply')}</PrimaryBtn>
           </div>
         </Card>
 
@@ -3278,6 +3346,7 @@ export function AdminSystemSettings() {
 
 // ─── Storage Pricing Policy (table + drawer edit) ─────────────────────────────
 function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boolean; setShowCreate: (v: boolean) => void }) {
+  const { t } = useTranslation();
   type Unit = "h" | "m" | "d";
   type PolicyRow = { id: string; type: string; color: string; ratePerGB: string; unit: Unit; billingStop: string };
   type HistEntry = { ver: number; at: string; applyAt: string; byName: string; by: string; ratePerGB: string; unit: Unit; billingStop: string };
@@ -3312,6 +3381,9 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
   const [applyAt, setApplyAt] = useState<string>("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<{ top: number; right: number } | null>(null);
+  const [stoSortKey, setStoSortKey] = useState("name");
+  const [stoSortDir, setStoSortDir] = useState<"asc" | "desc">("asc");
+  const handleStoSort = (key: string) => { if (stoSortKey === key) setStoSortDir(d => d === "asc" ? "desc" : "asc"); else { setStoSortKey(key); setStoSortDir("asc"); } };
 
   const tomorrowDate = () => {
     const d = new Date(); d.setDate(d.getDate() + 1);
@@ -3328,7 +3400,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
     const now = new Date(); const p = (n: number) => String(n).padStart(2, "0");
     const at = `${now.getFullYear()}-${p(now.getMonth()+1)}-${p(now.getDate())} ${p(now.getHours())}:${p(now.getMinutes())}`;
     setHistories(h => ({ ...h, [draft.id]: [{ ver: newVer, at, applyAt: `${applyAt} 00:00`, byName: "이지염", by: "jiyeom.lee@sdt.inc", ratePerGB: draft.ratePerGB, unit: draft.unit, billingStop: draft.billingStop }, ...prevHist] }));
-    setPolicies(ps => ps.map(p => p.id === draft.id ? draft : p));
+    setPolicies(ps => ps.map(pol => pol.id === draft.id ? draft : pol));
     closeDrawer();
   };
 
@@ -3389,7 +3461,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
         return pendingCount > 0 ? (
           <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, marginBottom: 12 }}>
             <AlertTriangle size={12} color={PRIMARY} />
-            <span style={{ fontSize: 12, color: PRIMARY }}>현재 적용 예정인 스토리지 가격 정책이 <strong>{pendingCount}건</strong> 있습니다.</span>
+            <span style={{ fontSize: 12, color: PRIMARY }} dangerouslySetInnerHTML={{ __html: t('admin.storage.pricing.pendingBanner', { count: pendingCount }) }} />
           </div>
         ) : null;
       })()}
@@ -3397,8 +3469,20 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
       <Card style={{ overflow: "hidden" }}>
         <Table
           spacerGaps
-          headers={["정책명", "상태", "대상", "정책 내용", "적용일", "액션"]}
-          rows={policies.map(p => {
+          headers={[
+            <SortableHeader k="name" label={t('admin.pricing.col.name')} sortKey={stoSortKey} sortDir={stoSortDir} onSort={handleStoSort} />,
+            t('admin.pricing.col.status'),
+            <SortableHeader k="target" label={t('admin.pricing.col.target')} sortKey={stoSortKey} sortDir={stoSortDir} onSort={handleStoSort} />,
+            <SortableHeader k="content" label={t('admin.pricing.col.content')} sortKey={stoSortKey} sortDir={stoSortDir} onSort={handleStoSort} />,
+            t('admin.pricing.col.applyAt'),
+            t('admin.pricing.col.action'),
+          ]}
+          rows={[...policies].sort((a, b) => {
+            if (stoSortKey === "name") return stoSortDir === "asc" ? a.type.localeCompare(b.type) : b.type.localeCompare(a.type);
+            if (stoSortKey === "target") return stoSortDir === "asc" ? a.type.localeCompare(b.type) : b.type.localeCompare(a.type);
+            if (stoSortKey === "content") return stoSortDir === "asc" ? parseFloat(a.ratePerGB) - parseFloat(b.ratePerGB) : parseFloat(b.ratePerGB) - parseFloat(a.ratePerGB);
+            return 0;
+          }).map(p => {
             const now = new Date();
             const hist = histories[p.id] || [];
             const pendingEntry = hist.find(h => new Date(h.applyAt.replace(" ", "T")) > now);
@@ -3414,13 +3498,13 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 {pendingEntry && (
                   <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, width: "fit-content" }}>
                     <Clock size={10} color={YELLOW} />
-                    <span style={{ fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>v{pendingEntry.ver} 적용 예정일: {pendingEntry.applyAt.split(" ")[0]}</span>
+                    <span style={{ fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>{t('admin.pricing.pendingLabel', { ver: pendingEntry.ver, date: pendingEntry.applyAt.split(" ")[0] })}</span>
                   </div>
                 )}
               </div>
             </div>,
             /* 상태 */
-            <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap", backgroundColor: "rgba(34,197,94,0.1)", color: GREEN }}>활성</span>,
+            <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap", backgroundColor: "rgba(34,197,94,0.1)", color: GREEN }}>{t('admin.pricing.status.active')}</span>,
             /* 대상 */
             <span style={{ fontSize: 13, color: GRAY_70, whiteSpace: "nowrap" }}>{p.type} Storage</span>,
             /* 정책 내용 */
@@ -3429,14 +3513,14 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
             <span style={{ fontSize: 12, color: GRAY_60, whiteSpace: "nowrap" }}>{currentEntry ? currentEntry.applyAt.split(" ")[0] : "—"}</span>,
             /* 액션 */
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <button type="button" onClick={() => openDrawer(p)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+              <button type="button" onClick={() => openDrawer(p)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
               <div style={{ position: "relative" }}>
                 {openMenuId === p.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                 <button type="button" onClick={(e) => { if (openMenuId !== p.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === p.id ? null : p.id); }}
                   style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === p.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                   onMouseEnter={e => { if (openMenuId !== p.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                   onMouseLeave={e => { if (openMenuId !== p.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                  <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
                   <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === p.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === p.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                     <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === p.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </span>
@@ -3444,11 +3528,11 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 {openMenuId === p.id && menuAnchor && (
                   <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 140, padding: "4px 0" }}>
                     {pendingEntry
-                      ? <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>새 버전 수정</button>
-                      : <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>새 버전 생성</button>
+                      ? <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.editVersion')}</button>
+                      : <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.newVersion')}</button>
                     }
                     <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
-                    <button type="button" onClick={() => { setPolicies(ps => ps.filter(x => x.id !== p.id)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                    <button type="button" onClick={() => { setPolicies(ps => ps.filter(x => x.id !== p.id)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                   </div>
                 )}
               </div>
@@ -3471,7 +3555,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                   </div>
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{draft.type}</div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>가격 정책 수정</div>
+                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>{t('admin.storage.pricing.editSubtitle')}</div>
                   </div>
                 </div>
                 <button type="button" onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
@@ -3484,11 +3568,11 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
 
             {/* Drawer tabs */}
             <div style={{ display: "flex", borderBottom: `1px solid ${GRAY_10}`, padding: "0 24px" }}>
-              {(["edit", "history"] as const).map(t => {
+              {(["edit", "history"] as const).map(tabKey => {
                 const hasPending = (histories[draft.id] || []).some(h => new Date(h.applyAt.replace(" ", "T")) > new Date());
-                const label = t === "edit" ? (hasPending ? "새 버전 수정" : "새 버전 생성") : `버전 변경 이력 (${(histories[draft.id] || []).length})`;
+                const label = tabKey === "edit" ? (hasPending ? t('admin.pricing.tab.editPending') : t('admin.pricing.tab.editNew')) : t('admin.pricing.tab.history', { count: (histories[draft.id] || []).length });
                 return (
-                  <button key={t} type="button" onClick={() => setDrawerTab(t)} style={{ padding: "10px 14px", fontSize: 13, fontWeight: drawerTab === t ? 600 : 400, color: drawerTab === t ? PRIMARY : GRAY_60, background: "none", border: "none", borderBottom: `2px solid ${drawerTab === t ? PRIMARY : "transparent"}`, cursor: "pointer", marginBottom: -1, fontFamily: "inherit" }}>
+                  <button key={tabKey} type="button" onClick={() => setDrawerTab(tabKey)} style={{ padding: "10px 14px", fontSize: 13, fontWeight: drawerTab === tabKey ? 600 : 400, color: drawerTab === tabKey ? PRIMARY : GRAY_60, background: "none", border: "none", borderBottom: `2px solid ${drawerTab === tabKey ? PRIMARY : "transparent"}`, cursor: "pointer", marginBottom: -1, fontFamily: "inherit" }}>
                     {label}
                   </button>
                 );
@@ -3499,7 +3583,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
             {drawerTab === "history" && (
               <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
                 {(histories[draft.id] || []).length === 0
-                  ? <div style={{ fontSize: 13, color: GRAY_40, textAlign: "center", marginTop: 40 }}>변경 이력이 없습니다.</div>
+                  ? <div style={{ fontSize: 13, color: GRAY_40, textAlign: "center", marginTop: 40 }}>{t('admin.pricing.history.empty')}</div>
                   : (() => {
                     const now = new Date();
                     const isPending = (h: HistEntry) => new Date(h.applyAt.replace(" ", "T")) > now;
@@ -3515,11 +3599,11 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                           {/* 버전 + 상태 */}
                           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                             <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99, backgroundColor: isCurrent ? PRIMARY_10 : GRAY_10, color: isCurrent ? PRIMARY : GRAY_60 }}>v{h.ver}</span>
-                            {isCurrent && <span style={{ fontSize: 11, fontWeight: 600, color: PRIMARY }}>현재 적용 중</span>}
+                            {isCurrent && <span style={{ fontSize: 11, fontWeight: 600, color: PRIMARY }}>{t('admin.pricing.history.current')}</span>}
                             {pending && (
                               <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10 }}>
                                 <Clock size={10} color={YELLOW} />
-                                <span style={{ fontSize: 11, color: YELLOW }}>v{h.ver} 적용 예정일: {h.applyAt.split(" ")[0]}</span>
+                                <span style={{ fontSize: 11, color: YELLOW }}>{t('admin.pricing.pendingLabel', { ver: h.ver, date: h.applyAt.split(" ")[0] })}</span>
                               </div>
                             )}
                           </div>
@@ -3529,11 +3613,11 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                           </div>
                           {/* 메타 */}
                           <div style={{ display: "grid", gridTemplateColumns: "64px 1fr", rowGap: 3 }}>
-                            <span style={{ fontSize: 11, color: GRAY_40 }}>적용일</span>
+                            <span style={{ fontSize: 11, color: GRAY_40 }}>{t('admin.pricing.history.applyAt')}</span>
                             <span style={{ fontSize: 11, color: GRAY_60 }}>{h.applyAt.split(" ")[0]}</span>
-                            <span style={{ fontSize: 11, color: GRAY_40 }}>등록 일시</span>
+                            <span style={{ fontSize: 11, color: GRAY_40 }}>{t('admin.pricing.history.registeredAt')}</span>
                             <span style={{ fontSize: 11, color: GRAY_60 }}>{h.at}</span>
-                            <span style={{ fontSize: 11, color: GRAY_40 }}>등록자</span>
+                            <span style={{ fontSize: 11, color: GRAY_40 }}>{t('admin.pricing.history.registeredBy')}</span>
                             <span style={{ fontSize: 11, color: GRAY_60 }}>{h.byName} ({h.by})</span>
                           </div>
                         </div>
@@ -3549,16 +3633,16 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
 
               {/* 버전명 */}
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>버전명</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.version')}</div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_10}`, backgroundColor: GRAY_5 }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_70 }}>v{(histories[draft.id]?.[0]?.ver ?? 0) + 1}</span>
-                  <span style={{ fontSize: 10, color: GRAY_40, backgroundColor: "white", border: `1px solid ${GRAY_10}`, borderRadius: 4, padding: "1px 6px" }}>자동 생성</span>
+                  <span style={{ fontSize: 10, color: GRAY_40, backgroundColor: "white", border: `1px solid ${GRAY_10}`, borderRadius: 4, padding: "1px 6px" }}>{t('admin.pricing.autoGenerate')}</span>
                 </div>
               </div>
 
               {/* 가격 */}
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>가격</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.price')}</div>
                 <div style={{ display: "flex", alignItems: "center", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, overflow: "hidden", transition: "border-color 0.1s" }}
                   onFocusCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = PRIMARY; }}
                   onBlurCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = GRAY_30; }}>
@@ -3574,7 +3658,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
 
               {/* 과금 단위 */}
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 단위</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.billingUnit')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["h", "m", "d"] as Unit[]).map(u => (
                     <button type="button" key={u} onClick={() => setDraft(d => d ? { ...d, unit: u } : d)} style={{
@@ -3583,14 +3667,14 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                       backgroundColor: draft.unit === u ? `rgba(99,90,220,0.07)` : "white",
                       color: draft.unit === u ? PRIMARY : GRAY_60,
                       fontFamily: "inherit", transition: "all 0.1s",
-                    }}>{u === "h" ? "시간 (h)" : u === "m" ? "분 (m)" : "일 (d)"}</button>
+                    }}>{u === "h" ? t('admin.pricing.unit.hour') : u === "m" ? t('admin.pricing.unit.minute') : t('admin.pricing.unit.day')}</button>
                   ))}
                 </div>
               </div>
 
               {/* 변경 적용일 */}
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>변경 적용일</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.applyAt')}</div>
                 <div style={{ position: "relative", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", cursor: "pointer" }}>
                   <span style={{ fontSize: 13, color: applyAt ? GRAY_90 : GRAY_40, pointerEvents: "none", userSelect: "none" }}>
                     {applyAt ? applyAt : "YYYY-MM-DD"}
@@ -3605,20 +3689,20 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
 
               {/* 미리보기 */}
               <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>미리보기 · 100GB 기준</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>{t('admin.storage.pricing.preview')}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: GRAY_60 }}>정책명</span>
+                  <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.policyName')}</span>
                   <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{draft.id}-policy-v{(histories[draft.id]?.[0]?.ver ?? 0) + 1}</span>
                 </div>
                 {applyAt && (
                   <div style={{ marginBottom: 10, paddingBottom: 10, borderBottom: `1px solid ${GRAY_10}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>적용일</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.applyAt')}</span>
                       <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{applyAt}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>상태</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>적용 예정</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.status')}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>{t('admin.pricing.preview.pending')}</span>
                     </div>
                   </div>
                 )}
@@ -3628,9 +3712,9 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                   const perDay  = draft.unit === "h" ? r * 24 : draft.unit === "m" ? r * 60 * 24 : r;
                   const perMonth = perDay * 30;
                   const rows = [
-                    { label: `1${draft.unit}당`, val: perUnit.toFixed(2) },
-                    { label: "일당",             val: perDay.toFixed(1) },
-                    { label: "30일",             val: perMonth.toFixed(0) },
+                    { label: t('admin.pricing.preview.perUnit', { unit: draft.unit }), val: perUnit.toFixed(2) },
+                    { label: t('admin.pricing.preview.perDay'),                        val: perDay.toFixed(1) },
+                    { label: t('admin.pricing.preview.per30day'),                      val: perMonth.toFixed(0) },
                   ];
                   return rows.map(({ label, val }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -3643,8 +3727,8 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
 
               {/* 버튼 */}
               <div style={{ borderTop: `1px solid ${GRAY_10}`, marginTop: 24, paddingTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <PrimaryBtn size="small" onClick={saveEdit}>저장</PrimaryBtn>
-                <PrimaryBtn size="small" variant="secondary" onClick={closeDrawer}>취소</PrimaryBtn>
+                <PrimaryBtn size="small" onClick={saveEdit}>{t('common.action.save')}</PrimaryBtn>
+                <PrimaryBtn size="small" variant="secondary" onClick={closeDrawer}>{t('common.action.cancel')}</PrimaryBtn>
               </div>
             </div>}
           </div>
@@ -3662,8 +3746,8 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                     <ScrollText size={14} color={PRIMARY} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>가격 정책 등록</div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>새 스토리지 가격 정책을 등록합니다.</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.storage.pricing.createTitle')}</div>
+                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>{t('admin.storage.pricing.createSubtitle')}</div>
                   </div>
                 </div>
                 <button type="button" onClick={() => setShowCreate(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
@@ -3675,11 +3759,11 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>스토리지 타입 선택</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.storage.pricing.typeSelectLabel')}</div>
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ position: "relative" }}>
                     <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                    <input type="text" placeholder="검색어를 입력하세요." value={createSearch} onChange={e => setCreateSearch(e.target.value)}
+                    <input type="text" placeholder={t('common.placeholder.search')} value={createSearch} onChange={e => setCreateSearch(e.target.value)}
                       style={{ width: "100%", height: 32, paddingLeft: 28, paddingRight: 10, borderRadius: 7, border: `1.5px solid ${GRAY_10}`, fontSize: 12, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }}
                       onFocus={e => { e.target.style.borderColor = PRIMARY; }} onBlur={e => { e.target.style.borderColor = GRAY_10; }} />
                   </div>
@@ -3689,13 +3773,13 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                     <thead>
                       <tr style={{ backgroundColor: GRAY_5 }}>
                         <th onClick={() => toggleStorageSort("type")} style={{ padding: "7px 14px", textAlign: "left", fontSize: 11, fontWeight: 600, color: GRAY_60, borderBottom: `1px solid ${GRAY_10}`, cursor: "pointer", userSelect: "none" }}>
-                          <div style={{ display: "flex", alignItems: "center" }}>스토리지 타입{storageSortIcon("type")}</div>
+                          <div style={{ display: "flex", alignItems: "center" }}>{t('admin.storage.pricing.typeColHeader')}{storageSortIcon("type")}</div>
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredCreatePolicies.length === 0 ? (
-                        <tr><td style={{ padding: "20px 14px", textAlign: "center", fontSize: 12, color: GRAY_40 }}>검색 결과가 없습니다.</td></tr>
+                        <tr><td style={{ padding: "20px 14px", textAlign: "center", fontSize: 12, color: GRAY_40 }}>{t('common.empty.noResults')}</td></tr>
                       ) : filteredCreatePolicies.map((p, idx) => {
                         const sel = createForm.selectedId === p.id;
                         const isLast = idx === filteredCreatePolicies.length - 1;
@@ -3715,16 +3799,16 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 </Card>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>버전명</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.version')}</div>
                 <div style={{ height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_10}`, backgroundColor: GRAY_5, display: "flex", alignItems: "center" }}>
                   {createForm.selectedId
                     ? <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_70 }}>v{(histories[createForm.selectedId]?.[0]?.ver ?? 0) + 1}</span>
-                    : <span style={{ fontSize: 13, color: GRAY_40 }}>타입을 선택하면 자동 생성됩니다.</span>
+                    : <span style={{ fontSize: 13, color: GRAY_40 }}>{t('admin.storage.pricing.versionHint')}</span>
                   }
                 </div>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>가격</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.price')}</div>
                 <div style={{ display: "flex", alignItems: "center", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, overflow: "hidden" }}
                   onFocusCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = PRIMARY; }}
                   onBlurCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = GRAY_30; }}>
@@ -3735,7 +3819,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 </div>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 단위</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.billingUnit')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["h", "m", "d"] as Unit[]).map(u => (
                     <button type="button" key={u} onClick={() => setCreateForm(f => ({ ...f, unit: u }))} style={{
@@ -3743,12 +3827,12 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                       border: `1.5px solid ${createForm.unit === u ? PRIMARY : GRAY_30}`,
                       backgroundColor: createForm.unit === u ? "rgba(99,90,220,0.07)" : "white",
                       color: createForm.unit === u ? PRIMARY : GRAY_60, fontFamily: "inherit", transition: "all 0.1s",
-                    }}>{u === "h" ? "시간 (h)" : u === "m" ? "분 (m)" : "일 (d)"}</button>
+                    }}>{u === "h" ? t('admin.pricing.unit.hour') : u === "m" ? t('admin.pricing.unit.minute') : t('admin.pricing.unit.day')}</button>
                   ))}
                 </div>
               </div>
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>적용일</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.applyAt')}</div>
                 <div style={{ position: "relative", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", cursor: "pointer" }}>
                   <span style={{ fontSize: 13, color: createApplyAt ? GRAY_90 : GRAY_40, pointerEvents: "none", userSelect: "none" }}>
                     {createApplyAt ? `${createApplyAt}` : "YYYY-MM-DD"}
@@ -3761,9 +3845,9 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
               </div>
               {/* 미리보기 */}
               <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>미리보기 · 100GB 기준</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>{t('admin.storage.pricing.preview')}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: GRAY_60 }}>정책명</span>
+                  <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.policyName')}</span>
                   {createForm.selectedId
                     ? <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{createForm.selectedId}-policy-v{(histories[createForm.selectedId]?.[0]?.ver ?? 0) + 1}</span>
                     : <span style={{ fontSize: 12, color: GRAY_40 }}>—</span>
@@ -3772,12 +3856,12 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 {createApplyAt && (
                   <div style={{ marginBottom: 10, paddingBottom: 10, borderBottom: `1px solid ${GRAY_10}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>적용일</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.applyAt')}</span>
                       <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{createApplyAt}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>상태</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>적용 예정</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.status')}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>{t('admin.pricing.preview.pending')}</span>
                     </div>
                   </div>
                 )}
@@ -3785,9 +3869,9 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                   const r = parseFloat(createForm.ratePerGB || "0") * 100;
                   const perDay = createForm.unit === "h" ? r * 24 : createForm.unit === "m" ? r * 60 * 24 : r;
                   return [
-                    { label: `1${createForm.unit}당`, val: r.toFixed(2) },
-                    { label: "일당",                  val: perDay.toFixed(1) },
-                    { label: "30일",                  val: (perDay * 30).toFixed(0) },
+                    { label: t('admin.pricing.preview.perUnit', { unit: createForm.unit }), val: r.toFixed(2) },
+                    { label: t('admin.pricing.preview.perDay'),                              val: perDay.toFixed(1) },
+                    { label: t('admin.pricing.preview.per30day'),                            val: (perDay * 30).toFixed(0) },
                   ].map(({ label, val }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                       <span style={{ fontSize: 12, color: GRAY_60 }}>{label}</span>
@@ -3797,8 +3881,8 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 })()}
               </div>
               <div style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <PrimaryBtn size="small" onClick={saveCreate}>등록</PrimaryBtn>
-                <PrimaryBtn size="small" variant="secondary" onClick={() => setShowCreate(false)}>취소</PrimaryBtn>
+                <PrimaryBtn size="small" onClick={saveCreate}>{t('common.action.register')}</PrimaryBtn>
+                <PrimaryBtn size="small" variant="secondary" onClick={() => setShowCreate(false)}>{t('common.action.cancel')}</PrimaryBtn>
               </div>
             </div>
           </div>
@@ -3819,6 +3903,7 @@ const INIT_GPU_PRICES: GpuPrice[] = [
 ];
 
 function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { prices: GpuPrice[]; setPrices: React.Dispatch<React.SetStateAction<GpuPrice[]>>; showCreate: boolean; setShowCreate: (v: boolean) => void }) {
+  const { t } = useTranslation();
   type GpuHistEntry = { ver: number; at: string; applyAt: string; byName: string; by: string; rate: string; unit: GpuUnit };
   const [histories, setHistories] = useState<Record<string, GpuHistEntry[]>>({
     h100:  [
@@ -3849,6 +3934,9 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
   const [applyAt, setApplyAt] = useState<string>("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<{ top: number; right: number } | null>(null);
+  const [gpuPriceSortKey, setGpuPriceSortKey] = useState("name");
+  const [gpuPriceSortDir, setGpuPriceSortDir] = useState<"asc" | "desc">("asc");
+  const handleGpuPriceSort = (key: string) => { if (gpuPriceSortKey === key) setGpuPriceSortDir(d => d === "asc" ? "desc" : "asc"); else { setGpuPriceSortKey(key); setGpuPriceSortDir("asc"); } };
 
   const tomorrowDate = () => {
     const d = new Date(); d.setDate(d.getDate() + 1);
@@ -3925,7 +4013,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
         return pendingCount > 0 ? (
           <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, marginBottom: 12 }}>
             <AlertTriangle size={12} color={PRIMARY} />
-            <span style={{ fontSize: 12, color: PRIMARY }}>현재 적용 예정인 GPU 가격 정책이 <strong>{pendingCount}건</strong> 있습니다.</span>
+            <span style={{ fontSize: 12, color: PRIMARY }} dangerouslySetInnerHTML={{ __html: t('admin.gpu.pricing.pendingBanner', { count: pendingCount }) }} />
           </div>
         ) : null;
       })()}
@@ -3933,8 +4021,20 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
       <Card style={{ overflow: "hidden" }}>
         <Table
           spacerGaps
-          headers={["정책명", "상태", "GPU", "정책 내용", "적용일", "액션"]}
-          rows={prices.map(p => {
+          headers={[
+            <SortableHeader k="name" label={t('admin.pricing.col.name')} sortKey={gpuPriceSortKey} sortDir={gpuPriceSortDir} onSort={handleGpuPriceSort} />,
+            t('admin.pricing.col.status'),
+            <SortableHeader k="target" label={t('admin.pricing.col.gpu')} sortKey={gpuPriceSortKey} sortDir={gpuPriceSortDir} onSort={handleGpuPriceSort} />,
+            <SortableHeader k="content" label={t('admin.pricing.col.content')} sortKey={gpuPriceSortKey} sortDir={gpuPriceSortDir} onSort={handleGpuPriceSort} />,
+            t('admin.pricing.col.applyAt'),
+            t('admin.pricing.col.action'),
+          ]}
+          rows={[...prices].sort((a, b) => {
+            if (gpuPriceSortKey === "name") return gpuPriceSortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            if (gpuPriceSortKey === "target") return gpuPriceSortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            if (gpuPriceSortKey === "content") return gpuPriceSortDir === "asc" ? parseFloat(a.rate) - parseFloat(b.rate) : parseFloat(b.rate) - parseFloat(a.rate);
+            return 0;
+          }).map(p => {
             const now = new Date();
             const hist = histories[p.id] || [];
             const pendingEntry = hist.find(h => new Date(h.applyAt.replace(" ", "T")) > now);
@@ -3950,19 +4050,19 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                 {pendingEntry && (
                   <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, width: "fit-content" }}>
                     <Clock size={10} color={YELLOW} />
-                    <span style={{ fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>v{pendingEntry.ver} 적용 예정일: {pendingEntry.applyAt.split(" ")[0]}</span>
+                    <span style={{ fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>{t('admin.pricing.pendingLabel', { ver: pendingEntry.ver, date: pendingEntry.applyAt.split(" ")[0] })}</span>
                   </div>
                 )}
                 {!p.enabled && p.disabledAt && (
                   <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, width: "fit-content" }}>
                     <Clock size={10} color={YELLOW} />
-                    <span style={{ fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>비활성 일시: {p.disabledAt}</span>
+                    <span style={{ fontSize: 11, color: YELLOW, whiteSpace: "nowrap" }}>{t('admin.gpu.pricing.disabledAt', { date: p.disabledAt })}</span>
                   </div>
                 )}
               </div>
             </div>,
             /* 상태 */
-            <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap", backgroundColor: p.enabled ? "rgba(34,197,94,0.1)" : GRAY_10, color: p.enabled ? GREEN : GRAY_60 }}>{p.enabled ? "활성" : "비활성"}</span>,
+            <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 99, whiteSpace: "nowrap", backgroundColor: p.enabled ? "rgba(34,197,94,0.1)" : GRAY_10, color: p.enabled ? GREEN : GRAY_60 }}>{p.enabled ? t('admin.pricing.status.active') : t('admin.pricing.status.inactive')}</span>,
             /* GPU Type */
             <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <span style={{ fontSize: 13, color: GRAY_70, whiteSpace: "nowrap" }}>{p.name}</span>
@@ -3974,14 +4074,14 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
             <span style={{ fontSize: 12, color: GRAY_60, whiteSpace: "nowrap" }}>{currentEntry ? currentEntry.applyAt.split(" ")[0] : "—"}</span>,
             /* 액션 */
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <button type="button" onClick={() => openDrawer(p)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+              <button type="button" onClick={() => openDrawer(p)} style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
               <div style={{ position: "relative" }}>
                 {openMenuId === p.id && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                 <button type="button" onClick={(e) => { if (openMenuId !== p.id) { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === p.id ? null : p.id); }}
                   style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === p.id ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                   onMouseEnter={e => { if (openMenuId !== p.id) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                   onMouseLeave={e => { if (openMenuId !== p.id) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                  <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
                   <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === p.id ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === p.id ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                     <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === p.id ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </span>
@@ -3990,11 +4090,11 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 140, padding: "4px 0" }}>
                     {p.enabled && (
                       pendingEntry
-                        ? <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>새 버전 수정</button>
-                        : <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>새 버전 생성</button>
+                        ? <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.editVersion')}</button>
+                        : <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.newVersion')}</button>
                     )}
                     {p.enabled && <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />}
-                    <button type="button" onClick={() => { setPrices(ps => ps.filter(x => x.id !== p.id)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>삭제</button>
+                    <button type="button" onClick={() => { setPrices(ps => ps.filter(x => x.id !== p.id)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
                   </div>
                 )}
               </div>
@@ -4017,7 +4117,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   </div>
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{draft.name}</div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>VRAM {draft.vram} · 가격 정책 수정</div>
+                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>{t('admin.gpu.pricing.editSubtitle', { vram: draft.vram })}</div>
                   </div>
                 </div>
                 <button type="button" onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
@@ -4030,11 +4130,11 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
 
             {/* Tab switcher */}
             <div style={{ display: "flex", borderBottom: `1px solid ${GRAY_10}`, paddingLeft: 24 }}>
-              {(["edit", "history"] as const).map(t => {
+              {(["edit", "history"] as const).map(tabKey => {
                 const hasPending = (histories[draft.id] || []).some(h => new Date(h.applyAt.replace(" ", "T")) > new Date());
-                const label = t === "edit" ? (hasPending ? "새 버전 수정" : "새 버전 생성") : `버전 변경 이력 (${(histories[draft.id] || []).length})`;
+                const label = tabKey === "edit" ? (hasPending ? t('admin.pricing.tab.editPending') : t('admin.pricing.tab.editNew')) : t('admin.pricing.tab.history', { count: (histories[draft.id] || []).length });
                 return (
-                  <button key={t} type="button" onClick={() => setDrawerTab(t)} style={{ padding: "10px 14px", fontSize: 13, fontWeight: drawerTab === t ? 600 : 400, color: drawerTab === t ? PRIMARY : GRAY_60, background: "none", border: "none", borderBottom: `2px solid ${drawerTab === t ? PRIMARY : "transparent"}`, cursor: "pointer", marginBottom: -1, fontFamily: "inherit" }}>
+                  <button key={tabKey} type="button" onClick={() => setDrawerTab(tabKey)} style={{ padding: "10px 14px", fontSize: 13, fontWeight: drawerTab === tabKey ? 600 : 400, color: drawerTab === tabKey ? PRIMARY : GRAY_60, background: "none", border: "none", borderBottom: `2px solid ${drawerTab === tabKey ? PRIMARY : "transparent"}`, cursor: "pointer", marginBottom: -1, fontFamily: "inherit" }}>
                     {label}
                   </button>
                 );
@@ -4045,7 +4145,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
             {drawerTab === "history" && (
               <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
                 {(histories[draft.id] || []).length === 0
-                  ? <div style={{ fontSize: 13, color: GRAY_40, textAlign: "center", marginTop: 40 }}>변경 이력이 없습니다.</div>
+                  ? <div style={{ fontSize: 13, color: GRAY_40, textAlign: "center", marginTop: 40 }}>{t('admin.pricing.history.empty')}</div>
                   : (() => {
                     const now = new Date();
                     const isPendingEntry = (h: GpuHistEntry) => new Date(h.applyAt.replace(" ", "T")) > now;
@@ -4061,11 +4161,11 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                           {/* 버전 + 상태 */}
                           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
                             <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99, backgroundColor: isCurrent ? PRIMARY_10 : GRAY_10, color: isCurrent ? PRIMARY : GRAY_60 }}>v{h.ver}</span>
-                            {isCurrent && <span style={{ fontSize: 11, fontWeight: 600, color: PRIMARY }}>현재 적용 중</span>}
+                            {isCurrent && <span style={{ fontSize: 11, fontWeight: 600, color: PRIMARY }}>{t('admin.pricing.history.current')}</span>}
                             {pending && (
                               <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10 }}>
                                 <Clock size={10} color={YELLOW} />
-                                <span style={{ fontSize: 11, color: YELLOW }}>v{h.ver} 적용 예정일: {h.applyAt.split(" ")[0]}</span>
+                                <span style={{ fontSize: 11, color: YELLOW }}>{t('admin.pricing.pendingLabel', { ver: h.ver, date: h.applyAt.split(" ")[0] })}</span>
                               </div>
                             )}
                           </div>
@@ -4075,11 +4175,11 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                           </div>
                           {/* 메타 */}
                           <div style={{ display: "grid", gridTemplateColumns: "64px 1fr", rowGap: 3 }}>
-                            <span style={{ fontSize: 11, color: GRAY_40 }}>적용일</span>
+                            <span style={{ fontSize: 11, color: GRAY_40 }}>{t('admin.pricing.history.applyAt')}</span>
                             <span style={{ fontSize: 11, color: GRAY_60 }}>{h.applyAt.split(" ")[0]}</span>
-                            <span style={{ fontSize: 11, color: GRAY_40 }}>등록 일시</span>
+                            <span style={{ fontSize: 11, color: GRAY_40 }}>{t('admin.pricing.history.registeredAt')}</span>
                             <span style={{ fontSize: 11, color: GRAY_60 }}>{h.at}</span>
-                            <span style={{ fontSize: 11, color: GRAY_40 }}>등록자</span>
+                            <span style={{ fontSize: 11, color: GRAY_40 }}>{t('admin.pricing.history.registeredBy')}</span>
                             <span style={{ fontSize: 11, color: GRAY_60 }}>{h.byName} ({h.by})</span>
                           </div>
                         </div>
@@ -4094,15 +4194,15 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
             {drawerTab === "edit" && <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
               {/* 버전명 */}
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>버전명</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.version')}</div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_10}`, backgroundColor: GRAY_5 }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_70 }}>v{(histories[draft.id]?.[0]?.ver ?? 0) + 1}</span>
-                  <span style={{ fontSize: 10, color: GRAY_40, backgroundColor: "white", border: `1px solid ${GRAY_10}`, borderRadius: 4, padding: "1px 6px" }}>자동 생성</span>
+                  <span style={{ fontSize: 10, color: GRAY_40, backgroundColor: "white", border: `1px solid ${GRAY_10}`, borderRadius: 4, padding: "1px 6px" }}>{t('admin.pricing.autoGenerate')}</span>
                 </div>
               </div>
               {/* 가격 */}
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>가격</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.price')}</div>
                 <div style={{ display: "flex", alignItems: "center", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, overflow: "hidden" }}
                   onFocusCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = PRIMARY; }}
                   onBlurCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = GRAY_30; }}>
@@ -4118,7 +4218,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
 
               {/* 과금 단위 */}
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 단위</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.billingUnit')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["min", "h", "day"] as GpuUnit[]).map(u => (
                     <button type="button" key={u} onClick={() => setDraft(d => d ? { ...d, unit: u } : d)} style={{
@@ -4127,14 +4227,14 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                       backgroundColor: draft.unit === u ? "rgba(99,90,220,0.07)" : "white",
                       color: draft.unit === u ? PRIMARY : GRAY_60,
                       fontFamily: "inherit", transition: "all 0.1s",
-                    }}>{u === "min" ? "분 (min)" : u === "h" ? "시간 (h)" : "일 (day)"}</button>
+                    }}>{u === "min" ? t('admin.gpu.pricing.unit.minute') : u === "h" ? t('admin.gpu.pricing.unit.hour') : t('admin.gpu.pricing.unit.day')}</button>
                   ))}
                 </div>
               </div>
 
               {/* 변경 적용일 */}
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>변경 적용일</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.applyAt')}</div>
                 <div style={{ position: "relative", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", cursor: "pointer" }}>
                   <span style={{ fontSize: 13, color: applyAt ? GRAY_90 : GRAY_40, pointerEvents: "none", userSelect: "none" }}>
                     {applyAt ? applyAt : "YYYY-MM-DD"}
@@ -4149,20 +4249,20 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
 
               {/* 미리보기 */}
               <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>미리보기 · GPU 1대 기준</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>{t('admin.gpu.pricing.preview')}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: GRAY_60 }}>정책명</span>
+                  <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.policyName')}</span>
                   <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{draft.id}-{draft.vram.toLowerCase()}-policy-v{(histories[draft.id]?.[0]?.ver ?? 0) + 1}</span>
                 </div>
                 {applyAt && (
                   <div style={{ marginBottom: 10, paddingBottom: 10, borderBottom: `1px solid ${GRAY_10}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>적용일</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.applyAt')}</span>
                       <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{applyAt}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>상태</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>적용 예정</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.status')}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>{t('admin.pricing.preview.pending')}</span>
                     </div>
                   </div>
                 )}
@@ -4172,9 +4272,9 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   const perDay  = draft.unit === "min" ? r * 1440 : draft.unit === "h" ? r * 24 : r;
                   const perMonth = perDay * 30;
                   return [
-                    { label: `1${draft.unit === "min" ? "분" : draft.unit === "h" ? "시간" : "일"}당`, val: perUnit.toFixed(2) },
-                    { label: "일당",  val: perDay.toFixed(1) },
-                    { label: "30일", val: perMonth.toFixed(0) },
+                    { label: t('admin.pricing.preview.perUnitGpu', { unit: draft.unit }), val: perUnit.toFixed(2) },
+                    { label: t('admin.pricing.preview.perDay'),                            val: perDay.toFixed(1) },
+                    { label: t('admin.pricing.preview.per30day'),                          val: perMonth.toFixed(0) },
                   ].map(({ label, val }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                       <span style={{ fontSize: 12, color: GRAY_60 }}>{label}</span>
@@ -4186,8 +4286,8 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
 
               {/* 버튼 */}
               <div style={{ borderTop: `1px solid ${GRAY_10}`, marginTop: 24, paddingTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <PrimaryBtn size="small" onClick={saveEdit}>저장</PrimaryBtn>
-                <PrimaryBtn size="small" variant="secondary" onClick={closeDrawer}>취소</PrimaryBtn>
+                <PrimaryBtn size="small" onClick={saveEdit}>{t('common.action.save')}</PrimaryBtn>
+                <PrimaryBtn size="small" variant="secondary" onClick={closeDrawer}>{t('common.action.cancel')}</PrimaryBtn>
               </div>
             </div>}
           </div>
@@ -4206,8 +4306,8 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                     <ScrollText size={14} color={PRIMARY} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>가격 정책 등록</div>
-                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>새 GPU 타입 가격 정책을 등록합니다.</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.gpu.pricing.createTitle')}</div>
+                    <div style={{ fontSize: 12, color: GRAY_60, marginTop: 1 }}>{t('admin.gpu.pricing.createSubtitle')}</div>
                   </div>
                 </div>
                 <button type="button" onClick={() => setShowCreate(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, color: GRAY_60, display: "flex", borderRadius: 6 }}
@@ -4219,11 +4319,11 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>GPU 선택</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.gpu.pricing.gpuSelectLabel')}</div>
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ position: "relative" }}>
                     <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                    <input type="text" placeholder="검색어를 입력하세요." value={gpuCreateSearch} onChange={e => setGpuCreateSearch(e.target.value)}
+                    <input type="text" placeholder={t('common.placeholder.search')} value={gpuCreateSearch} onChange={e => setGpuCreateSearch(e.target.value)}
                       style={{ width: "100%", height: 32, paddingLeft: 28, paddingRight: 10, borderRadius: 7, border: `1.5px solid ${GRAY_10}`, fontSize: 12, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }}
                       onFocus={e => { e.target.style.borderColor = PRIMARY; }} onBlur={e => { e.target.style.borderColor = GRAY_10; }} />
                   </div>
@@ -4242,7 +4342,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                     </thead>
                     <tbody>
                       {filteredCreatePrices.length === 0 ? (
-                        <tr><td colSpan={2} style={{ padding: "20px 14px", textAlign: "center", fontSize: 12, color: GRAY_40 }}>검색 결과가 없습니다.</td></tr>
+                        <tr><td colSpan={2} style={{ padding: "20px 14px", textAlign: "center", fontSize: 12, color: GRAY_40 }}>{t('common.empty.noResults')}</td></tr>
                       ) : filteredCreatePrices.map((p, idx) => {
                         const sel = createForm.selectedId === p.id;
                         const isLast = idx === filteredCreatePrices.length - 1;
@@ -4265,18 +4365,18 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                 </Card>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>버전명</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.version')}</div>
                 <div style={{ height: 42, padding: "0 12px", borderRadius: 8, border: `1.5px solid ${GRAY_10}`, backgroundColor: GRAY_5, display: "flex", alignItems: "center" }}>
                   {(() => {
                     const sel = prices.find(p => p.id === createForm.selectedId);
                     return sel
                       ? <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_70 }}>v{(histories[sel.id]?.[0]?.ver ?? 0) + 1}</span>
-                      : <span style={{ fontSize: 13, color: GRAY_40 }}>GPU를 선택하면 자동 생성됩니다.</span>;
+                      : <span style={{ fontSize: 13, color: GRAY_40 }}>{t('admin.gpu.pricing.versionHint')}</span>;
                   })()}
                 </div>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>가격</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.price')}</div>
                 <div style={{ display: "flex", alignItems: "center", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, overflow: "hidden" }}
                   onFocusCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = PRIMARY; }}
                   onBlurCapture={e => { (e.currentTarget as HTMLElement).style.borderColor = GRAY_30; }}>
@@ -4287,7 +4387,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                 </div>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>과금 단위</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.billingUnit')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {(["min", "h", "day"] as GpuUnit[]).map(u => (
                     <button type="button" key={u} onClick={() => setCreateForm(f => ({ ...f, unit: u }))} style={{
@@ -4295,12 +4395,12 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                       border: `1.5px solid ${createForm.unit === u ? PRIMARY : GRAY_30}`,
                       backgroundColor: createForm.unit === u ? "rgba(99,90,220,0.07)" : "white",
                       color: createForm.unit === u ? PRIMARY : GRAY_60, fontFamily: "inherit", transition: "all 0.1s",
-                    }}>{u === "min" ? "분 (min)" : u === "h" ? "시간 (h)" : "일 (day)"}</button>
+                    }}>{u === "min" ? t('admin.gpu.pricing.unit.minute') : u === "h" ? t('admin.gpu.pricing.unit.hour') : t('admin.gpu.pricing.unit.day')}</button>
                   ))}
                 </div>
               </div>
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>적용일</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.applyAt')}</div>
                 <div style={{ position: "relative", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, height: 42, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", cursor: "pointer" }}>
                   <span style={{ fontSize: 13, color: createApplyAt ? GRAY_90 : GRAY_40, pointerEvents: "none", userSelect: "none" }}>
                     {createApplyAt ? `${createApplyAt}` : "YYYY-MM-DD"}
@@ -4313,9 +4413,9 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
               </div>
               {/* 미리보기 */}
               <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 18px", marginBottom: 24 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>미리보기 · GPU 1대 기준</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 14 }}>{t('admin.gpu.pricing.preview')}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: GRAY_60 }}>정책명</span>
+                  <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.policyName')}</span>
                   {(() => {
                     const sel = prices.find(p => p.id === createForm.selectedId);
                     return sel
@@ -4326,12 +4426,12 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                 {createApplyAt && (
                   <div style={{ marginBottom: 10, paddingBottom: 10, borderBottom: `1px solid ${GRAY_10}` }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>적용일</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.applyAt')}</span>
                       <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_70 }}>{createApplyAt}</span>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: GRAY_60 }}>상태</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>적용 예정</span>
+                      <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.pricing.preview.status')}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99, backgroundColor: ORANGE_10, color: ORANGE }}>{t('admin.pricing.preview.pending')}</span>
                     </div>
                   </div>
                 )}
@@ -4339,9 +4439,9 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   const r = parseFloat(createForm.rate || "0");
                   const perDay = createForm.unit === "min" ? r * 1440 : createForm.unit === "h" ? r * 24 : r;
                   return [
-                    { label: `1${createForm.unit === "min" ? "분" : createForm.unit === "h" ? "시간" : "일"}당`, val: r.toFixed(2) },
-                    { label: "일당",  val: perDay.toFixed(1) },
-                    { label: "30일", val: (perDay * 30).toFixed(0) },
+                    { label: t('admin.pricing.preview.perUnitGpu', { unit: createForm.unit }), val: r.toFixed(2) },
+                    { label: t('admin.pricing.preview.perDay'),                                 val: perDay.toFixed(1) },
+                    { label: t('admin.pricing.preview.per30day'),                               val: (perDay * 30).toFixed(0) },
                   ].map(({ label, val }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                       <span style={{ fontSize: 12, color: GRAY_60 }}>{label}</span>
@@ -4351,8 +4451,8 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                 })()}
               </div>
               <div style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 20, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-                <PrimaryBtn size="small" onClick={saveCreate}>등록</PrimaryBtn>
-                <PrimaryBtn size="small" variant="secondary" onClick={() => setShowCreate(false)}>취소</PrimaryBtn>
+                <PrimaryBtn size="small" onClick={saveCreate}>{t('common.action.register')}</PrimaryBtn>
+                <PrimaryBtn size="small" variant="secondary" onClick={() => setShowCreate(false)}>{t('common.action.cancel')}</PrimaryBtn>
               </div>
             </div>
           </div>
@@ -4364,8 +4464,9 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
 
 // ─── Audit Log ────────────────────────────────────────────────────────────────
 export function AdminAuditLog() {
+  const { t } = useTranslation();
   return (
-    <PageContainer title="Audit Log" subtitle="시스템 전체 감사 로그를 조회합니다.">
+    <PageContainer title={t('admin.auditLog.pageTitle')} subtitle={t('admin.auditLog.subtitle')}>
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         flex: 1, gap: 16, padding: "80px 0", color: GRAY_60,
@@ -4374,8 +4475,8 @@ export function AdminAuditLog() {
           <ClipboardList size={26} color={GRAY_40} />
         </div>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_70, marginBottom: 6 }}>화면 구성이 확정되지 않았습니다</div>
-          <div style={{ fontSize: 13, color: GRAY_60 }}>Audit Log 기능의 세부 내용은 현재 기획 검토 중입니다.</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_70, marginBottom: 6 }}>{t('admin.auditLog.empty')}</div>
+          <div style={{ fontSize: 13, color: GRAY_60 }}>{t('admin.auditLog.emptyDetail')}</div>
         </div>
       </div>
     </PageContainer>
@@ -4384,13 +4485,14 @@ export function AdminAuditLog() {
 
 // ─── GPU Management (Types & Nodes + Pricing) ─────────────────────────────────
 export function AdminGPUManagement({ initialTab = "GPU" }: { initialTab?: string }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState(initialTab);
   const [prices, setPrices] = useState<GpuPrice[]>(INIT_GPU_PRICES);
   useEffect(() => { setTab(initialTab); }, [initialTab]);
   const [showGpuCreate, setShowGpuCreate] = useState(false);
   return (
-    <PageContainer title="GPU Management" subtitle="GPU 유형 및 가격 정책을 통합 관리합니다."
-      actions={tab === "GPU Pricing Policy" ? <PrimaryBtn size="small" onClick={() => setShowGpuCreate(true)}><Plus size={14} /> 가격 정책 등록</PrimaryBtn> : undefined}>
+    <PageContainer title={t('admin.gpu.pageTitle')} subtitle={t('admin.gpu.subtitle')}
+      actions={tab === "GPU Pricing Policy" ? <PrimaryBtn size="small" onClick={() => setShowGpuCreate(true)}><Plus size={14} /> {t('admin.gpu.pricing.registerBtn')}</PrimaryBtn> : undefined}>
       <TabBar tabs={["GPU", "GPU Pricing Policy"]} active={tab} onChange={setTab} />
       {tab === "GPU" && <GPUTypesContent prices={prices} />}
       {tab === "GPU Pricing Policy" && <GPUPricingContent prices={prices} setPrices={setPrices} showCreate={showGpuCreate} setShowCreate={setShowGpuCreate} />}

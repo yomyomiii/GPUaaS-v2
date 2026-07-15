@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   ComposedChart, Bar, Cell, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -49,6 +50,7 @@ const storageUsage = [
 
 // ─── SVG Donut chart (replaces recharts PieChart — no clipping) ───────────────
 function CostDonut({ data, total, size }: { data: { name: string; value: number; color: string }[]; total: number; size: number }) {
+  const { t } = useTranslation();
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.37;
@@ -76,7 +78,7 @@ function CostDonut({ data, total, size }: { data: { name: string; value: number;
         ))}
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-        <div style={{ fontSize: size * 0.11, color: GRAY_60 }}>총 사용</div>
+        <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>{t('dashboard.chart.creditUsed')}</div>
         <div style={{ fontSize: size * 0.14, fontWeight: 800, color: PRIMARY, lineHeight: 1.2 }}>{(total / 1000).toFixed(1)}K</div>
         <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>cr</div>
       </div>
@@ -86,19 +88,21 @@ function CostDonut({ data, total, size }: { data: { name: string; value: number;
 
 // ─── Custom Tooltip ───────────────────────────────────────────────────────────
 const CreditTooltip = ({ active, payload, label }: any) => {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   const find = (k: string) => payload.find((p: any) => p.dataKey === k)?.value;
   return (
     <div style={{ background: "white", border: `1px solid ${GRAY_30}`, borderRadius: 10, padding: "10px 14px", fontSize: 12 }}>
       <div style={{ color: GRAY_60, marginBottom: 6 }}>{label}</div>
-      <div style={{ color: GRAY_70, fontWeight: 600 }}>총 사용: {find("total")?.toLocaleString()} cr</div>
-      <div style={{ color: PRIMARY, fontWeight: 600 }}>서버: {find("server")?.toLocaleString()} cr</div>
-      <div style={{ color: GREEN, fontWeight: 600 }}>스토리지: {find("storage")?.toLocaleString()} cr</div>
+      <div style={{ color: GRAY_70, fontWeight: 600 }}>{t('dashboard.chart.creditUsed')}: {find("total")?.toLocaleString()} cr</div>
+      <div style={{ color: PRIMARY, fontWeight: 600 }}>{t('dashboard.section.serverUsage')}: {find("server")?.toLocaleString()} cr</div>
+      <div style={{ color: GREEN, fontWeight: 600 }}>{t('dashboard.section.resourceOverview')}: {find("storage")?.toLocaleString()} cr</div>
     </div>
   );
 };
 
 export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => void }) {
+  const { t } = useTranslation();
   const totalCost = costBreakdown.reduce((s, c) => s + c.value, 0);
   const creditBalance = 45230;
   const isLow = creditBalance < 10000;
@@ -111,17 +115,17 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
   return (
     <PageContainer
-      title="Dashboard"
-      subtitle="My Workspace"
+      title={t('gnb.lnb.dashboard')}
+      subtitle={t('gnb.lnb.myWorkspace')}
       actions={
-        <span style={{ fontSize: 12, color: GRAY_60 }}>마지막 업데이트 · 2026년 7월 13일 14:32</span>
+        <span style={{ fontSize: 12, color: GRAY_60 }}>{t('dashboard.lastUpdated', '마지막 업데이트 · 2026년 7월 13일 14:32')}</span>
       }
     >
       {/* ── 크레딧 경고 배너 (잔액 30% 미만 시) ── */}
       {isLow && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: ORANGE_10, borderRadius: 10, marginBottom: 14 }}>
           <AlertTriangle size={12} color={ORANGE} />
-          <span style={{ fontSize: 12, color: GRAY_70 }}>크레딧 잔액이 <strong>{creditBalance.toLocaleString()} cr</strong> 남았습니다. 현재 가격 기준으로 약 <strong>32일</strong> 사용 가능합니다.</span>
+          <span style={{ fontSize: 12, color: GRAY_70 }}>{t('dashboard.creditLowWarning', { balance: creditBalance.toLocaleString(), days: 32 })}</span>
         </div>
       )}
 
@@ -147,13 +151,13 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
         };
 
         const serverStatusItems = [
-          { label: "실행중", count: runningServers, color: GREEN },
-          { label: "중지", count: stoppedServers, color: GRAY_40 },
+          { label: t('dashboard.status.running'), count: runningServers, color: GREEN },
+          { label: t('dashboard.status.stopped'), count: stoppedServers, color: GRAY_40 },
         ];
 
         const storageStatusItems = [
-          { label: "사용중", count: storageUsage.filter(s => s.used > 0).length, color: BLUE },
-          { label: "미사용", count: storageUsage.filter(s => s.used === 0).length, color: GRAY_40 },
+          { label: t('common.status.active'), count: storageUsage.filter(s => s.used > 0).length, color: BLUE },
+          { label: t('common.status.inactive'), count: storageUsage.filter(s => s.used === 0).length, color: GRAY_40 },
         ];
 
         return (
@@ -162,7 +166,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
             {/* 활성 서버 */}
             <div style={cardStyle}>
               <div style={headerStyle}>
-                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>활성 서버</span>
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>{t('dashboard.kpi.activeServers')}</span>
                 <div style={iconBoxStyle(PRIMARY)}><Server size={16} color={PRIMARY} /></div>
               </div>
               <div style={valueRowStyle}>
@@ -171,8 +175,8 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
               </div>
               <div style={statusRowStyle}>
                 <span style={{ fontSize: 11, color: GRAY_60 }}>
-                  {highLoadServers > 0 && <><span style={{ color: RED, fontWeight: 600 }}>고부하 <strong style={{ color: RED, fontWeight: 600 }}>{highLoadServers}</strong>개</span><span style={{ color: GRAY_60 }}> · </span></>}
-                  생성중 <strong style={{ color: GRAY_90, fontWeight: 600 }}>{creatingServers}</strong>개
+                  {highLoadServers > 0 && <><span style={{ color: RED, fontWeight: 600 }}>{t('dashboard.highLoad')} <strong style={{ color: RED, fontWeight: 600 }}>{highLoadServers}</strong>개</span><span style={{ color: GRAY_60 }}> · </span></>}
+                  {t('dashboard.status.creating')} <strong style={{ color: GRAY_90, fontWeight: 600 }}>{creatingServers}</strong>개
                 </span>
               </div>
             </div>
@@ -180,7 +184,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
             {/* 활성 스토리지 */}
             <div style={cardStyle}>
               <div style={headerStyle}>
-                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>활성 스토리지</span>
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>{t('dashboard.kpi.activeStorage')}</span>
                 <div style={iconBoxStyle(BLUE)}><Database size={16} color={BLUE} /></div>
               </div>
               <div style={valueRowStyle}>
@@ -188,14 +192,14 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                 <span style={{ fontSize: 11, color: GRAY_60 }}>/{storageUsage.length}개</span>
               </div>
               <div style={statusRowStyle}>
-<span style={{ fontSize: 11, color: GRAY_60 }}>총 사용량 <strong style={{ color: GRAY_90, fontWeight: 600 }}>{((storageUsage.reduce((a, s) => a + s.used, 0)) / 1000).toFixed(1)}</strong> TB</span>
+<span style={{ fontSize: 11, color: GRAY_60 }}>{t('dashboard.totalUsage')} <strong style={{ color: GRAY_90, fontWeight: 600 }}>{((storageUsage.reduce((a, s) => a + s.used, 0)) / 1000).toFixed(1)}</strong> TB</span>
               </div>
             </div>
 
             {/* 크레딧 잔액 */}
             <div style={cardStyle}>
               <div style={headerStyle}>
-                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>크레딧 잔액</span>
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>{t('dashboard.kpi.creditBalance')}</span>
                 <div style={iconBoxStyle(GREEN)}><CreditCard size={16} color={GREEN} /></div>
               </div>
               <div style={valueRowStyle}>
@@ -203,14 +207,14 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                 <span style={{ fontSize: 11, color: GRAY_60 }}>cr</span>
               </div>
               <div style={statusRowStyle}>
-                <span style={{ fontSize: 11, color: GRAY_60 }}>현재 속도로 약 <strong style={{ color: GRAY_90, fontWeight: 600 }}>32</strong>일 사용 가능</span>
+                <span style={{ fontSize: 11, color: GRAY_60 }}>{t('dashboard.daysRemaining', { n: 32 })}</span>
               </div>
             </div>
 
             {/* 오늘의 사용 */}
             <div style={cardStyle}>
               <div style={headerStyle}>
-                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>오늘의 크레딧 사용</span>
+                <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 500 }}>{t('dashboard.kpi.todayUsage')}</span>
                 <div style={iconBoxStyle(YELLOW)}><Zap size={16} color={YELLOW} /></div>
               </div>
               <div style={valueRowStyle}>
@@ -218,7 +222,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                 <span style={{ fontSize: 11, color: GRAY_60 }}>cr</span>
               </div>
               <div style={statusRowStyle}>
-                <span style={{ fontSize: 11, color: GRAY_60 }}>서버 <strong style={{ color: GRAY_90, fontWeight: 600 }}>1,740</strong> cr · 스토리지 <strong style={{ color: GRAY_90, fontWeight: 600 }}>260</strong> cr</span>
+                <span style={{ fontSize: 11, color: GRAY_60 }}>{t('dashboard.section.serverUsage')} <strong style={{ color: GRAY_90, fontWeight: 600 }}>1,740</strong> cr · {t('dashboard.kpi.activeStorage')} <strong style={{ color: GRAY_90, fontWeight: 600 }}>260</strong> cr</span>
               </div>
             </div>
 
@@ -228,11 +232,11 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
       {/* ── Row 1: 크레딧 사용 추이 + [중요 알림 / 빠른 이동] ── */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14, marginBottom: 14 }}>
-        <SectionCard title="크레딧 사용 추이" subtitle="최근 14일 서버 및 스토리지 크레딧 사용 현황">
+        <SectionCard title={t('dashboard.section.creditUsage')} subtitle={t('dashboard.creditTrendSubtitle', '최근 14일 서버 및 스토리지 크레딧 사용 현황')}>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 14, fontSize: 12, marginBottom: 16 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: GRAY_40, display: "inline-block" }} />총 사용</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: PRIMARY, display: "inline-block" }} />서버</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: GREEN, display: "inline-block" }} />스토리지</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: GRAY_40, display: "inline-block" }} />{t('dashboard.chart.creditUsed')}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: PRIMARY, display: "inline-block" }} />{t('dashboard.section.serverUsage')}</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: GREEN, display: "inline-block" }} />{t('dashboard.kpi.activeStorage')}</span>
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <ComposedChart data={creditTrend} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -248,16 +252,16 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
         </SectionCard>
 
         {/* 중요 알림 */}
-        <SectionCard title="주요 알림" subtitle="미확인 2건" action={
+        <SectionCard title={t('dashboard.notifications.title', '주요 알림')} subtitle={t('dashboard.notifications.unread', { n: 2 })} action={
           <button type="button" onClick={() => onNavigate("workspace-settings")} style={{ fontSize: 11, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
-            전체 <ChevronRight size={12} />
+            {t('dashboard.notifications.viewAll', '전체')} <ChevronRight size={12} />
           </button>
         }>
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
-              { time: "18:30", type: "스토리지", msg: "model-checkpoint 공유 스토리지 사용량이 99% (198 / 200 GB)에 도달했습니다.", typeColor: PRIMARY, read: false },
-              { time: "11:02", type: "크레딧",   msg: "크레딧 잔액이 설정한 임계값(50,000cr) 미만입니다. 현재 잔액: 45,230cr", typeColor: PRIMARY, read: false },
-              { time: "7/12",  type: "GPU",      msg: "llm-finetuning 서버의 GPU 점유율이 95%를 초과했습니다.", typeColor: PRIMARY, read: true },
+              { time: "18:30", type: t('dashboard.notification.storage', '스토리지'), msg: t('dashboard.notification.storageMsg', "model-checkpoint 공유 스토리지 사용량이 99% (198 / 200 GB)에 도달했습니다."), typeColor: PRIMARY, read: false },
+              { time: "11:02", type: t('dashboard.notification.credit', '크레딧'),   msg: t('dashboard.notification.creditMsg', "크레딧 잔액이 설정한 임계값(50,000cr) 미만입니다. 현재 잔액: 45,230cr"), typeColor: PRIMARY, read: false },
+              { time: "7/12",  type: "GPU",      msg: t('dashboard.notification.gpuMsg', "llm-finetuning 서버의 GPU 점유율이 95%를 초과했습니다."), typeColor: PRIMARY, read: true },
             ].map((n, i, arr) => (
               <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 0", borderBottom: i < arr.length - 1 ? `1px solid rgb(248,248,248)` : "none" }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: n.read ? "transparent" : n.typeColor, marginTop: 4, flexShrink: 0, display: "inline-block" }} />
@@ -276,8 +280,8 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
       {/* ── Row 2: 서버 GPU 점유율 + 스토리지 현황 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-        <SectionCard title="GPU 사용 현황" subtitle="실행 중인 서버의 실시간 GPU 점유율" action={
-          <button type="button" onClick={() => onNavigate("server-list")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>관리 <ChevronRight size={13} /></button>
+        <SectionCard title={t('dashboard.section.serverUsage')} subtitle={t('dashboard.gpuUsageSubtitle', '실행 중인 서버의 실시간 GPU 점유율')} action={
+          <button type="button" onClick={() => onNavigate("server-list")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>{t('dashboard.manage', '관리')} <ChevronRight size={13} /></button>
         }>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {servers.filter(s => s.status === "running").map(s => {
@@ -291,7 +295,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                         <Server size={13} color={s.status === "running" ? barColor : GRAY_40} />
                       </div>
                       <div>
-                        <div style={{ fontFamily: "Roboto Mono, monospace", fontSize: 12, fontWeight: 600, color: GRAY_90 }}>{s.name}</div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_90 }}>{s.name}</div>
                         <div style={{ fontSize: 10, color: GRAY_60, marginTop: 1 }}>{s.gpu}</div>
                       </div>
                     </div>
@@ -311,8 +315,8 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
           </div>
         </SectionCard>
 
-        <SectionCard title="스토리지 사용 현황" subtitle="유형별 용량 및 사용률" action={
-          <button type="button" onClick={() => onNavigate("storage")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>관리 <ChevronRight size={13} /></button>
+        <SectionCard title={t('dashboard.section.resourceOverview')} subtitle={t('dashboard.storageSubtitle', '유형별 용량 및 사용률')} action={
+          <button type="button" onClick={() => onNavigate("storage")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>{t('dashboard.manage', '관리')} <ChevronRight size={13} /></button>
         }>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {storageUsage.map(s => {
@@ -324,14 +328,14 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                       <Database size={12} color={s.color} />
                       <span style={{ color: GRAY_90, fontWeight: 500 }}>{s.name}</span>
                     </div>
-                    <span style={{ color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_70, fontWeight: 600 }}>
+                    <span style={{ color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, fontWeight: 600 }}>
                       {s.used >= 1000 ? `${(s.used / 1000).toFixed(1)} TB` : `${s.used} GB`} / {s.total >= 1000 ? `${(s.total / 1000).toFixed(1)} TB` : `${s.total} GB`}
                     </span>
                   </div>
                   <div style={{ height: 7, backgroundColor: GRAY_5, borderRadius: 4, overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${pct}%`, backgroundColor: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, borderRadius: 4 }} />
                   </div>
-                  <div style={{ fontSize: 10, color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GRAY_60, marginTop: 2, textAlign: "right" }}>{pct}%</div>
+                  <div style={{ fontSize: 10, color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, marginTop: 2, textAlign: "right" }}>{pct}%</div>
                 </div>
               );
             })}
@@ -341,7 +345,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
       {/* ── Row 3: 이번 달 비용 구성 + 빠른 액션 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-        <SectionCard title="이번 달 크레딧 사용" subtitle={`총 ${totalCost.toLocaleString()} cr 사용`}>
+        <SectionCard title={t('dashboard.section.creditUsage')} subtitle={`총 ${totalCost.toLocaleString()} cr 사용`}>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             <CostDonut data={costBreakdown} total={totalCost} size={130} />
             <div style={{ flex: 1 }}>
@@ -361,15 +365,15 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
           </div>
         </SectionCard>
 
-        <SectionCard title="빠른 실행">
+        <SectionCard title={t('dashboard.section.quickActions', '빠른 실행')}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[
-              { icon: <Server size={18} />,   label: "새 서버 생성",        desc: "GPU 서버 즉시 시작",        screen: "server-create",    color: PRIMARY },
-              { icon: <Database size={18} />, label: "새 공유 스토리지 생성", desc: "멤버와 함께 쓰는 스토리지 만들기", screen: "storage",          color: BLUE },
-              { icon: <Users size={18} />,    label: "멤버 초대",            desc: "멤버를 워크스페이스에 초대하기",   screen: "workspace-members", color: GREEN },
-              { icon: <CreditCard size={18} />, label: "크레딧 내역",        desc: "크레딧을 어디에 얼마나 썼는지 확인",      screen: "workspace-credit", color: YELLOW },
+              { id: "create-server",  icon: <Server size={18} />,     label: t('dashboard.quickAction.createServer'),  desc: t('dashboard.quickAction.createServerDesc', 'GPU 서버 즉시 시작'),               screen: "server-create",     color: PRIMARY },
+              { id: "create-storage", icon: <Database size={18} />,   label: t('dashboard.quickAction.createStorage'), desc: t('dashboard.quickAction.createStorageDesc', '멤버와 함께 쓰는 스토리지 만들기'),  screen: "storage",           color: BLUE },
+              { id: "manage-members", icon: <Users size={18} />,      label: t('dashboard.quickAction.manageMembers'), desc: t('dashboard.quickAction.manageMembersDesc', '멤버를 워크스페이스에 초대하기'),    screen: "workspace-members", color: GREEN },
+              { id: "view-billing",   icon: <CreditCard size={18} />, label: t('dashboard.quickAction.viewBilling'),   desc: t('dashboard.quickAction.viewBillingDesc', '크레딧을 어디에 얼마나 썼는지 확인'),  screen: "workspace-credit",  color: YELLOW },
             ].map(action => (
-              <button type="button" key={action.label} onClick={() => onNavigate(action.screen)} style={{
+              <button type="button" key={action.id} onClick={() => onNavigate(action.screen)} style={{
                 display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8,
                 padding: "14px 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`,
                 backgroundColor: "white", cursor: "pointer", textAlign: "left", transition: "all 0.1s",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Plus, Crown, Shield, User, CreditCard, Mail, Smartphone,
   Server, Zap, Layers, MoreHorizontal, Clock,
@@ -64,17 +65,18 @@ type AlertCfg = {
 };
 type MemberSortField = "name" | "email" | "role" | "servers" | "inactive" | "local" | "shared" | "credits" | "joined" | null;
 
-const alertDefs: { key: AlertKey; label: string; desc: string; hasThreshold: boolean; unit: string }[] = [
-  { key: "credit",         label: "크레딧 잔액 부족",           desc: "크레딧 잔액이 설정한 수치 이하로 떨어지면 알림을 전송합니다.",          hasThreshold: true, unit: "cr 이하" },
-  { key: "gpu_usage",      label: "GPU 사용률 초과",            desc: "GPU 사용률이 설정한 임계값을 초과하면 알림을 전송합니다.",              hasThreshold: true, unit: "% 이상" },
-  { key: "gpu_vram",       label: "GPU vRAM 사용률 초과",       desc: "GPU vRAM 사용률이 설정한 임계값을 초과하면 알림을 전송합니다.",          hasThreshold: true, unit: "% 이상" },
-  { key: "storage_temp",   label: "임시 스토리지 잔량 부족",     desc: "임시 스토리지 잔량이 설정한 수치 이하로 떨어지면 알림을 전송합니다.",   hasThreshold: true, unit: "GB 이하" },
-  { key: "storage_local",  label: "볼륨 스토리지 잔량 부족",     desc: "볼륨 스토리지 잔량이 설정한 수치 이하로 떨어지면 알림을 전송합니다.",   hasThreshold: true, unit: "GB 이하" },
-  { key: "storage_shared", label: "공유 스토리지 잔량 부족",     desc: "공유 스토리지 잔량이 설정한 수치 이하로 떨어지면 알림을 전송합니다.",   hasThreshold: true, unit: "GB 이하" },
+const alertDefs: { key: AlertKey; labelKey: string; descKey: string; hasThreshold: boolean; unit: string }[] = [
+  { key: "credit",         labelKey: "workspace.alert.credit.label",        descKey: "workspace.alert.credit.desc",        hasThreshold: true, unit: "cr 이하" },
+  { key: "gpu_usage",      labelKey: "workspace.alert.gpu_usage.label",     descKey: "workspace.alert.gpu_usage.desc",     hasThreshold: true, unit: "% 이상" },
+  { key: "gpu_vram",       labelKey: "workspace.alert.gpu_vram.label",      descKey: "workspace.alert.gpu_vram.desc",      hasThreshold: true, unit: "% 이상" },
+  { key: "storage_temp",   labelKey: "workspace.alert.storage_temp.label",  descKey: "workspace.alert.storage_temp.desc",  hasThreshold: true, unit: "GB 이하" },
+  { key: "storage_local",  labelKey: "workspace.alert.storage_local.label", descKey: "workspace.alert.storage_local.desc", hasThreshold: true, unit: "GB 이하" },
+  { key: "storage_shared", labelKey: "workspace.alert.storage_shared.label",descKey: "workspace.alert.storage_shared.desc",hasThreshold: true, unit: "GB 이하" },
 ];
 
 // ─── InfoTooltip ──────────────────────────────────────────────────────────────
 function InfoTooltip({ items, emptyLabel }: { items: string[]; emptyLabel?: string }) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   return (
     <div style={{ position: "relative", display: "inline-flex", flexShrink: 0, cursor: "default" }}
@@ -83,13 +85,13 @@ function InfoTooltip({ items, emptyLabel }: { items: string[]; emptyLabel?: stri
       {show && (
         <div style={{ position: "absolute", bottom: "calc(100% + 7px)", left: "50%", transform: "translateX(-50%)", backgroundColor: GRAY_90, color: "white", fontSize: 11, padding: "7px 11px", borderRadius: 8, zIndex: 200, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", pointerEvents: "none", minWidth: 140 }}>
           {items.length === 0 ? (
-            <span style={{ color: "rgba(255,255,255,0.45)" }}>{emptyLabel ?? "없음"}</span>
+            <span style={{ color: "rgba(255,255,255,0.45)" }}>{emptyLabel ?? t('common.table.noResults')}</span>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {items.map((item, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 10 }}>▸</span>
-                  <span style={{ fontFamily: "Roboto Mono, monospace", fontSize: 11 }}>{item}</span>
+                  <span style={{ fontSize: 11 }}>{item}</span>
                 </div>
               ))}
             </div>
@@ -120,6 +122,7 @@ const roleIcon = (role: string) => {
 
 // ─── Member Card ──────────────────────────────────────────────────────────────
 function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequest }: { m: typeof members[0]; isOwner: boolean; menuOpen: boolean; onMenuToggle: () => void; onDetail: () => void; onDeleteRequest: () => void }) {
+  const { t } = useTranslation();
   const [menuAnchor, setMenuAnchor] = useState<{ top: number; right: number } | null>(null);
   const avatarBg = m.role === "workspace.owner" ? PRIMARY : m.role === "workspace.admin" ? "rgb(255,232,186)" : GRAY_5;
   const avatarColor = m.role === "workspace.owner" ? "white" : m.role === "workspace.admin" ? "rgb(180,80,0)" : GRAY_70;
@@ -168,7 +171,7 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
           <div style={{ textAlign: "center" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
               <Database size={11} color={m.localStorages.length > 0 ? GRAY_70 : GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.localStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.localStorages.length}개</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: m.localStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.localStorages.length}{t('workspace.unit.item')}</span>
               {m.localStorages.length > 0 && <InfoTooltip items={m.localStorages} />}
             </div>
           </div>
@@ -176,7 +179,7 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
           <div style={{ textAlign: "center" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
               <Database size={11} color={m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.sharedStorages.length}개</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.sharedStorages.length}{t('workspace.unit.item')}</span>
               {m.sharedStorages.length > 0 && <InfoTooltip items={m.sharedStorages} />}
             </div>
           </div>
@@ -202,7 +205,7 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
             style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-            상세 보기
+            {t('common.action.viewDetail')}
           </button>
           {!isOwner && (
             <div style={{ position: "relative" }}>
@@ -211,7 +214,7 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
                 style={{ height: 32, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: menuOpen ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", gap: 0, padding: 0, overflow: "hidden" }}
                 onMouseEnter={e => { if (!menuOpen) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                 onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                <span style={{ padding: "0 10px 0 12px" }}>관리</span>
+                <span style={{ padding: "0 10px 0 12px" }}>{t('common.action.manage')}</span>
                 <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: menuOpen ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 8px", borderLeft: `1px solid ${menuOpen ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                   <ChevronDown size={12} color={PRIMARY} style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                 </span>
@@ -221,23 +224,23 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
                   {m.role === "workspace.user" && (
                     <button type="button" onClick={onMenuToggle} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                      Admin으로 변경
+                      {t('workspace.member.changeToAdmin')}
                     </button>
                   )}
                   {m.role === "workspace.admin" && (
                     <button type="button" onClick={onMenuToggle} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }}
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                      User로 변경
+                      {t('workspace.member.changeToUser')}
                     </button>
                   )}
                   <button type="button" onClick={onMenuToggle} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }}
                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                    Owner로 변경
+                    {t('workspace.member.changeToOwner')}
                   </button>
                   <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
                   <button type="button" onClick={() => { onMenuToggle(); onDeleteRequest(); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }}
                     onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                    멤버 삭제
+                    {t('workspace.member.remove')}
                   </button>
                 </div>
               )}
@@ -251,6 +254,7 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
 
 // ─── Member Detail Drawer ─────────────────────────────────────────────────────
 function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () => void }) {
+  const { t } = useTranslation();
   const badgeBg = m.role === "workspace.owner" ? PRIMARY_10 : m.role === "workspace.admin" ? "rgb(255,246,225)" : GRAY_10;
   const badgeColor = m.role === "workspace.owner" ? PRIMARY : m.role === "workspace.admin" ? "rgb(180,80,0)" : GRAY_60;
 
@@ -264,7 +268,7 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: items.length > 0 ? 8 : 4 }}>
             <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_70 }}>{label}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: items.length > 0 ? GRAY_70 : GRAY_30, backgroundColor: items.length > 0 ? GRAY_5 : "transparent", padding: "1px 7px", borderRadius: 999 }}>{items.length}개</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: items.length > 0 ? GRAY_70 : GRAY_30, backgroundColor: items.length > 0 ? GRAY_5 : "transparent", padding: "1px 7px", borderRadius: 999 }}>{items.length}{t('workspace.unit.item')}</span>
           </div>
           {items.length > 0 ? (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
@@ -275,7 +279,7 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
               ))}
             </div>
           ) : (
-            <span style={{ fontSize: 12, color: GRAY_30, fontStyle: "italic" }}>아직 자원 없음</span>
+            <span style={{ fontSize: 12, color: GRAY_30, fontStyle: "italic" }}>{t('common.table.noResults')}</span>
           )}
         </div>
       </div>
@@ -292,11 +296,11 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
 
         {/* Header */}
         <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{m.name} 상세 정보</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{m.name} {t('workspace.member.drawer.title')}</span>
           <button type="button" onClick={onClose} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>
-            닫기
+            {t('common.action.close')}
           </button>
         </div>
 
@@ -305,17 +309,17 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
 
           {/* 기본 정보 — card */}
           <section>
-            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>기본 정보</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('workspace.member.drawer.info')}</div>
             <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 16, columnGap: 20 }}>
               {[
-                { label: "이름", value: m.name },
-                { label: "이메일", value: m.email },
-                { label: "역할", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 9px", borderRadius: 999, backgroundColor: badgeBg, color: badgeColor, fontSize: 11, fontWeight: 600 }}>{roleIcon(m.role)} {roleLabel(m.role)}</span> },
-                { label: "상태", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: m.online ? GREEN : GRAY_40 }}><span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: m.online ? GREEN : GRAY_40, display: "inline-block", flexShrink: 0 }} />{m.online ? "온라인" : "오프라인"}</span> },
-                { label: "참여일", value: m.joined },
-                { label: "이달 사용 크레딧", value: `${m.usedCr.toLocaleString()} cr` },
-              ].map(({ label, value }) => (
-                <div key={label}>
+                { label: t('workspace.member.drawer.name'), key: "name", value: m.name },
+                { label: t('workspace.member.drawer.email'), key: "email", value: m.email },
+                { label: t('workspace.member.drawer.role'), key: "role", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 9px", borderRadius: 999, backgroundColor: badgeBg, color: badgeColor, fontSize: 11, fontWeight: 600 }}>{roleIcon(m.role)} {roleLabel(m.role)}</span> },
+                { label: t('workspace.member.drawer.status'), key: "status", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: m.online ? GREEN : GRAY_40 }}><span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: m.online ? GREEN : GRAY_40, display: "inline-block", flexShrink: 0 }} />{m.online ? t('common.status.active') : t('common.status.inactive')}</span> },
+                { label: t('workspace.member.drawer.joinedAt'), key: "joined", value: m.joined },
+                { label: t('workspace.member.drawer.monthlyUsage'), key: "monthlyUsage", value: `${m.usedCr.toLocaleString()} cr` },
+              ].map(({ label, key, value }) => (
+                <div key={key}>
                   <div style={{ fontSize: 11, color: GRAY_40, marginBottom: 4 }}>{label}</div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{value}</div>
                 </div>
@@ -325,12 +329,12 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
 
           {/* 자원 현황 */}
           <section>
-            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>자원 현황</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 10 }}>{t('workspace.member.drawer.resources')}</div>
             <div>
-              <ResourceRow icon={<Server size={14} />} iconBg="rgba(34,197,94,0.12)" iconColor="rgb(22,163,74)" label="실행 중인 서버" items={m.activeServers} chipBg="rgba(34,197,94,0.12)" chipColor="rgb(22,163,74)" />
-              <ResourceRow icon={<Server size={14} />} iconBg={GRAY_5} iconColor={GRAY_40} label="정지된 서버" items={m.inactiveServers} chipBg={GRAY_5} chipColor={GRAY_60} />
-              <ResourceRow icon={<Database size={14} />} iconBg={PRIMARY_10} iconColor={PRIMARY} label="볼륨 스토리지" items={m.localStorages} chipBg={PRIMARY_10} chipColor={PRIMARY} />
-              <ResourceRow icon={<Database size={14} />} iconBg="rgba(36,142,213,0.1)" iconColor="rgb(36,142,213)" label="공유 스토리지" items={m.sharedStorages} chipBg="rgba(36,142,213,0.1)" chipColor="rgb(36,142,213)" last />
+              <ResourceRow icon={<Server size={14} />} iconBg="rgba(34,197,94,0.12)" iconColor="rgb(22,163,74)" label={t('workspace.member.drawer.servers')} items={m.activeServers} chipBg="rgba(34,197,94,0.12)" chipColor="rgb(22,163,74)" />
+              <ResourceRow icon={<Server size={14} />} iconBg={GRAY_5} iconColor={GRAY_40} label={t('workspace.member.drawer.servers')} items={m.inactiveServers} chipBg={GRAY_5} chipColor={GRAY_60} />
+              <ResourceRow icon={<Database size={14} />} iconBg={PRIMARY_10} iconColor={PRIMARY} label={t('workspace.member.drawer.storage')} items={m.localStorages} chipBg={PRIMARY_10} chipColor={PRIMARY} />
+              <ResourceRow icon={<Database size={14} />} iconBg="rgba(36,142,213,0.1)" iconColor="rgb(36,142,213)" label={t('workspace.member.drawer.storage')} items={m.sharedStorages} chipBg="rgba(36,142,213,0.1)" chipColor="rgb(36,142,213)" last />
             </div>
           </section>
 
@@ -348,6 +352,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ backgroundColor: "white", borderRadius: 14, padding: "28px 32px", width: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
@@ -359,7 +364,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
             style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontFamily: "inherit", transition: "background 0.15s" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>
-            취소
+            {t('common.action.cancel')}
           </button>
           <button type="button" onClick={onConfirm}
             style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", backgroundColor: RED, color: "white", cursor: "pointer", fontFamily: "inherit", transition: "opacity 0.15s" }}
@@ -375,6 +380,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
 
 // ─── Role Donut ───────────────────────────────────────────────────────────────
 function RoleDonut({ data, total, size }: { data: { name: string; value: number; color: string }[]; total: number; size: number }) {
+  const { t } = useTranslation();
   const cx = size / 2, cy = size / 2, r = size * 0.37, sw = size * 0.14;
   const circ = 2 * Math.PI * r;
   let offset = 0;
@@ -398,9 +404,9 @@ function RoleDonut({ data, total, size }: { data: { name: string; value: number;
         ))}
       </svg>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-        <div style={{ fontSize: size * 0.10, color: GRAY_60 }}>총 멤버</div>
+        <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>{t('workspace.section.members')}</div>
         <div style={{ fontSize: size * 0.16, fontWeight: 800, color: GRAY_90, lineHeight: 1.2 }}>{total}</div>
-        <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>명</div>
+        <div style={{ fontSize: size * 0.09, color: GRAY_60 }}>{t('workspace.credit.runwayUnit')}</div>
       </div>
     </div>
   );
@@ -496,6 +502,15 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 
 // ─── Workspace Page ───────────────────────────────────────────────────────────
 export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, onBack }: { initialTab?: string; onTabChange?: (tab: string) => void; hideTabs?: string[]; onBack?: () => void }) {
+  const { t } = useTranslation();
+  const creditTypeLabel = (type: CreditType): string => {
+    if (type === "관리자 지급") return t('workspace.creditType.adminGrant');
+    if (type === "관리자 회수") return t('workspace.creditType.adminRevoke');
+    if (type === "서버 사용") return t('workspace.creditType.server');
+    if (type === "볼륨 스토리지 사용") return t('workspace.creditType.storage');
+    if (type === "공유 스토리지 사용") return t('workspace.creditType.storage');
+    return type;
+  };
   const [tab, setTab] = useState(initialTab);
 
   const [alertConfig, setAlertConfig] = useState<Record<AlertKey, AlertCfg>>({
@@ -583,7 +598,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
     <>
     <PageContainer
       title="Workspace"
-      subtitle="My Workspace — 워크스페이스 현황·멤버·크레딧을 한눈에 관리합니다."
+      subtitle={`My Workspace — ${t('workspace.section.overview')}`}
       backNav={onBack && (
         <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, padding: 0 }}>
           ← Workspace Management
@@ -607,15 +622,15 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
                   {[
-                    { label: "Owner", value: "지염염", sub: "yeomeyeom.ji@sdt.inc" },
-                    { label: "멤버", value: `${members.length}명` },
-                    { label: "생성 일시", value: "2026-01-15 10:30:22" },
-                    { label: "크레딧 잔액", value: `${CREDIT_NOW.toLocaleString()} cr` },
-                  ].map(({ label, value, sub }, i, arr) => (
-                    <div key={label} style={{ paddingRight: 20, borderRight: i < arr.length - 1 ? `1px solid ${GRAY_10}` : "none", paddingLeft: i > 0 ? 20 : 0 }}>
+                    { key: "owner",   label: "Owner",                      value: "지염염",                              sub: "yeomeyeom.ji@sdt.inc", isCredit: false },
+                    { key: "members", label: t('workspace.section.members'), value: `${members.length}${t('workspace.unit.person')}`, sub: undefined, isCredit: false },
+                    { key: "created", label: t('workspace.createdAt'),         value: "2026-01-15 10:30:22",                sub: undefined, isCredit: false },
+                    { key: "credit",  label: t('workspace.credit.balance'),  value: `${CREDIT_NOW.toLocaleString()} cr`, sub: undefined, isCredit: true },
+                  ].map(({ key, label, value, sub, isCredit }, i, arr) => (
+                    <div key={key} style={{ paddingRight: 20, borderRight: i < arr.length - 1 ? `1px solid ${GRAY_10}` : "none", paddingLeft: i > 0 ? 20 : 0 }}>
                       <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{label}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: label === "크레딧 잔액" ? PRIMARY : GRAY_90 }}>{value}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: isCredit ? PRIMARY : GRAY_90 }}>{value}</span>
                         {sub && <span style={{ fontSize: 11, color: GRAY_60 }}>({sub})</span>}
                       </div>
                     </div>
@@ -633,31 +648,31 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
               const dailySpend  = Math.round(SPEND_TOTAL / 13);
               const runwayDays  = Math.floor(CREDIT_NOW / dailySpend);
               const runwayColor = runwayDays <= 7 ? RED : runwayDays <= 14 ? YELLOW : GREEN;
-              const runwayLabel = runwayDays <= 7 ? "잔액 부족 · 충전이 필요합니다" : runwayDays <= 14 ? "잔액이 얼마 남지 않았습니다" : "잔액이 충분합니다";
+              const runwayLabel = runwayDays <= 7 ? t('workspace.credit.runwayCritical') : runwayDays <= 14 ? t('workspace.credit.runwayWarn', { days: runwayDays }) : t('workspace.credit.runwayOk');
               const spendChange = Math.round((SPEND_TOTAL - SPEND_PREV) / SPEND_PREV * 100);
               const MAX_DAYS    = 30;
               const markerPct   = Math.min(97, (Math.min(runwayDays, MAX_DAYS) / MAX_DAYS) * 100);
               return (
-                <SectionCard title="크레딧 현황" headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", flexDirection: "column" }}>
+                <SectionCard title={t('workspace.section.overview')} headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
                     {/* 상단 3-col: 잔액 | 이달 사용 | 일 평균 — flex:1 으로 남은 높이 흡수 */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, flex: 1 }}>
                       <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>현재 잔액</div>
+                        <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{t('workspace.credit.balance')}</div>
                         <div style={{ fontSize: 28, fontWeight: 900, color: PRIMARY, lineHeight: 1, letterSpacing: "-0.5px" }}>
                           {CREDIT_NOW.toLocaleString()}
                           <span style={{ fontSize: 12, fontWeight: 500, color: GRAY_60, marginLeft: 5 }}>cr</span>
                         </div>
                       </div>
                       <div style={{ backgroundColor: GRAY_5, borderRadius: 8, padding: "8px 12px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ fontSize: 10, color: GRAY_60, marginBottom: 4 }}>이달 크레딧 사용</div>
+                        <div style={{ fontSize: 10, color: GRAY_60, marginBottom: 4 }}>{t('workspace.credit.used')}</div>
                         <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{SPEND_TOTAL.toLocaleString()} cr</div>
                       </div>
                       <div style={{ backgroundColor: GRAY_5, borderRadius: 8, padding: "8px 12px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ fontSize: 10, color: GRAY_60, marginBottom: 4 }}>일 평균 크레딧 사용</div>
+                        <div style={{ fontSize: 10, color: GRAY_60, marginBottom: 4 }}>{t('workspace.credit.runway')}</div>
                         <div style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>
                           {dailySpend.toLocaleString()} cr
-                          <span style={{ fontSize: 10, fontWeight: 400, color: GRAY_60, marginLeft: 4 }}>/ 일</span>
+                          <span style={{ fontSize: 10, fontWeight: 400, color: GRAY_60, marginLeft: 4 }}>/ {t('workspace.credit.runwayUnit')}</span>
                         </div>
                       </div>
                     </div>
@@ -665,9 +680,9 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                     <div style={{ borderRadius: 8, padding: "8px 12px", border: `1px solid ${GRAY_10}` }}>
                       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 7 }}>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-                          <span style={{ fontSize: 11, color: GRAY_60 }}>소진까지</span>
+                          <span style={{ fontSize: 11, color: GRAY_60 }}>{t('workspace.credit.runway')}</span>
                           <span style={{ fontSize: 15, fontWeight: 800, color: runwayColor, letterSpacing: "-0.3px" }}>
-                            {runwayDays > MAX_DAYS ? `${MAX_DAYS}일+` : `약 ${runwayDays}일`}
+                            {runwayDays > MAX_DAYS ? `${MAX_DAYS}${t('workspace.credit.runwayUnit')}+` : `${runwayDays}${t('workspace.credit.runwayUnit')}`}
                           </span>
                         </div>
                         <span style={{ fontSize: 11, fontWeight: 600, color: runwayColor }}>{runwayLabel}</span>
@@ -700,25 +715,25 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
               const allVolumes  = [...new Set(members.flatMap(m => m.localStorages))];
               const allShared   = [...new Set(members.flatMap(m => m.sharedStorages))];
               const WS_SHARED_TOTAL = 2;
-              const rows: { icon: React.ReactNode; bg: string; label: string; active: number; total: number | null; color: string }[] = [
-                { icon: <Server size={13} color={GREEN} />,     bg: "rgba(34,197,94,0.1)",  label: "활성 서버",          active: allActive.length,  total: allActive.length + allInactive.length, color: GREEN },
-                { icon: <Database size={13} color={YELLOW} />,  bg: "rgba(255,177,0,0.1)",  label: "활성 로컬 스토리지",  active: allActive.length,  total: null,              color: YELLOW },
-                { icon: <Database size={13} color={PRIMARY} />, bg: PRIMARY_10,              label: "활성 볼륨 스토리지",  active: allVolumes.length, total: null,              color: PRIMARY },
-                { icon: <Database size={13} color={BLUE} />,    bg: "rgba(36,142,213,0.1)", label: "활성 공유 스토리지",  active: allShared.length,  total: WS_SHARED_TOTAL,   color: BLUE },
+              const rows: { id: string; icon: React.ReactNode; bg: string; label: string; active: number; total: number | null; color: string }[] = [
+                { id: "servers",        icon: <Server size={13} color={GREEN} />,     bg: "rgba(34,197,94,0.1)",  label: t('workspace.resource.servers'),  active: allActive.length,  total: allActive.length + allInactive.length, color: GREEN },
+                { id: "temp-storage",   icon: <Database size={13} color={YELLOW} />,  bg: "rgba(255,177,0,0.1)",  label: t('workspace.resource.storage'),  active: allActive.length,  total: null,              color: YELLOW },
+                { id: "local-storage",  icon: <Database size={13} color={PRIMARY} />, bg: PRIMARY_10,              label: t('workspace.resource.storage'),  active: allVolumes.length, total: null,              color: PRIMARY },
+                { id: "shared-storage", icon: <Database size={13} color={BLUE} />,    bg: "rgba(36,142,213,0.1)", label: t('workspace.resource.storage'),  active: allShared.length,  total: WS_SHARED_TOTAL,   color: BLUE },
               ];
               return (
-                <SectionCard title="서버 및 스토리지 현황" headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", flexDirection: "column" }}>
+                <SectionCard title={`${t('workspace.resource.servers')} & ${t('workspace.resource.storage')}`} headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, flex: 1 }}>
-                    {rows.map(({ icon, bg, label, active, total, color }) => (
-                      <div key={label} style={{ display: "flex", alignItems: "center", gap: 12, backgroundColor: GRAY_5, borderRadius: 10, padding: "12px 14px" }}>
+                    {rows.map(({ id, icon, bg, label, active, total, color }) => (
+                      <div key={id} style={{ display: "flex", alignItems: "center", gap: 12, backgroundColor: GRAY_5, borderRadius: 10, padding: "12px 14px" }}>
                         <div style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{icon}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 3 }}>{label}</div>
                           <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
                             <span style={{ fontSize: 20, fontWeight: 800, color, lineHeight: 1 }}>{active}</span>
                             {total !== null
-                              ? <span style={{ fontSize: 11, color: GRAY_60 }}>/{total}개</span>
-                              : <span style={{ fontSize: 11, color: GRAY_60 }}>개</span>
+                              ? <span style={{ fontSize: 11, color: GRAY_60 }}>/{total}{t('workspace.unit.item')}</span>
+                              : <span style={{ fontSize: 11, color: GRAY_60 }}>{t('workspace.unit.item')}</span>
                             }
                           </div>
                         </div>
@@ -737,7 +752,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                 { key: "workspace.user",  label: "Member", color: GRAY_60,          icon: <User size={14} color={GRAY_60} />,           bg: "rgba(120,120,128,0.1)" },
               ];
               return (
-                <SectionCard title="멤버 역할 구성" headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                <SectionCard title={t('workspace.section.members')} headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 20, width: "100%" }}>
                     <RoleDonut
                       size={110}
@@ -754,7 +769,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                             <div style={{ flex: 1 }}>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 3 }}>
                                 <span style={{ fontSize: 11, color: GRAY_60 }}>{label}</span>
-                                <span style={{ fontSize: 12, fontWeight: 700, color }}>{count}명 <span style={{ fontSize: 10, fontWeight: 400, color: GRAY_40 }}>{pct}%</span></span>
+                                <span style={{ fontSize: 12, fontWeight: 700, color }}>{count}{t('workspace.unit.person')} <span style={{ fontSize: 10, fontWeight: 400, color: GRAY_40 }}>{pct}%</span></span>
                               </div>
                               <div style={{ height: 3, borderRadius: 99, backgroundColor: GRAY_10, overflow: "hidden" }}>
                                 <div style={{ height: "100%", width: `${pct}%`, backgroundColor: color, borderRadius: 99 }} />
@@ -770,7 +785,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
             })()}
 
             {/* [Row 2-1] 크레딧 이력 */}
-            <SectionCard title="크레딧 이력">
+            <SectionCard title={t('workspace.section.creditHistory')}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {creditHistory.slice(0, 3).map((r, i, arr) => {
                   const meta = {
@@ -782,7 +797,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                   }[r.type];
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 44, borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_10}` : "none" }}>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: meta.color, backgroundColor: meta.bg, padding: "2px 7px", borderRadius: 4, flexShrink: 0 }}>{r.type}</span>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: meta.color, backgroundColor: meta.bg, padding: "2px 7px", borderRadius: 4, flexShrink: 0 }}>{creditTypeLabel(r.type)}</span>
                       <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.desc}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, color: r.amount > 0 ? GREEN : RED, flexShrink: 0 }}>{r.amount > 0 ? "+" : ""}{r.amount.toLocaleString()} cr</span>
                       <span style={{ fontSize: 11, color: GRAY_60, flexShrink: 0 }}>{r.date} {r.time}</span>
@@ -800,22 +815,22 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>전체 {filteredMembers.length}개</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{t('common.status.all')} {filteredMembers.length}{t('workspace.credit.runwayUnit')}</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ position: "relative" }}>
                 <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                <input value={memberSearch} onChange={e => setMemberSearch(e.target.value)} placeholder="검색어를 입력하세요."
+                <input value={memberSearch} onChange={e => setMemberSearch(e.target.value)} placeholder={t('common.searchPlaceholder')}
                   style={{ height: 32, paddingLeft: 28, paddingRight: 10, border: `1px solid ${GRAY_30}`, borderRadius: 8, fontSize: 12, width: 180, outline: "none", fontFamily: "inherit" }} />
               </div>
               <div style={{ display: "flex", backgroundColor: GRAY_10, borderRadius: 10, padding: 3, gap: 2 }}>
                 {(["전체", "Owner", "Admin", "User"] as const).map(f => (
                   <button key={f} type="button" onClick={() => setMemberRoleFilter(f)}
                     style={{ padding: "5px 12px", borderRadius: 7, fontSize: 11, border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: memberRoleFilter === f ? 600 : 400, backgroundColor: memberRoleFilter === f ? "white" : "transparent", color: memberRoleFilter === f ? GRAY_90 : GRAY_60, boxShadow: memberRoleFilter === f ? "0 1px 3px rgba(0,0,0,0.10)" : "none", transition: "all 0.15s" }}>
-                    {f}
+                    {f === "전체" ? t('common.status.all') : f}
                   </button>
                 ))}
               </div>
-              <PrimaryBtn size="small"><Plus size={14} /> 멤버 초대</PrimaryBtn>
+              <PrimaryBtn size="small"><Plus size={14} /> {t('workspace.member.invite')}</PrimaryBtn>
             </div>
           </div>
 
@@ -830,16 +845,16 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
             </div>
             <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Active <SortBtn field="servers" /></span>
+                <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.active')} <SortBtn field="servers" /></span>
                 <span style={{ color: GRAY_40 }}>/</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Inactive <SortBtn field="inactive" /></span>
+                <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.inactive')} <SortBtn field="inactive" /></span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>Volume <SortBtn field="local" /></div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>Shared <SortBtn field="shared" /></div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>Credits <SortBtn field="credits" /></div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>Joined <SortBtn field="joined" /></div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.volume')} <SortBtn field="local" /></div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.shared')} <SortBtn field="shared" /></div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.credits')} <SortBtn field="credits" /></div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.joined')} <SortBtn field="joined" /></div>
             </div>
-            <div style={{ width: 160, flexShrink: 0 }}>Actions</div>
+            <div style={{ width: 160, flexShrink: 0 }}>{t('workspace.member.col.actions')}</div>
           </div>
 
           {/* Member cards */}
@@ -862,14 +877,14 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
       {/* 멤버 삭제 확인 모달 */}
       {deletingMember && (
         <ConfirmModal
-          title="멤버 삭제 확인"
+          title={t('workspace.member.removeConfirmTitle')}
           message={
             <span>
-              <strong style={{ color: GRAY_90 }}>{deletingMember.name}</strong> 님의 워크스페이스 멤버십을 삭제하시겠습니까?<br /><br />
-              삭제 즉시 이 워크스페이스에 접근할 수 없게 되며, 보유 중인 서버 및 스토리지는 비활성화됩니다. 이 작업은 되돌릴 수 없습니다.
+              {t('workspace.member.removeConfirmMsg', { name: deletingMember.name, email: deletingMember.email })}<br /><br />
+              {t('workspace.settings.deleteConfirmMsg')}
             </span>
           }
-          confirmLabel="삭제"
+          confirmLabel={t('common.action.delete')}
           onConfirm={() => {
             setDeletedEmails(prev => new Set([...prev, deletingMember.email]));
             setDeletingMember(null);
@@ -885,16 +900,16 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
             {/* Card 1: 잔액 */}
             <Card style={{ padding: "22px 24px" }}>
               <div style={{ marginBottom: 6 }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>크레딧 포인트 잔액</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>{t('workspace.credit.balance')}</span>
               </div>
               <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginBottom: 2 }}>{CREDIT_NOW.toLocaleString()} cr</div>
-              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>크레딧 + 포인트 합산</div>
+              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>{t('workspace.credit.balance')}</div>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 <MiniDonut segments={[{ value: 44230, color: PRIMARY }, { value: 1000, color: YELLOW }]} />
                 <div style={{ flex: 1 }}>
                   {[
-                    { label: "크레딧", amount: 44230, color: PRIMARY },
-                    { label: "포인트", amount: 1000, color: YELLOW },
+                    { label: t('workspace.credit.balance'), amount: 44230, color: PRIMARY },
+                    { label: t('workspace.credit.points'), amount: 1000, color: YELLOW },
                   ].map(({ label, amount, color }) => (
                     <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
@@ -910,13 +925,13 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
             <Card style={{ padding: "22px 24px" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
                 <div>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>이번 달 사용</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>{t('workspace.credit.used')}</span>
                   <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginTop: 4, marginBottom: 2 }}>12,450 cr</div>
                 </div>
                 <div style={{ display: "flex", gap: 20, marginTop: 2 }}>
                   {([
-                    { label: "서버 사용", amount: 10890, color: PRIMARY, dashed: false },
-                    { label: "스토리지", amount: 1560, color: BLUE, dashed: true },
+                    { label: t('workspace.creditType.server'), amount: 10890, color: PRIMARY, dashed: false },
+                    { label: t('workspace.resource.storage'), amount: 1560, color: BLUE, dashed: true },
                   ] as const).map(({ label, amount, color, dashed }) => (
                     <div key={label} style={{ textAlign: "right" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end", marginBottom: 3 }}>
@@ -955,18 +970,18 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
               <Card style={{ overflow: "hidden" }}>
                 {/* 필터 바 */}
                 <div style={{ padding: "14px 16px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, borderBottom: `1px solid ${GRAY_10}` }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, flexShrink: 0 }}>크레딧 이력</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, flexShrink: 0 }}>{t('workspace.section.creditHistory')}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                     <div style={{ position: "relative" }}>
                       <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                      <input value={creditSearch} onChange={e => setCreditSearch(e.target.value)} placeholder="검색어를 입력하세요."
+                      <input value={creditSearch} onChange={e => setCreditSearch(e.target.value)} placeholder={t('common.searchPlaceholder')}
                         style={{ height: 32, paddingLeft: 28, paddingRight: 10, border: `1px solid ${GRAY_30}`, borderRadius: 8, fontSize: 12, width: 160, outline: "none", fontFamily: "inherit" }} />
                     </div>
                     <div style={{ display: "flex", backgroundColor: GRAY_10, borderRadius: 10, padding: 3, gap: 2 }}>
                       {typeFilters.map(f => (
                         <button key={f} type="button" onClick={() => setCreditTypeFilter(f)}
                           style={{ padding: "5px 12px", borderRadius: 7, fontSize: 11, border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: creditTypeFilter === f ? 600 : 400, backgroundColor: creditTypeFilter === f ? "white" : "transparent", color: creditTypeFilter === f ? GRAY_90 : GRAY_60, boxShadow: creditTypeFilter === f ? "0 1px 3px rgba(0,0,0,0.10)" : "none", transition: "all 0.15s" }}>
-                          {f}
+                          {f === "전체" ? t('workspace.creditType.all') : f === "관리자 지급" ? t('workspace.creditType.adminGrant') : f === "관리자 회수" ? t('workspace.creditType.adminRevoke') : f === "서버 사용" ? t('workspace.creditType.server') : f === "볼륨 스토리지 사용" ? t('workspace.resource.storage') : t('workspace.resource.storage')}
                         </button>
                       ))}
                     </div>
@@ -975,16 +990,16 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr>
-                      <th style={{ ...thBase, padding: "10px 0 10px 16px", width: 130 }}>Type</th>
-                      <th style={{ ...thBase, padding: "10px 12px 10px 0" }}>Details</th>
-                      <th style={{ ...thBase, padding: "10px 12px 10px 0", width: 140 }}>User</th>
-                      <th style={{ ...thBase, padding: "10px 12px 10px 0", width: 110 }}>Amount</th>
-                      <th style={{ ...thBase, padding: "10px 16px 10px 0", width: 160 }}>일시</th>
+                      <th style={{ ...thBase, padding: "10px 0 10px 16px", width: 130 }}>{t('workspace.creditCol.type')}</th>
+                      <th style={{ ...thBase, padding: "10px 12px 10px 0" }}>{t('workspace.creditCol.details')}</th>
+                      <th style={{ ...thBase, padding: "10px 12px 10px 0", width: 140 }}>{t('workspace.creditCol.user')}</th>
+                      <th style={{ ...thBase, padding: "10px 12px 10px 0", width: 110 }}>{t('workspace.creditCol.amount')}</th>
+                      <th style={{ ...thBase, padding: "10px 16px 10px 0", width: 160 }}>{t('workspace.creditTable.date')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
-                      <tr><td colSpan={5} style={{ padding: "28px 16px", textAlign: "center", fontSize: 13, color: GRAY_40 }}>이력이 없습니다</td></tr>
+                      <tr><td colSpan={5} style={{ padding: "28px 16px", textAlign: "center", fontSize: 13, color: GRAY_40 }}>{t('common.table.noResults')}</td></tr>
                     ) : filtered.map((r, idx) => {
                       const isLast = idx === filtered.length - 1;
                       const brd = isLast ? "none" : `1px solid ${GRAY_10}`;
@@ -996,7 +1011,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                           <td style={{ ...tdBase, padding: "12px 0 12px 16px", borderBottom: brd }}>
                             <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 8px", borderRadius: 6, backgroundColor: typeMeta[r.type].bg }}>
                               {typeMeta[r.type].icon}
-                              <span style={{ fontSize: 11, fontWeight: 600, color: typeMeta[r.type].color }}>{r.type}</span>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: typeMeta[r.type].color }}>{creditTypeLabel(r.type)}</span>
                             </div>
                           </td>
                           {/* Description */}
@@ -1039,15 +1054,15 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
 
       {tab === "Settings" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 680 }}>
-          <SectionCard title="Alert Settings" bodyStyle={{ padding: "6px 20px" }}>
+          <SectionCard title={t('workspace.alert.settingsTitle')} bodyStyle={{ padding: "6px 20px" }}>
             {alertDefs.map((def, i) => {
               const cfg = alertConfig[def.key];
               return (
                 <div key={def.key} style={{ padding: "14px 0", borderBottom: i < alertDefs.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{def.label}</div>
-                      <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{def.desc}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{t(def.labelKey)}</div>
+                      <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{t(def.descKey)}</div>
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -1066,7 +1081,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                     <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
                       {(["inapp", "email"] as Array<"inapp" | "email">).map(ch => (
                         <div key={ch} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 11, color: GRAY_60 }}>{ch === "inapp" ? "Console" : "Email"}</span>
+                          <span style={{ fontSize: 11, color: GRAY_60 }}>{ch === "inapp" ? t('workspace.alert.channelConsole') : t('workspace.alert.channelEmail')}</span>
                           <button type="button"
                             onClick={() => toggleChannel(def.key, ch)}
                             style={{
@@ -1085,7 +1100,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
             })}
           </SectionCard>
 
-          <SectionCard title="Notification Recipients" bodyStyle={{ padding: "6px 20px" }}>
+          <SectionCard title={t('workspace.alert.recipientsTitle')} bodyStyle={{ padding: "6px 20px" }}>
             {(() => {
               const byRole = (role: string) => members.filter(m => m.role === role);
               const emailDesc = (list: typeof members) =>

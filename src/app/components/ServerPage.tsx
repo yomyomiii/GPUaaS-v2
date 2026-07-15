@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   ComposedChart, Area, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -120,12 +121,13 @@ function UtilBar({ pct, height = 6 }: { pct: number; color?: string; height?: nu
 
 // ─── Access button ────────────────────────────────────────────────────────────
 function AccessBtn({ label, icon, url, enabled }: { label: string; icon: React.ReactNode; url: string; enabled: boolean }) {
+  const { t } = useTranslation();
   return (
     <button type="button"
       onClick={() => enabled && window.open(url, "_blank")}
       style={{
         display: "flex", alignItems: "center", gap: 6, padding: "6px 12px",
-        borderRadius: 8, border: `1px solid ${enabled ? PRIMARY : GRAY_30}`,
+        borderRadius: 8, border: "none",
         backgroundColor: enabled ? PRIMARY_10 : GRAY_5,
         color: enabled ? PRIMARY : GRAY_40,
         cursor: enabled ? "pointer" : "default",
@@ -133,7 +135,7 @@ function AccessBtn({ label, icon, url, enabled }: { label: string; icon: React.R
       }}
       onMouseEnter={e => { if (enabled) e.currentTarget.style.backgroundColor = "rgb(230,228,255)"; }}
       onMouseLeave={e => { if (enabled) e.currentTarget.style.backgroundColor = PRIMARY_10; }}
-      title={enabled ? url : "서버 실행 중에만 접속 가능"}
+      title={enabled ? url : t('server.detail.access.serverStopped')}
     >
       {icon}
       {label}
@@ -155,6 +157,7 @@ function ImageGalleryPicker({ images, selectedId, onSelect }: {
   selectedId: string | null;
   onSelect: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("전체");
   const [tierFilter, setTierFilter] = useState("전체");
@@ -184,14 +187,14 @@ function ImageGalleryPicker({ images, selectedId, onSelect }: {
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
+          <input type="text" placeholder={t('common.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
             style={{ width: "100%", height: 36, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, outline: "none", boxSizing: "border-box", color: GRAY_90 }} />
         </div>
         <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
           style={{ height: 36, padding: "0 10px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_70, cursor: "pointer", outline: "none", backgroundColor: "white" }}>
-          <option value="used">사용 많은순</option>
-          <option value="rating">평점순</option>
-          <option value="name">이름순</option>
+          <option value="used">{t('server.image.sort.used')}</option>
+          <option value="rating">{t('server.image.sort.rating')}</option>
+          <option value="name">{t('server.sort.nameAsc')}</option>
         </select>
       </div>
       {/* Category + Tier filters */}
@@ -203,23 +206,23 @@ function ImageGalleryPicker({ images, selectedId, onSelect }: {
               backgroundColor: catFilter === cat ? PRIMARY_10 : "white",
               color: catFilter === cat ? PRIMARY : GRAY_70,
               fontSize: 11, fontWeight: catFilter === cat ? 700 : 400, cursor: "pointer",
-            }}>{cat}</button>
+            }}>{cat === "전체" ? t('server.image.cat.all') : cat}</button>
           ))}
         </div>
         <div style={{ display: "flex", gap: 2, backgroundColor: GRAY_5, padding: "3px", borderRadius: 8, flexShrink: 0 }}>
-          {tiers.map(t => (
-            <button type="button" key={t} onClick={() => setTierFilter(t)} style={{
+          {tiers.map(tier => (
+            <button type="button" key={tier} onClick={() => setTierFilter(tier)} style={{
               padding: "3px 10px", borderRadius: 6, border: "none", cursor: "pointer",
               fontSize: 11, fontWeight: 500,
-              backgroundColor: tierFilter === t ? PRIMARY : "transparent",
-              color: tierFilter === t ? "white" : GRAY_70,
-            }}>{t}</button>
+              backgroundColor: tierFilter === tier ? PRIMARY : "transparent",
+              color: tierFilter === tier ? "white" : GRAY_70,
+            }}>{tier === "전체" ? t('server.image.tier.all') : tier === "Official" ? t('server.image.tier.official') : t('server.image.tier.verified')}</button>
           ))}
         </div>
       </div>
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "24px 0", color: GRAY_60, fontSize: 13 }}>검색 결과가 없습니다.</div>
+        <div style={{ textAlign: "center", padding: "24px 0", color: GRAY_60, fontSize: 13 }}>{t('common.table.noResults')}</div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
           {filtered.map(img => {
@@ -272,6 +275,7 @@ function GPUPicker({ options, selectedName, onSelect, gpuCount, onCountChange }:
   gpuCount: number;
   onCountChange: (count: number) => void;
 }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [vramFilter, setVramFilter] = useState("전체");
   const [sort, setSort] = useState<"price" | "vram" | "avail">("price");
@@ -295,7 +299,7 @@ function GPUPicker({ options, selectedName, onSelect, gpuCount, onCountChange }:
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
+          <input type="text" placeholder={t('common.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
             style={{ width: "100%", height: 32, paddingLeft: 26, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, outline: "none", boxSizing: "border-box", color: GRAY_90 }} />
         </div>
         <div style={{ display: "flex", gap: 2, backgroundColor: GRAY_5, padding: "3px", borderRadius: 8 }}>
@@ -310,9 +314,9 @@ function GPUPicker({ options, selectedName, onSelect, gpuCount, onCountChange }:
         </div>
         <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
           style={{ height: 32, padding: "0 8px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 11, color: GRAY_70, cursor: "pointer", outline: "none", backgroundColor: "white" }}>
-          <option value="price">가격순</option>
-          <option value="vram">vRAM순</option>
-          <option value="avail">가용순</option>
+          <option value="price">{t('server.gpu.sort.price')}</option>
+          <option value="vram">{t('server.gpu.sort.vram')}</option>
+          <option value="avail">{t('server.gpu.sort.avail')}</option>
         </select>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -332,11 +336,11 @@ function GPUPicker({ options, selectedName, onSelect, gpuCount, onCountChange }:
               <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 6 }}>{gpu.desc}</div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: PRIMARY }}>{gpu.ratePerGpu} cr/GPU/h</span>
-                <Badge color={gpu.available > 4 ? "success" : "warning"}>가용 {gpu.available}개</Badge>
+                <Badge color={gpu.available > 4 ? "success" : "warning"}>{t('server.gpu.available', { count: gpu.available })}</Badge>
               </div>
               {isSel && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${GRAY_30}` }}>
-                  <span style={{ fontSize: 11, color: GRAY_60, flex: 1 }}>수량</span>
+                  <span style={{ fontSize: 11, color: GRAY_60, flex: 1 }}>{t('server.gpu.quantity')}</span>
                   <button type="button" onClick={e => { e.stopPropagation(); onCountChange(Math.max(1, gpuCount - 1)); }} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${GRAY_30}`, backgroundColor: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, lineHeight: 1 }}>−</button>
                   <span style={{ width: 24, textAlign: "center", fontWeight: 700, color: PRIMARY, fontSize: 14 }}>{gpuCount}</span>
                   <button type="button" onClick={e => { e.stopPropagation(); onCountChange(Math.min(gpu.available, gpuCount + 1)); }} style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${GRAY_30}`, backgroundColor: "white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, lineHeight: 1 }}>+</button>
@@ -356,6 +360,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
   title: string; message: React.ReactNode; confirmLabel: string;
   onConfirm: () => void; onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ backgroundColor: "white", borderRadius: 14, padding: "28px 32px", width: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
@@ -365,7 +370,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button type="button" onClick={onCancel} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>취소</button>
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.cancel')}</button>
           <button type="button" onClick={onConfirm} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", backgroundColor: RED, color: "white", cursor: "pointer", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>{confirmLabel}</button>
@@ -377,6 +382,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
 
 // ─── Server Card (list item) ──────────────────────────────────────────────────
 function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; onDetail: () => void; onDeleteRequest: () => void }) {
+  const { t } = useTranslation();
   const avgUtil = s.gpuUtil.length ? Math.round(s.gpuUtil.reduce((a, b) => a + b, 0) / s.gpuUtil.length) : 0;
   const isRunning = s.status === "running";
   const isHigh = avgUtil > 90;
@@ -390,7 +396,7 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
         {s.status === "creating" && SERVER_STATUS.creating.msg && (
           <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, fontSize: 12, color: PRIMARY, width: "100%", marginBottom: 16, boxSizing: "border-box" }}>
             <AlertTriangle size={12} color={PRIMARY} style={{ flexShrink: 0 }} />
-            {SERVER_STATUS.creating.msg}
+            {t('server.creating')}
           </div>
         )}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: (isRunning || s.status === "stopped") ? 16 : 0 }}>
@@ -408,16 +414,16 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
                   )}
                 </div>
                 <span style={{ fontSize: 14, fontWeight: 700, color: GRAY_90 }}>{s.name}</span>
-                {isHigh && <Badge color="danger">⚠ 고부하</Badge>}
+                {isHigh && <Badge color="danger">⚠ {t('server.status.highLoad')}</Badge>}
                 {s.status === "creating" && (
-                  <span style={{ fontSize: 11, fontWeight: 600, color: PURPLE, backgroundColor: PURPLE_10, borderRadius: 9999, padding: "2px 8px" }}>생성 중...</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: PURPLE, backgroundColor: PURPLE_10, borderRadius: 9999, padding: "2px 8px" }}>{t('server.status.creating')}...</span>
                 )}
               </div>
               <div style={{ fontSize: 12, color: GRAY_60, paddingLeft: 18 }}>{s.image} &nbsp;·&nbsp; {s.gpu} × {s.gpuCnt} &nbsp;·&nbsp; VRAM {s.vram}</div>
               {s.status === "stopped" && s.stoppedAt && (
                 <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, fontSize: 11, color: YELLOW, marginLeft: 18, marginTop: 4 }}>
                   <Clock size={10} color={YELLOW} />
-                  중지 일시: {s.stoppedAt}
+                  {t('server.status.stoppedAt', { date: s.stoppedAt })}
                 </div>
               )}
             </div>
@@ -426,41 +432,44 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
             <button type="button" onClick={onDetail} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: "none", backgroundColor: PRIMARY_10, color: PRIMARY, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit", transition: "background 0.15s" }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-              상세 보기 <ChevronRight size={12} />
+              {t('server.action.detail')} <ChevronRight size={12} />
             </button>
-            {isRunning && <AccessBtn label="접속" icon={<Terminal size={12} />} url={s.jupyterUrl} enabled={isRunning} />}
-            {s.status === "stopped" && (
-              <button type="button" onClick={() => {}} style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                시작
-              </button>
-            )}
-            {isRunning && (
-              <button type="button" onClick={() => {}} style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>
-                중지
-              </button>
-            )}
-            {s.status === "stopped" && (
+            {isRunning && <AccessBtn label={t('server.action.connect')} icon={<Terminal size={12} />} url={s.jupyterUrl} enabled={isRunning} />}
+            {(s.status === "stopped" || isRunning) && (
               <div style={{ position: "relative" }}>
                 {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
                 <button type="button" onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); setMenuOpen(o => !o); }}
                   style={{ height: 32, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: menuOpen ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                   onMouseEnter={e => { if (!menuOpen) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                   onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                  <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('server.action.manage')}</span>
                   <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: menuOpen ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${menuOpen ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                     <ChevronDown size={11} color={PRIMARY} style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                   </span>
                 </button>
                 {menuOpen && menuAnchor && (
                   <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
-                    <button type="button" onClick={() => { setMenuOpen(false); onDeleteRequest(); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }}
-                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                      삭제
-                    </button>
+                    {s.status === "stopped" && (
+                      <button type="button" onClick={() => { setMenuOpen(false); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap" }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
+                        {t('server.action.start')}
+                      </button>
+                    )}
+                    {isRunning && (
+                      <button type="button" onClick={() => { setMenuOpen(false); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
+                        {t('server.action.stop')}
+                      </button>
+                    )}
+                    {s.status === "stopped" && (
+                      <>
+                        <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                        <button type="button" onClick={() => { setMenuOpen(false); onDeleteRequest(); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }}
+                          onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
+                          {t('server.action.delete')}
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -472,9 +481,9 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
           <div style={{ marginBottom: 16, padding: "12px 16px", backgroundColor: "rgba(0,0,0,0.018)", borderRadius: 10 }}>
             <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
               {s.gpuUtil.map((u, i) => {
-                const uColor = u > 90 ? RED : u > 75 ? YELLOW : PRIMARY;
+                const uColor = u >= 90 ? RED : u >= 70 ? YELLOW : GREEN;
                 const vramPct = Math.min(100, Math.max(0, s.vramUsedPct + (i % 2 === 0 ? 2 : -2)));
-                const vColor = vramPct > 90 ? RED : vramPct > 75 ? YELLOW : BLUE;
+                const vColor = vramPct >= 90 ? RED : vramPct >= 70 ? YELLOW : GREEN;
                 return (
                   <div key={i} style={{ display: "flex", alignItems: "stretch", flex: 1, minWidth: 0 }}>
                     {i > 0 && <div style={{ width: 32, flexShrink: 0 }} />}
@@ -482,7 +491,7 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
                       <div style={{ fontSize: 10, fontWeight: 600, color: GRAY_60, marginBottom: 8, letterSpacing: "0.04em" }}>GPU {i}</div>
                       <div style={{ marginBottom: 10 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
-                          <span>점유율</span><span style={{ fontWeight: 700, color: uColor }}>{u}%</span>
+                          <span>{t('server.monitoring.utilization')}</span><span style={{ fontWeight: 700, color: uColor }}>{u}%</span>
                         </div>
                         <UtilBar pct={u} color={uColor} height={7} />
                       </div>
@@ -506,7 +515,7 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Calendar size={12} color={GRAY_60} /><span>Created At <strong style={{ color: GRAY_90 }}>{s.created}</strong></span></div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Clock size={12} color={GRAY_60} /><span>Uptime <strong style={{ color: GRAY_90 }}>{s.uptime}</strong></span></div>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={12} color={GRAY_60} /><span>가격 <strong style={{ color: GRAY_90 }}>{s.rate} cr/h</strong></span></div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={12} color={GRAY_60} /><span>{t('server.card.cost')} <strong style={{ color: GRAY_90 }}>{s.rate} cr/h</strong></span></div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><HardDrive size={12} color={GRAY_60} /><span>Local <strong>{s.tmpUsed}GB</strong> / {s.tmpStorage}</span></div>
                 {s.localStorage !== "none" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={12} color={BLUE} /><span>Volume <strong>{s.localUsed}GB</strong> / {s.localStorage}</span></div>
@@ -527,21 +536,27 @@ function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; on
 
 // ─── Server Detail ────────────────────────────────────────────────────────────
 function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof servers[0]; onBack: () => void; onDeleteRequest: () => void }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState("Monitoring");
   const [upgradeLocal, setUpgradeLocal] = useState(false);
   const [newLocalGB, setNewLocalGB] = useState(100);
   const isRunning = server.status === "running";
+  const bc = (p: number) => p >= 90 ? RED : p >= 70 ? YELLOW : GREEN;
+  const tmpPct = Math.round(server.tmpUsed / parseInt(server.tmpStorage) * 100);
+  const localPct = server.localStorage !== "none" ? Math.round(server.localUsed / parseInt(server.localStorage) * 100) : 0;
+  const sharedPct = 57;
 
   return (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
       <div style={{ maxWidth: 1100 }}>
         <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 16 }}>
-          ← 서버 목록
+          {t('server.backBtn')}
         </button>
+
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0, fontFamily: "Roboto Mono, monospace" }}>{server.name}</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, margin: 0 }}>{server.name}</h1>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <StatusDot status={server.status} />
                 <Badge color={isRunning ? "success" : server.status === "creating" ? "info" : "neutral"}>
@@ -552,9 +567,9 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
             <div style={{ fontSize: 13, color: GRAY_60 }}>{server.image} &nbsp;·&nbsp; {server.gpu} × {server.gpuCnt} &nbsp;·&nbsp; VRAM {server.vram}</div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            {server.status === "stopped" && <PrimaryBtn size="small"><Play size={13} /> 시작</PrimaryBtn>}
-            {isRunning && <PrimaryBtn size="small" variant="secondary"><Square size={13} /> 중지</PrimaryBtn>}
-            <PrimaryBtn size="small" variant="danger" onClick={onDeleteRequest}><Trash2 size={13} /> 삭제</PrimaryBtn>
+            {server.status === "stopped" && <PrimaryBtn size="small"><Play size={13} /> {t('server.action.start')}</PrimaryBtn>}
+            {isRunning && <PrimaryBtn size="small" variant="secondary"><Square size={13} /> {t('server.action.stop')}</PrimaryBtn>}
+            <PrimaryBtn size="small" variant="danger" onClick={onDeleteRequest}><Trash2 size={13} /> {t('server.action.delete')}</PrimaryBtn>
           </div>
         </div>
 
@@ -562,13 +577,13 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
         <div style={{ backgroundColor: "white", borderRadius: 14, marginBottom: 20, border: `1px solid ${GRAY_30}`, boxShadow: "0 2px 8px rgba(0,0,0,0.06)", overflow: "hidden" }}>
           <div style={{ display: "flex", padding: "16px 24px" }}>
             {[
-              { label: "이미지", value: server.image },
-              { label: "GPU", value: `${server.gpu} × ${server.gpuCnt}` },
-              { label: "VRAM", value: server.vram },
-              { label: "로컬 스토리지", value: server.tmpStorage },
-              ...(server.localStorage !== "none" ? [{ label: "볼륨 스토리지", value: server.localStorage }] : []),
-              ...(server.sharedStorage !== "none" ? [{ label: "공유 스토리지", value: server.sharedStorage }] : []),
-              { label: "생성 일시", value: server.created },
+              { label: t('server.detail.overview.image'), value: server.image },
+              { label: t('server.detail.overview.gpu'), value: `${server.gpu} × ${server.gpuCnt}` },
+              { label: t('server.detail.overview.vram'), value: server.vram },
+              { label: t('server.create.localStorage'), value: server.tmpStorage },
+              ...(server.localStorage !== "none" ? [{ label: t('server.create.volumeStorage'), value: server.localStorage }] : []),
+              ...(server.sharedStorage !== "none" ? [{ label: t('server.detail.storage.sharedTitle'), value: server.sharedStorage }] : []),
+              { label: t('server.detail.overview.createdAt'), value: server.created },
             ].map(({ label, value }, i, arr) => (
               <div key={label} style={{
                 flex: 1, minWidth: 0,
@@ -582,13 +597,14 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
             ))}
           </div>
           <div style={{ borderTop: `1px solid ${GRAY_10}`, padding: "10px 24px", backgroundColor: GRAY_5, display: "flex", alignItems: "center", gap: 10 }}>
-            {isRunning && <AccessBtn label="접속" icon={<Terminal size={13} />} url={server.jupyterUrl} enabled={isRunning} />}
+            {isRunning && <AccessBtn label={t('server.action.connect')} icon={<Terminal size={13} />} url={server.jupyterUrl} enabled={isRunning} />}
             {isRunning ? (
               <>
                 <div style={{ width: 1, height: 16, backgroundColor: GRAY_30, margin: "0 6px" }} />
                 <div style={{ display: "flex", gap: 20, fontSize: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Clock size={11} color={GRAY_60} /><span>Uptime <strong style={{ color: GRAY_90 }}>{server.uptime}</strong></span></div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={11} color={GRAY_60} /><span>사용량 <strong style={{ color: GRAY_90 }}>{server.rate} cr/h</strong></span></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={11} color={GRAY_60} /><span>{t('server.card.cost')} <strong style={{ color: GRAY_90 }}>{server.rate} cr/h</strong></span></div>
+
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><HardDrive size={11} color={GRAY_60} /><span>Local <strong>{server.tmpUsed}GB</strong> / {server.tmpStorage}</span></div>
                   {server.localStorage !== "none" && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={11} color={BLUE} /><span>Volume <strong>{server.localUsed}GB</strong> / {server.localStorage}</span></div>
@@ -603,7 +619,7 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                 </div>
               </>
             ) : (
-              <span style={{ fontSize: 12, color: GRAY_40, marginLeft: 4 }}>서버 실행 중에만 접속 가능합니다.</span>
+              <span style={{ fontSize: 12, color: GRAY_40, marginLeft: 4 }}>{t('server.detail.access.serverStopped')}</span>
             )}
           </div>
         </div>
@@ -615,13 +631,13 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
 
             {/* GPU 모니터링 */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <SectionCard title="GPU 사용량 / vRAM 사용량" subtitle="점유율 (%)">
+              <SectionCard title={`${t('server.detail.monitoring.gpuUsage')} / ${t('server.detail.monitoring.memoryUsage')}`} subtitle="점유율 (%)">
                 <ResponsiveContainer width="100%" height={150}>
                   <ComposedChart data={gpuHistory} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" />
                     <XAxis dataKey="t" tick={{ fontSize: 10, fill: GRAY_60 }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: GRAY_60 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} />
-                    <Tooltip formatter={(v: number, name: string) => [`${v}%`, name === "util" ? "GPU 사용량" : "vRAM 사용량"]} />
+                    <Tooltip formatter={(v: number, name: string) => [`${v}%`, name === "util" ? t('server.detail.monitoring.gpuUsage') : t('server.detail.monitoring.memoryUsage')]} />
                     <Line type="monotone" dataKey="util" stroke={PRIMARY} strokeWidth={2} dot={false} />
                     <Line type="monotone" dataKey="mem" stroke={BLUE} strokeWidth={2} dot={false} strokeDasharray="5 3" />
                   </ComposedChart>
@@ -629,15 +645,15 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                 <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: GRAY_60 }}>
                     <div style={{ width: 18, height: 2, backgroundColor: PRIMARY, borderRadius: 1 }} />
-                    GPU 사용량
+                    {t('server.detail.monitoring.gpuUsage')}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: GRAY_60 }}>
                     <div style={{ width: 18, height: 2, backgroundColor: BLUE, borderRadius: 1 }} />
-                    vRAM 사용량
+                    {t('server.detail.monitoring.memoryUsage')}
                   </div>
                 </div>
               </SectionCard>
-              <SectionCard title="GPU / RAM" subtitle="점유율 (%)">
+              <SectionCard title={t('server.detail.monitoring.gpuRam')} subtitle={t('server.detail.monitoring.utilPct')}>
                 <ResponsiveContainer width="100%" height={150}>
                   <ComposedChart data={gpuHistory} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" />
@@ -662,23 +678,23 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
             </div>
 
             {/* Storage 모니터링 */}
-            <SectionCard title="로컬 스토리지" subtitle={`서버 중지 시 데이터 소멸 · 0.05 cr/GB/h · ${(parseInt(server.tmpStorage) * 0.05).toFixed(2)} cr/h`}>
-              <UtilBar pct={server.tmpUsed / parseInt(server.tmpStorage) * 100} color={BLUE} height={10} />
+            <SectionCard title={t('server.detail.storage.local')} subtitle={t('server.detail.storage.localCost', { rate: "0.05", cost: (parseInt(server.tmpStorage) * 0.05).toFixed(2) })}>
+              <UtilBar pct={tmpPct} color={BLUE} height={10} />
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: GRAY_70 }}>
                 <span>{server.tmpUsed}GB 사용 중 / {server.tmpStorage}</span>
-                <span style={{ color: GRAY_60 }}>{Math.round(server.tmpUsed / parseInt(server.tmpStorage) * 100)}%</span>
+                <span style={{ color: bc(tmpPct) }}>{tmpPct}%</span>
               </div>
             </SectionCard>
             {server.localStorage !== "none" && (
-              <SectionCard title="볼륨 스토리지" subtitle="정지 중도 과금 · 0.1 cr/GB/h" action={<div style={{ display: "flex", gap: 8 }}><PrimaryBtn size="xsmall" variant="secondary" onClick={() => setUpgradeLocal(!upgradeLocal)}>용량 상향</PrimaryBtn><PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /></PrimaryBtn></div>}>
+              <SectionCard title={t('server.detail.storage.volume')} subtitle="정지 중도 과금 · 0.1 cr/GB/h" action={<div style={{ display: "flex", gap: 8 }}><PrimaryBtn size="xsmall" variant="secondary" onClick={() => setUpgradeLocal(!upgradeLocal)}>용량 상향</PrimaryBtn><PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /></PrimaryBtn></div>}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, marginBottom: 12 }}>
                   <AlertTriangle size={12} color={PRIMARY} />
                   <span style={{ fontSize: 12, color: PRIMARY }}>서버 정지 중에도 볼륨 스토리지 요금이 발생합니다.</span>
                 </div>
-                <UtilBar pct={server.localUsed / parseInt(server.localStorage) * 100} height={10} />
+                <UtilBar pct={localPct} height={10} />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: GRAY_70 }}>
                   <span>{server.localUsed}GB / {server.localStorage}</span>
-                  <span style={{ color: GRAY_60 }}>{Math.round(server.localUsed / parseInt(server.localStorage) * 100)}%</span>
+                  <span style={{ color: bc(localPct) }}>{localPct}%</span>
                 </div>
                 {upgradeLocal && (
                   <div style={{ marginTop: 14, padding: "14px 16px", backgroundColor: GRAY_5, borderRadius: 10, border: `1px solid ${GRAY_30}` }}>
@@ -692,19 +708,19 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                      <PrimaryBtn size="xsmall" onClick={() => setUpgradeLocal(false)}>확인</PrimaryBtn>
-                      <PrimaryBtn size="xsmall" variant="ghost" onClick={() => setUpgradeLocal(false)}>취소</PrimaryBtn>
+                      <PrimaryBtn size="xsmall" onClick={() => setUpgradeLocal(false)}>{t('common.action.save')}</PrimaryBtn>
+                      <PrimaryBtn size="xsmall" variant="ghost" onClick={() => setUpgradeLocal(false)}>{t('common.action.cancel')}</PrimaryBtn>
                     </div>
                   </div>
                 )}
               </SectionCard>
             )}
             {server.sharedStorage !== "none" && (
-              <SectionCard title={`공유 스토리지 — ${server.sharedStorage}`} subtitle="Persistent PVC · 워크스페이스 공유">
-                <UtilBar pct={57} color={BLUE} height={10} />
+              <SectionCard title={`${t('server.detail.storage.sharedTitle')} — ${server.sharedStorage}`} subtitle={t('server.detail.storage.sharedSubtitle')}>
+                <UtilBar pct={sharedPct} color={BLUE} height={10} />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: GRAY_70 }}>
                   <span>287GB / 500GB 사용 중</span>
-                  <span style={{ color: GRAY_60 }}>57%</span>
+                  <span style={{ color: bc(sharedPct) }}>57%</span>
                 </div>
               </SectionCard>
             )}
@@ -716,12 +732,12 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
             {!isRunning && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10 }}>
                 <AlertTriangle size={12} color={PRIMARY} />
-                <span style={{ flex: 1, fontSize: 12, color: PRIMARY }}>서버가 실행 중이지 않습니다. 접속하려면 서버를 시작하세요.</span>
-                <PrimaryBtn size="xsmall" style={{ marginLeft: "auto" }}><Play size={11} /> 서버 시작</PrimaryBtn>
+                <span style={{ flex: 1, fontSize: 12, color: PRIMARY }}>{t('server.detail.access.serverStopped')}</span>
+                <PrimaryBtn size="xsmall" style={{ marginLeft: "auto" }}><Play size={11} /> {t('server.action.start')}</PrimaryBtn>
               </div>
             )}
             {[
-              { label: "JupyterLab", desc: "브라우저 기반 Jupyter 노트북 및 터미널", icon: "📓", url: server.jupyterUrl, port: "8888" },
+              { label: t('server.detail.access.jupyterlab'), desc: "브라우저 기반 Jupyter 노트북 및 터미널", icon: "📓", url: server.jupyterUrl, port: "8888" },
             ].map(access => (
               <Card key={access.label} style={{ padding: "20px 24px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -729,7 +745,7 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                       <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{access.label}</span>
-                      <Badge color={isRunning ? "success" : "neutral"}>{isRunning ? "접속 가능" : "오프라인"}</Badge>
+                      <Badge color={isRunning ? "success" : "neutral"}>{isRunning ? t('server.detail.access.online') : t('server.detail.access.offline')}</Badge>
                     </div>
                     <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 6 }}>{access.desc} · Port {access.port}</div>
                     <code style={{ fontSize: 12, color: isRunning ? GRAY_90 : GRAY_40, fontFamily: "Roboto Mono, monospace", backgroundColor: GRAY_5, padding: "4px 10px", borderRadius: 6, display: "inline-block" }}>
@@ -737,7 +753,7 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                     </code>
                   </div>
                   <PrimaryBtn size="small" variant={isRunning ? "primary" : "secondary"} onClick={() => isRunning && window.open(access.url, "_blank")}>
-                    <ExternalLink size={13} /> {isRunning ? "접속하기" : "오프라인"}
+                    <ExternalLink size={13} /> {isRunning ? t('server.detail.access.openJupyterLab') : t('server.detail.access.offlineBtn')}
                   </PrimaryBtn>
                 </div>
               </Card>
@@ -759,6 +775,7 @@ function StorageSection({
   hasShared: boolean; setHasShared: (v: boolean) => void;
   useTemplate: boolean; recTmp?: number;
 }) {
+  const { t } = useTranslation();
   const [sharedMode, setSharedMode] = useState<"existing" | "create">("existing");
   const [newSharedName, setNewSharedName] = useState("");
   const [newSharedCapacity, setNewSharedCapacity] = useState(100);
@@ -778,14 +795,14 @@ function StorageSection({
     <Card style={{ padding: "22px 24px", marginBottom: 14 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
         <SectionNum n={n} />
-        <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>스토리지</span>
-        {useTemplate && <Badge color="primary">템플릿 자동 설정</Badge>}
+        <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.storage')}</span>
+        {useTemplate && <Badge color="primary">{t('server.create.templateAutoSet')}</Badge>}
       </div>
       <div style={{ padding: "14px 16px", borderRadius: 10, border: `1px solid ${GRAY_30}`, marginBottom: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, marginBottom: 3 }}>
-              Local Storage
+              {t('server.detail.storage.local')}
             </div>
             <div style={{ fontSize: 11, color: GRAY_60 }}>Ephemeral · 중지·삭제 시 데이터 소멸</div>
             {recTmp !== undefined && (
@@ -811,7 +828,7 @@ function StorageSection({
             {hasLocal && <span style={{ color: "white", fontSize: 11 }}>✓</span>}
           </button>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, marginBottom: 3 }}>Volume Storage <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>(옵션)</span></div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, marginBottom: 3 }}>{t('server.detail.storage.volume')} <span style={{ fontSize: 11, fontWeight: 400, color: GRAY_60 }}>(옵션)</span></div>
             <div style={{ fontSize: 11, color: GRAY_60 }}>Persistent PVC · 정지 중에도 데이터 유지 · 정지 중도 과금</div>
           </div>
           {hasLocal && <span style={{ fontSize: 12, color: PRIMARY, fontWeight: 600 }}>{(localGB * 0.1).toFixed(0)} cr/h</span>}
@@ -847,20 +864,20 @@ function StorageSection({
 
             {sharedMode === "create" && (
               <div style={{ padding: "14px 16px", borderRadius: 10, border: `1.5px solid ${PRIMARY}`, backgroundColor: PRIMARY_10, display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: PRIMARY }}>새 공유 스토리지 생성</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: PRIMARY }}>{t('server.storage.createNew')}</div>
                 <div style={{ display: "flex", gap: 10 }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>스토리지 이름</div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{t('server.storage.name')}</div>
                     <input
                       type="text"
-                      placeholder="예: team-shared-02"
+                      placeholder={t('server.detail.storage.sharedPlaceholder')}
                       value={newSharedName}
                       onChange={e => setNewSharedName(e.target.value)}
                       style={{ width: "100%", height: 36, padding: "0 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, backgroundColor: "white", boxSizing: "border-box" }}
                     />
                   </div>
                   <div style={{ width: 110 }}>
-                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>용량</div>
+                    <div style={{ fontSize: 11, color: GRAY_60, marginBottom: 4 }}>{t('server.detail.storage.size')}</div>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <input
                         type="number"
@@ -895,6 +912,7 @@ function CostPanel({
   hasLocal: boolean; localGB: number; hasShared: boolean;
   onSubmit: () => void; serverName: string;
 }) {
+  const { t } = useTranslation();
   const gpuObj = SC_GPU_OPTIONS.find(g => g.name === gpuType) ?? SC_GPU_OPTIONS[0];
   const totalRate = gpuObj.ratePerGpu * gpuCount;
   const localRate = hasLocal ? localGB * 0.1 : 0;
@@ -902,16 +920,16 @@ function CostPanel({
 
   return (
     <Card style={{ padding: "20px 22px" }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 14 }}>생성 요약 · 예상 비용</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 14 }}>{t('server.cost.title')}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         <div style={{ fontSize: 12, color: GRAY_60, fontWeight: 600, marginBottom: 8 }}>구성</div>
         {[
-          { label: "이미지", value: selectedImage?.name ?? "선택 안 됨" },
-          { label: "설정 방식", value: useTemplate && imageTemplate ? `🚀 ${imageTemplate.name}` : "⚙️ 직접 설정" },
-          { label: "GPU", value: `${gpuType} × ${gpuCount}` },
-          { label: "로컬 스토리지", value: `${tmpGB} GB` },
-          { label: "볼륨 스토리지", value: hasLocal ? `${localGB} GB` : "없음" },
-          { label: "공유 스토리지", value: hasShared ? "마운트" : "없음" },
+          { label: t('server.create.image'), value: selectedImage?.name ?? t('server.cost.noImage') },
+          { label: t('server.create.configMode'), value: useTemplate && imageTemplate ? `🚀 ${imageTemplate.name}` : "⚙️ 직접 설정" },
+          { label: t('server.card.gpu'), value: `${gpuType} × ${gpuCount}` },
+          { label: t('server.create.localStorage'), value: `${tmpGB} GB` },
+          { label: t('server.create.volumeStorage'), value: hasLocal ? `${localGB} GB` : t('server.cost.noStorage') },
+          { label: t('server.create.sharedStorage'), value: hasShared ? t('server.cost.mount') : t('server.cost.noStorage') },
         ].map(({ label, value }) => (
           <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "6px 0", borderBottom: `1px solid rgb(248,248,248)` }}>
             <span style={{ color: GRAY_60 }}>{label}</span>
@@ -920,7 +938,7 @@ function CostPanel({
         ))}
       </div>
       <div style={{ marginTop: 16, padding: "14px", backgroundColor: PRIMARY_10, borderRadius: 10 }}>
-        <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 4 }}>예상 시간당 비용</div>
+        <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 4 }}>{t('server.detail.overview.costPerHour')}</div>
         <div style={{ fontSize: 22, fontWeight: 700, color: PRIMARY }}>{(totalRate + localRate).toFixed(0)} <span style={{ fontSize: 13, fontWeight: 400 }}>cr/h</span></div>
         <div style={{ fontSize: 11, color: GRAY_60, marginTop: 4 }}>
           GPU {totalRate} cr/h{hasLocal ? ` + 스토리지 ${localRate.toFixed(0)} cr/h` : ""}
@@ -930,7 +948,7 @@ function CostPanel({
         </div>
       </div>
       <PrimaryBtn disabled={!serverName || !selectedImage} onClick={onSubmit} style={{ width: "100%", justifyContent: "center", marginTop: 12 }}>
-        서버 생성하기
+        {t('server.create.confirm')}
       </PrimaryBtn>
     </Card>
   );
@@ -943,9 +961,10 @@ function ModeToggle({ imageTemplate, useTemplate, onSelectTemplate, onSelectManu
   onSelectTemplate: () => void;
   onSelectManual: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Card style={{ padding: "22px 24px", marginBottom: 14 }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, marginBottom: 12 }}>설정 방식</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, marginBottom: 12 }}>{t('server.create.configMode')}</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <button type="button"
           onClick={() => imageTemplate && onSelectTemplate()}
@@ -960,7 +979,7 @@ function ModeToggle({ imageTemplate, useTemplate, onSelectTemplate, onSelectManu
           }}
         >
           <div style={{ fontSize: 22, marginBottom: 6 }}>🚀</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>템플릿 사용</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>{t('server.create.useTemplate')}</div>
           {imageTemplate ? (
             <div style={{ fontSize: 11, color: GRAY_60, lineHeight: 1.5 }}>
               <strong style={{ color: PRIMARY }}>{imageTemplate.name}</strong><br />
@@ -968,7 +987,7 @@ function ModeToggle({ imageTemplate, useTemplate, onSelectTemplate, onSelectManu
               {imageTemplate.hasLocal ? ` · Volume: ${imageTemplate.localGB}GB` : ""}
             </div>
           ) : (
-            <div style={{ fontSize: 11, color: GRAY_40 }}>이 이미지에는 템플릿이 없습니다</div>
+            <div style={{ fontSize: 11, color: GRAY_40 }}>{t('server.create.noTemplate')}</div>
           )}
         </button>
         <button type="button"
@@ -981,8 +1000,8 @@ function ModeToggle({ imageTemplate, useTemplate, onSelectTemplate, onSelectManu
           }}
         >
           <div style={{ fontSize: 22, marginBottom: 6 }}>⚙️</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>직접 설정</div>
-          <div style={{ fontSize: 11, color: GRAY_60, lineHeight: 1.5 }}>GPU 유형 및 수량, 스토리지, 환경변수를 직접 설정합니다.</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>{t('server.create.manualConfig')}</div>
+          <div style={{ fontSize: 11, color: GRAY_60, lineHeight: 1.5 }}>{t('server.create.manualConfigDesc')}</div>
         </button>
       </div>
     </Card>
@@ -991,6 +1010,7 @@ function ModeToggle({ imageTemplate, useTemplate, onSelectTemplate, onSelectManu
 
 // ─── Server Create — Step mode (2 steps) ──────────────────────────────────────
 function ServerCreateStep({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [useTemplate, setUseTemplate] = useState(false);
@@ -1053,20 +1073,21 @@ function ServerCreateStep({ onBack }: { onBack: () => void }) {
   return (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
       <div style={{ maxWidth: 960 }}>
-        <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← 서버 목록</button>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, marginBottom: 20 }}>새 서버 생성 <span style={{ fontSize: 13, fontWeight: 400, color: GRAY_60, marginLeft: 8 }}>단계별 생성</span></h1>
+        <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>{t('server.backBtn')}</button>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, marginBottom: 20 }}>{t('server.create.title')} <span style={{ fontSize: 13, fontWeight: 400, color: GRAY_60, marginLeft: 8 }}>{t('server.create.stepSubtitle')}</span></h1>
 
         {/* Step indicator */}
         <div style={{ display: "flex", alignItems: "center", marginBottom: 24, backgroundColor: "white", borderRadius: 12, padding: "14px 22px", border: `1px solid ${GRAY_30}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-          <StepDot n={1} label="이미지 선택" />
+          <StepDot n={1} label={t('server.step.selectImage')} />
           <div style={{ flex: 1, height: 1, backgroundColor: step > 1 ? PRIMARY : GRAY_30, margin: "0 16px", transition: "background 0.3s" }} />
-          <StepDot n={2} label="서버 설정" />
+          <StepDot n={2} label={t('server.step.serverConfig')} />
         </div>
 
         {/* Step 1: Image gallery */}
         {step === 1 && (
           <div>
-            <div style={{ fontSize: 14, color: GRAY_60, marginBottom: 14 }}>서버에 사용할 이미지를 선택하세요.</div>
+            <div style={{ fontSize: 14, color: GRAY_60, marginBottom: 14 }}>{t('server.create.imageInstruction')}</div>
+
             <Card style={{ padding: "20px 24px", marginBottom: 16 }}>
               <ImageGalleryPicker
                 images={SC_IMAGE_CATALOG}
@@ -1075,7 +1096,7 @@ function ServerCreateStep({ onBack }: { onBack: () => void }) {
               />
             </Card>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <PrimaryBtn disabled={!selectedImageId} onClick={goToStep2}>다음 단계 →</PrimaryBtn>
+              <PrimaryBtn disabled={!selectedImageId} onClick={goToStep2}>{t('server.create.nextStep')}</PrimaryBtn>
             </div>
           </div>
         )}
@@ -1084,16 +1105,17 @@ function ServerCreateStep({ onBack }: { onBack: () => void }) {
         {step === 2 && (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 20 }}>
             <div>
-              <button type="button" onClick={() => setStep(1)} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 16 }}>← 이미지 선택</button>
+              <button type="button" onClick={() => setStep(1)} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 16 }}>← {t('server.step.selectImage')}</button>
 
               {selectedImage && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, marginBottom: 14 }}>
                   <span style={{ fontSize: 20 }}>{selectedImage.thumb}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{selectedImage.name}</span>
-                    <span style={{ fontSize: 12, color: GRAY_60, marginLeft: 8 }}>선택된 이미지</span>
+                    <span style={{ fontSize: 12, color: GRAY_60, marginLeft: 8 }}>{t('server.create.selectedImage')}</span>
                   </div>
                   <button type="button" onClick={() => { setStep(1); setSelectedImageId(null); setUseTemplate(false); }} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer" }}>변경</button>
+
                 </div>
               )}
 
@@ -1109,20 +1131,20 @@ function ServerCreateStep({ onBack }: { onBack: () => void }) {
               <Card style={{ padding: "22px 24px", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                   <SectionNum n={1} />
-                  <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>서버 이름</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.serverName')}</span>
                 </div>
                 <input type="text" placeholder="my-server-01" value={serverName} onChange={e => setServerName(e.target.value)}
                   style={{ width: "100%", height: 44, padding: "0 14px", borderRadius: 10, border: `1.5px solid ${serverName ? PRIMARY : GRAY_30}`, fontSize: 14, color: GRAY_90, outline: "none", boxSizing: "border-box", fontFamily: "Roboto Mono, monospace", transition: "border-color 0.15s" }} />
-                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 6 }}>영문 소문자, 숫자, 하이픈만 사용 가능. 최대 40자</div>
+                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 6 }}>{t('server.create.nameConstraint')}</div>
               </Card>
 
               {/* GPU */}
               <Card style={{ padding: "22px 24px", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                   <SectionNum n={2} />
-                  <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>GPU 유형 및 수량</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.gpu')}</span>
                   {useTemplate && imageTemplate && (
-                    <Badge color="info">권장 vRAM: {imageTemplate.recVram}</Badge>
+                    <Badge color="info">{t('server.upgrade.gpuSelect')}: {imageTemplate.recVram}</Badge>
                   )}
                 </div>
                 <GPUPicker
@@ -1149,18 +1171,18 @@ function ServerCreateStep({ onBack }: { onBack: () => void }) {
               <Card style={{ padding: "22px 24px", marginBottom: 20 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                   <SectionNum n={4} />
-                  <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>환경변수</span>
-                  {useTemplate && envVars && <Badge color="primary">템플릿 자동 설정</Badge>}
-                  <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>선택</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.envVars')}</span>
+                  {useTemplate && envVars && <Badge color="primary">{t('server.create.templateAutoSet')}</Badge>}
+                  <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('server.create.optional')}</span>
                 </div>
                 <textarea value={envVars} onChange={e => setEnvVars(e.target.value)} rows={4}
                   style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, fontFamily: "Roboto Mono, monospace", backgroundColor: GRAY_5, resize: "vertical", boxSizing: "border-box", outline: "none" }} />
-                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 4 }}>KEY=VALUE 형식으로 한 줄에 하나씩 입력하세요.</div>
+                <div style={{ fontSize: 11, color: GRAY_60, marginTop: 4 }}>{t('server.create.envVarHint')}</div>
               </Card>
 
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <PrimaryBtn variant="secondary" onClick={onBack}>취소</PrimaryBtn>
-                <PrimaryBtn disabled={!serverName} onClick={onBack}>서버 생성하기</PrimaryBtn>
+                <PrimaryBtn variant="secondary" onClick={onBack}>{t('common.action.cancel')}</PrimaryBtn>
+                <PrimaryBtn disabled={!serverName} onClick={onBack}>{t('server.create.confirm')}</PrimaryBtn>
               </div>
             </div>
 
@@ -1189,6 +1211,7 @@ function ServerCreateStep({ onBack }: { onBack: () => void }) {
 
 // ─── Server Create — One-page mode ─────────────────────────────────────────────
 function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
+  const { t } = useTranslation();
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [useTemplate, setUseTemplate] = useState(false);
   const [serverName, setServerName] = useState("");
@@ -1227,8 +1250,8 @@ function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
 
   return (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: 28 }}>
-      <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>← 서버 목록</button>
-      <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, marginBottom: 24 }}>서버 생성</h1>
+      <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, marginBottom: 20 }}>{t('server.backBtn')}</button>
+      <h1 style={{ fontSize: 22, fontWeight: 700, color: GRAY_90, marginBottom: 24 }}>{t('server.create.title')}</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20, alignItems: "start" }}>
         {/* Left: all sections */}
@@ -1237,7 +1260,7 @@ function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
           <Card style={{ padding: "22px 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <SectionNum n={1} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>이미지 선택</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.step.selectImage')}</span>
               {selectedImage && (
                 <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: PRIMARY, fontWeight: 600 }}>
                   <span style={{ fontSize: 14 }}>{selectedImage.thumb}</span>
@@ -1266,19 +1289,19 @@ function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
           <Card style={{ padding: "22px 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <SectionNum n={selectedImage ? 3 : 2} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>서버 이름</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.serverName')}</span>
             </div>
             <input type="text" placeholder="my-server-01" value={serverName} onChange={e => setServerName(e.target.value)}
               style={{ width: "100%", height: 44, padding: "0 14px", borderRadius: 10, border: `1.5px solid ${serverName ? PRIMARY : GRAY_30}`, fontSize: 14, color: GRAY_90, outline: "none", boxSizing: "border-box", fontFamily: "Roboto Mono, monospace", transition: "border-color 0.15s" }} />
-            <div style={{ fontSize: 11, color: GRAY_60, marginTop: 6 }}>영문 소문자, 숫자, 하이픈만 사용 가능. 최대 40자</div>
+            <div style={{ fontSize: 11, color: GRAY_60, marginTop: 6 }}>{t('server.create.nameConstraint')}</div>
           </Card>
 
           {/* Section 4: GPU */}
           <Card style={{ padding: "22px 24px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
               <SectionNum n={selectedImage ? 4 : 3} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>GPU 유형 및 수량</span>
-              {useTemplate && imageTemplate && <Badge color="info">권장 vRAM: {imageTemplate.recVram}</Badge>}
+              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.gpu')}</span>
+              {useTemplate && imageTemplate && <Badge color="info">{t('server.upgrade.gpuSelect')}: {imageTemplate.recVram}</Badge>}
             </div>
             <GPUPicker
               options={SC_GPU_OPTIONS}
@@ -1304,13 +1327,14 @@ function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
           <Card style={{ padding: "22px 24px", marginBottom: 6 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
               <SectionNum n={selectedImage ? 6 : 5} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>환경변수</span>
-              {useTemplate && envVars && <Badge color="primary">템플릿 자동 설정</Badge>}
-              <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>선택</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: GRAY_90 }}>{t('server.create.envVars')}</span>
+
+              {useTemplate && envVars && <Badge color="primary">{t('server.create.templateAutoSet')}</Badge>}
+              <span style={{ fontSize: 12, color: GRAY_60, fontWeight: 400 }}>{t('server.create.optional')}</span>
             </div>
             <textarea value={envVars} onChange={e => setEnvVars(e.target.value)} rows={4}
               style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, fontFamily: "Roboto Mono, monospace", backgroundColor: GRAY_5, resize: "vertical", boxSizing: "border-box", outline: "none" }} />
-            <div style={{ fontSize: 11, color: GRAY_60, marginTop: 4 }}>KEY=VALUE 형식으로 한 줄에 하나씩 입력하세요.</div>
+            <div style={{ fontSize: 11, color: GRAY_60, marginTop: 4 }}>{t('server.create.envVarHint')}</div>
           </Card>
         </div>
 
@@ -1337,6 +1361,7 @@ function ServerCreateOnePage({ onBack }: { onBack: () => void }) {
 
 // ─── Server Page (list) ───────────────────────────────────────────────────────
 export function ServerPage() {
+  const { t } = useTranslation();
   const [view, setView] = useState<"list" | "detail" | "create-step" | "create-onepage">("list");
   const [selectedServer, setSelectedServer] = useState(servers[0]);
   const [search, setSearch] = useState("");
@@ -1351,9 +1376,9 @@ export function ServerPage() {
       <ServerDetail server={selectedServer} onBack={() => setView("list")} onDeleteRequest={() => setDeletingServer(selectedServer)} />
       {deletingServer && (
         <ConfirmModal
-          title="서버 삭제 확인"
-          message={<span>서버 <strong style={{ color: GRAY_90 }}>{deletingServer.name}</strong>을(를) 삭제하시겠습니까?<br /><br />삭제 즉시 서버가 종료되며, 로컬 스토리지(임시)의 모든 데이터가 영구 삭제됩니다. 볼륨 스토리지 및 공유 스토리지는 영향을 받지 않습니다. 이 작업은 되돌릴 수 없습니다.</span>}
-          confirmLabel="삭제"
+          title={t('server.delete.title')}
+          message={<span>{t('server.delete.message', { name: deletingServer.name })}<br /><br />{t('server.delete.warning')}</span>}
+          confirmLabel={t('common.action.delete')}
           onConfirm={() => { setDeletedServerIds(prev => new Set([...prev, deletingServer.id])); setDeletingServer(null); setView("list"); }}
           onCancel={() => setDeletingServer(null)}
         />
@@ -1369,15 +1394,15 @@ export function ServerPage() {
     .filter(s => statusFilter === "전체" || s.status === statusFilter)
     .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.image.toLowerCase().includes(search.toLowerCase()));
 
-  const STATUS_LABELS = { "전체": "전체", ...Object.fromEntries(Object.entries(SERVER_STATUS).map(([k, v]) => [k, v.label])) };
+  const STATUS_LABELS = { "전체": "전체", ...Object.fromEntries(Object.entries(SERVER_STATUS).map(([k, v]) => [k, v.label])) } as Record<string, string>;
 
   return (
     <PageContainer
       title="Server"
-      subtitle="GPU 서버를 생성·관리하고 개발 환경에 바로 접속하세요."
+      subtitle={t('server.subtitle')}
       actions={
         <PrimaryBtn size="small" onClick={() => setView("create-onepage")}>
-          <Plus size={14} /> 서버 생성
+          <Plus size={14} /> {t('server.action.createNew')}
         </PrimaryBtn>
       }
     >
@@ -1388,7 +1413,7 @@ export function ServerPage() {
           <div style={{ position: "relative" }}>
             <Search size={13} color={GRAY_40} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
             <input
-              type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
+              type="text" placeholder={t('common.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)}
               style={{ paddingLeft: 30, paddingRight: 10, height: 32, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", width: 180 }}
             />
           </div>
@@ -1408,7 +1433,7 @@ export function ServerPage() {
       {/* Server cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {filtered.length === 0 ? (
-          <div style={{ padding: "60px 20px", textAlign: "center", fontSize: 13, color: GRAY_60 }}>조건에 맞는 서버가 없습니다.</div>
+          <div style={{ padding: "60px 20px", textAlign: "center", fontSize: 13, color: GRAY_60 }}>{t('server.noServers')}</div>
         ) : filtered.map(s => (
           <ServerCard
             key={s.id}
@@ -1421,9 +1446,9 @@ export function ServerPage() {
 
       {deletingServer && (
         <ConfirmModal
-          title="서버 삭제 확인"
-          message={<span>서버 <strong style={{ color: GRAY_90 }}>{deletingServer.name}</strong>을(를) 삭제하시겠습니까?<br /><br />삭제 즉시 서버가 종료되며, 로컬 스토리지(임시)의 모든 데이터가 영구 삭제됩니다. 볼륨 스토리지 및 공유 스토리지는 영향을 받지 않습니다. 이 작업은 되돌릴 수 없습니다.</span>}
-          confirmLabel="삭제"
+          title={t('server.delete.title')}
+          message={<span>{t('server.delete.message', { name: deletingServer.name })}<br /><br />{t('server.delete.warning')}</span>}
+          confirmLabel={t('common.action.delete')}
           onConfirm={() => { setDeletedServerIds(prev => new Set([...prev, deletingServer.id])); setDeletingServer(null); }}
           onCancel={() => setDeletingServer(null)}
         />

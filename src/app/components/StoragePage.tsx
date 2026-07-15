@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Plus, AlertTriangle, ChevronUp, ChevronDown, Trash2, Info, Server, Search, HardDrive, Database, Share2, Clock } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, PRIMARY_20, GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
@@ -39,6 +40,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
   title: string; message: React.ReactNode; confirmLabel: string;
   onConfirm: () => void; onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1001, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ backgroundColor: "white", borderRadius: 14, padding: "28px 32px", width: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
@@ -48,7 +50,7 @@ function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button type="button" onClick={onCancel} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>취소</button>
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.cancel')}</button>
           <button type="button" onClick={onConfirm} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", backgroundColor: RED, color: "white", cursor: "pointer", fontFamily: "inherit" }}
             onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>{confirmLabel}</button>
@@ -79,6 +81,7 @@ function StorageGauge({ used, total, showText = true }: { used: number; total: n
 
 // ─── Mount Badge ──────────────────────────────────────────────────────────────
 function MountBadge({ servers }: { servers: string[] }) {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   if (servers.length === 1) {
     return (
@@ -92,7 +95,7 @@ function MountBadge({ servers }: { servers: string[] }) {
     <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
       <Server size={11} color={servers.length > 0 ? GRAY_70 : GRAY_40} />
       <span style={{ fontSize: 12, color: servers.length > 0 ? GRAY_70 : GRAY_40 }}>
-        {servers.length}개 서버 마운트
+        {t('storage.mount.badge', { count: servers.length })}
       </span>
       {servers.length > 1 && (
       <div style={{ position: "relative", display: "inline-flex", alignItems: "center", cursor: "default" }}
@@ -131,6 +134,7 @@ function TypeTag({ meta }: { meta: typeof TYPE_META[keyof typeof TYPE_META] }) {
 }
 
 export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => void }) {
+  const { t } = useTranslation();
   const [drawer, setDrawer] = useState<
     | null
     | { type: "create" }
@@ -140,7 +144,6 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
   const [createForm, setCreateForm] = useState({ name: "", capacity: 100 });
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"전체" | "Local" | "Volume" | "Shared">("전체");
-  const [statusFilter, setStatusFilter] = useState<"전체" | "경고">("전체");
   type SortKey = "type" | "name" | "mount" | "used" | "total" | "usage" | "cost" | "createdAt";
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -190,7 +193,6 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
 
   const filtered = allItems
     .filter(item => typeFilter === "전체" || item.type === typeFilter)
-    .filter(item => statusFilter === "전체" || item.status === "Full" || item.stopped)
     .filter(item => !search || item.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       const mul = sort.dir === "asc" ? 1 : -1;
@@ -208,24 +210,24 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
     <>
     <PageContainer
       title="Storage"
-      subtitle="로컬·볼륨·공유 스토리지를 통합 관리하고 용량과 과금을 확인하세요."
+      subtitle={t('storage.subtitle')}
       actions={
         <PrimaryBtn size="small" onClick={() => { setCreateForm({ name: "", capacity: 100 }); setDrawer({ type: "create" }); }}>
-          <Plus size={14} /> 공유 스토리지 생성
+          <Plus size={14} /> {t('storage.action.create')}
         </PrimaryBtn>
       }
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {/* ── Controls ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, flexShrink: 0 }}>전체 {filtered.length}개</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90, flexShrink: 0 }}>{t('storage.totalCount', { count: filtered.length })}</span>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
           {/* Search */}
           <div style={{ position: "relative" }}>
             <Search size={13} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: GRAY_40, pointerEvents: "none" }} />
             <input
               type="text"
-              placeholder="검색어를 입력하세요."
+              placeholder={t('common.searchPlaceholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{ width: 220, height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, boxSizing: "border-box", outline: "none", color: GRAY_90 }}
@@ -233,39 +235,25 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
           </div>
           {/* Type filter — segmented control */}
           <div style={{ display: "flex", backgroundColor: GRAY_10, borderRadius: 10, padding: 3, gap: 2 }}>
-            {(["전체", "Local", "Volume", "Shared"] as const).map(t => (
-              <button key={t} type="button" onClick={() => setTypeFilter(t)} style={{
+            {(["전체", "Local", "Volume", "Shared"] as const).map(tf => (
+              <button key={tf} type="button" onClick={() => setTypeFilter(tf)} style={{
                 padding: "5px 12px", borderRadius: 7, fontSize: 12, border: "none", cursor: "pointer",
-                fontWeight: typeFilter === t ? 600 : 400,
-                backgroundColor: typeFilter === t ? "white" : "transparent",
-                color: typeFilter === t ? GRAY_90 : GRAY_60,
-                boxShadow: typeFilter === t ? "0 1px 3px rgba(0,0,0,0.10)" : "none",
+                fontWeight: typeFilter === tf ? 600 : 400,
+                backgroundColor: typeFilter === tf ? "white" : "transparent",
+                color: typeFilter === tf ? GRAY_90 : GRAY_60,
+                boxShadow: typeFilter === tf ? "0 1px 3px rgba(0,0,0,0.10)" : "none",
                 transition: "all 0.15s",
-              }}>{t}</button>
+              }}>{tf === "전체" ? t('storage.filter.all') : tf}</button>
             ))}
-          </div>
-          {/* Status filter — segmented control */}
-          <div style={{ display: "flex", backgroundColor: GRAY_10, borderRadius: 10, padding: 3 }}>
-            <button type="button" onClick={() => setStatusFilter(s => s === "경고" ? "전체" : "경고")} style={{
-              display: "flex", alignItems: "center", gap: 5,
-              padding: "5px 12px", borderRadius: 7, fontSize: 12, border: "none", cursor: "pointer",
-              fontWeight: statusFilter === "경고" ? 600 : 400,
-              backgroundColor: statusFilter === "경고" ? "white" : "transparent",
-              color: statusFilter === "경고" ? RED : GRAY_60,
-              boxShadow: statusFilter === "경고" ? "0 1px 3px rgba(0,0,0,0.10)" : "none",
-              transition: "all 0.15s",
-            }}>
-              <AlertTriangle size={11} /> 경고만
-            </button>
           </div>
         </div>
       </div>
 
       {/* ── Column header ── */}
       {filtered.length > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "10px 20px", fontSize: 12, fontWeight: 600, color: GRAY_60, backgroundColor: GRAY_10, borderRadius: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "10px 16px", fontSize: 12, fontWeight: 600, color: GRAY_60, backgroundColor: GRAY_10, borderRadius: 10 }}>
           <div style={{ width: 88, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
-            타입 <SortBtn k="type" />
+            {t('storage.column.type')} <SortBtn k="type" />
           </div>
           <div style={{ width: 200, flexShrink: 0, display: "flex", alignItems: "center", gap: 4 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Storage <SortBtn k="name" /></span>
@@ -283,7 +271,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
             Cost/h <SortBtn k="cost" />
           </div>
           <div style={{ width: 160, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
-            생성 일시 <SortBtn k="createdAt" />
+            {t('storage.column.createdAt')} <SortBtn k="createdAt" />
           </div>
           <div style={{ width: 210, flexShrink: 0 }}>Actions</div>
         </div>
@@ -293,12 +281,12 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {filtered.length === 0 ? (
           <div style={{ padding: "60px 20px", textAlign: "center", fontSize: 13, color: GRAY_60 }}>
-            조건에 맞는 스토리지가 없습니다.
+            {t('common.table.noResults')}
           </div>
         ) : filtered.map(item => {
           const meta = TYPE_META[item.type];
           return (
-            <Card hover key={`${item.type}-${item.name}`} style={{ padding: "16px 20px" }}>
+            <Card hover key={`${item.type}-${item.name}`} style={{ padding: "16px 16px" }}>
 
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                 {/* Type tag */}
@@ -318,7 +306,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                         {item.mounts === 0 && item.unmountedAt && (
                           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, fontSize: 11, color: YELLOW, marginTop: 3 }}>
                             <Clock size={10} color={YELLOW} />
-                            해제 일시: {item.unmountedAt}
+                            {t('storage.drawer.lastUnmountedAt')} {item.unmountedAt}
                           </div>
                         )}
                       </>
@@ -343,8 +331,8 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                 </div>
 
                 {/* Actions */}
-                <div style={{ width: 210, flexShrink: 0, display: "flex", gap: 6, alignItems: "center" }}>
-                  <button type="button" style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>상세 보기</button>
+                <div style={{ width: 210, flexShrink: 0, display: "flex", gap: 6, alignItems: "center", justifyContent: "flex-end" }}>
+                  <button type="button" style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('storage.drawer.detailTitle')}</button>
                   {(item.type === "Volume" || item.type === "Shared") && (
                     <div style={{ position: "relative" }}>
                       {openMenuId === item.name && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
@@ -352,7 +340,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                         style={{ height: 28, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === item.name ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
                         onMouseEnter={e => { if (openMenuId !== item.name) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
                         onMouseLeave={e => { if (openMenuId !== item.name) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
-                        <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                        <span style={{ padding: "0 8px 0 10px" }}>{t('storage.action.manage')}</span>
                         <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === item.name ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === item.name ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
                           <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === item.name ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
                         </span>
@@ -361,12 +349,12 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                         <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
                           <button type="button" onClick={() => { openUpgrade(item.name, item.total, item.type === "Volume" ? VOLUME_RATE_PER_GB : SHARED_RATE_PER_GB); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }}
                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                            용량 상향
+                            {t('storage.action.expand')}
                           </button>
                           <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
                           <button type="button" onClick={() => { setOpenMenuId(null); setDeletingItem({ name: item.name, type: item.type }); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }}
                             onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
-                            삭제
+                            {t('storage.action.delete')}
                           </button>
                         </div>
                       )}
@@ -393,7 +381,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
           <div style={{ padding: "24px 28px 20px", borderBottom: `1px solid ${GRAY_30}` }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: GRAY_90 }}>
-                {drawer.type === "create" ? "공유 스토리지 생성" : "용량 상향"}
+                {drawer.type === "create" ? t('storage.drawer.createTitle') : t('storage.action.expand')}
               </div>
               <button type="button" onClick={closeDrawer} style={{ background: "none", border: "none", cursor: "pointer", color: GRAY_60, fontSize: 20, lineHeight: 1, padding: 4 }}>×</button>
             </div>
@@ -404,17 +392,17 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
             {drawer.type === "create" ? (
               <>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>스토리지 이름</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>{t('storage.drawer.name')}</div>
                   <input
                     type="text"
-                    placeholder="예: team-shared-02"
+                    placeholder="e.g. team-shared-02"
                     value={createForm.name}
                     onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))}
                     style={{ width: "100%", height: 40, padding: "0 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, boxSizing: "border-box" }}
                   />
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>용량 (GB)</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>{t('storage.drawer.size')} (GB)</div>
                   <input
                     type="number"
                     min={MIN_STORAGE_GB}
@@ -424,26 +412,26 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                   />
                 </div>
                 <div style={{ padding: "14px 16px", backgroundColor: GRAY_5, borderRadius: 10, fontSize: 12, color: GRAY_70, lineHeight: 1.8 }}>
-                  <div>예상 비용: <strong style={{ color: GRAY_90 }}>{(createForm.capacity * SHARED_RATE_PER_GB).toFixed(2)} cr/h</strong></div>
-                  <div style={{ color: GRAY_60 }}>월 {(createForm.capacity * SHARED_RATE_PER_GB * 24 * 30).toFixed(0)} cr (30일 기준)</div>
+                  <div>{t('storage.costInfo')}: <strong style={{ color: GRAY_90 }}>{(createForm.capacity * SHARED_RATE_PER_GB).toFixed(2)} cr/h</strong></div>
+                  <div style={{ color: GRAY_60 }}>{t('storage.costMonthly', { amount: (createForm.capacity * SHARED_RATE_PER_GB * 24 * 30).toFixed(0) })}</div>
                 </div>
               </>
             ) : (
               <>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>스토리지</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>{t('storage.drawer.detailTitle')}</div>
                   <div style={{ height: 40, padding: "0 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, backgroundColor: GRAY_5, display: "flex", alignItems: "center", color: GRAY_70 }}>
                     {drawer.name}
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>현재 용량</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>{t('storage.currentSize')}</div>
                   <div style={{ height: 40, padding: "0 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, backgroundColor: GRAY_5, display: "flex", alignItems: "center", color: GRAY_70 }}>
                     {drawer.currentCapacity} GB
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>새 용량 (GB)</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_70, marginBottom: 6 }}>{t('storage.newSize')} (GB)</div>
                   <input
                     type="number"
                     min={drawer.currentCapacity + 1}
@@ -453,12 +441,12 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                   />
                 </div>
                 <div style={{ padding: "14px 16px", backgroundColor: GRAY_5, borderRadius: 10, fontSize: 12, color: GRAY_70, lineHeight: 1.8 }}>
-                  <div>현재: {drawer.currentCapacity} GB → 변경: {newCapacity} GB</div>
-                  <div>추가 과금: <strong style={{ color: GRAY_90 }}>{((newCapacity - drawer.currentCapacity) * drawer.ratePerGB).toFixed(2)} cr/h</strong></div>
+                  <div>{t('storage.sizeChange', { from: drawer.currentCapacity, to: newCapacity })}</div>
+                  <div>{t('storage.additionalCost')}: <strong style={{ color: GRAY_90 }}>{((newCapacity - drawer.currentCapacity) * drawer.ratePerGB).toFixed(2)} cr/h</strong></div>
                 </div>
                 <div style={{ padding: "8px 14px", backgroundColor: ORANGE_10, borderRadius: 10, display: "flex", alignItems: "center", gap: 6 }}>
                   <AlertTriangle size={13} color={ORANGE} style={{ flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, color: ORANGE }}>용량 축소는 불가합니다. 신청 후 즉시 적용됩니다.</span>
+                  <span style={{ fontSize: 12, color: ORANGE }}>{t('storage.warning.noShrink')}</span>
                 </div>
               </>
             )}
@@ -466,10 +454,10 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
 
           {/* Footer */}
           <div style={{ padding: "16px 28px", borderTop: `1px solid ${GRAY_30}`, display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <PrimaryBtn size="small" variant="ghost" onClick={closeDrawer}>취소</PrimaryBtn>
+            <PrimaryBtn size="small" variant="ghost" onClick={closeDrawer}>{t('common.action.cancel')}</PrimaryBtn>
             {drawer.type === "create"
-              ? <PrimaryBtn size="small" disabled={!createForm.name} onClick={closeDrawer}>생성</PrimaryBtn>
-              : <PrimaryBtn size="small" disabled={newCapacity <= drawer.currentCapacity} onClick={closeDrawer}>상향 신청</PrimaryBtn>
+              ? <PrimaryBtn size="small" disabled={!createForm.name} onClick={closeDrawer}>{t('storage.drawer.createTitle')}</PrimaryBtn>
+              : <PrimaryBtn size="small" disabled={newCapacity <= drawer.currentCapacity} onClick={closeDrawer}>{t('storage.action.expandApply')}</PrimaryBtn>
             }
           </div>
         </div>
@@ -478,9 +466,9 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
 
     {deletingItem && (
       <ConfirmModal
-        title="스토리지 삭제 확인"
-        message={<span>스토리지 <strong style={{ color: GRAY_90 }}>{deletingItem.name}</strong>을(를) 삭제하시겠습니까?<br /><br />{deletingItem.type === "Shared" ? "마운트된 서버에서 즉시 언마운트되며, 저장된 모든 데이터가 영구 삭제됩니다." : "저장된 모든 데이터가 영구 삭제됩니다."} 이 작업은 되돌릴 수 없습니다.</span>}
-        confirmLabel="삭제"
+        title={t('storage.delete.title')}
+        message={<span>{t('storage.delete.message', { name: deletingItem.name })}<br /><br />{deletingItem.type === "Shared" ? t('storage.delete.sharedWarning') : t('storage.delete.warning')} {t('storage.delete.irreversible')}</span>}
+        confirmLabel={t('common.action.delete')}
         onConfirm={() => { setDeletedItemNames(prev => new Set([...prev, deletingItem.name])); setDeletingItem(null); }}
         onCancel={() => setDeletingItem(null)}
       />

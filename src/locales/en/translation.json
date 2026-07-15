@@ -1,0 +1,1276 @@
+{
+  "common": {
+    "action": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "close": "Close",
+      "confirm": "Confirm",
+      "register": "Register",
+      "create": "Create",
+      "edit": "Edit",
+      "manage": "Manage",
+      "viewDetail": "View Detail",
+      "invite": "Invite",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "prev": "Previous",
+      "next": "Next",
+      "execute": "Execute",
+      "expand": "Expand",
+      "copy": "Copy",
+      "search": "Search",
+      "add": "Add",
+      "start": "Start",
+      "stop": "Stop",
+      "apply": "Apply"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "all": "All"
+    },
+    "filter": {
+      "status": "Status",
+      "type": "Type",
+      "all": "All"
+    },
+    "table": {
+      "noResults": "No results found.",
+      "noData": "No data available."
+    },
+    "count": {
+      "n": "{{count}}",
+      "outOf": "/{{total}}",
+      "total": "Total {{count}}"
+    },
+    "empty": {
+      "noResults": "No results found.",
+      "searchResult": "No search results."
+    },
+    "field": {
+      "createdAt": "Created At",
+      "date": "Date",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status"
+    },
+    "label": {
+      "total": "Total"
+    },
+    "pagination": {
+      "next": "Next",
+      "prev": "Previous"
+    },
+    "placeholder": {
+      "search": "Search..."
+    },
+    "section": {
+      "basicInfo": "Basic Info",
+      "manage": "Manage"
+    },
+    "unit": {
+      "count": "",
+      "times": "times"
+    },
+    "alertLevel": {
+      "info": "Info",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "searchPlaceholder": "Search..."
+  },
+  "gnb": {
+    "myProfile": "My Profile",
+    "notificationSettings": "Notification Settings",
+    "logout": "Log Out",
+    "switchToAdmin": "Switch to Admin Console",
+    "switchToUser": "Switch to User Console",
+    "currentWorkspace": "Current Workspace",
+    "switchConsole": {
+      "toAdmin": "Switch to Admin Console",
+      "toUser": "Switch to User Console"
+    },
+    "adminBadge": "Admin Console",
+    "lnb": {
+      "dashboard": "Dashboard",
+      "workspace": "Workspace",
+      "workspaceOverview": "Overview",
+      "workspaceMembers": "Members",
+      "workspaceCredit": "Credit",
+      "workspaceSettings": "Settings",
+      "server": "Server",
+      "storage": "Storage",
+      "myWorkspace": "My Workspace"
+    },
+    "adminLnb": {
+      "dashboard": "Dashboard",
+      "userManagement": "User Management",
+      "workspaceManagement": "Workspace Management",
+      "serverManagement": "Server Management",
+      "servers": "Servers",
+      "serverTemplates": "Server Templates",
+      "storageManagement": "Storage Management",
+      "storage": "Storage",
+      "storagePricing": "Storage Pricing",
+      "storageSettings": "Storage Settings",
+      "imageManagement": "Image Management",
+      "image": "Images",
+      "category": "Category",
+      "tier": "Tier",
+      "gpuManagement": "GPU Management",
+      "gpu": "GPU",
+      "gpuPricing": "GPU Pricing",
+      "creditHistory": "Credit History",
+      "systemSettings": "System Settings",
+      "auditLog": "Audit Log"
+    }
+  },
+  "dashboard": {
+    "kpi": {
+      "activeServers": "Active Servers",
+      "activeStorage": "Active Storage",
+      "creditBalance": "Credit Balance",
+      "todayUsage": "Today's Credit Usage"
+    },
+    "section": {
+      "quickActions": "Quick Actions",
+      "recentActivity": "Recent Activity",
+      "resourceOverview": "Resource Overview",
+      "serverUsage": "Server Status",
+      "creditUsage": "Credit Usage"
+    },
+    "quickAction": {
+      "createServer": "New Server",
+      "createStorage": "Add Storage",
+      "viewBilling": "Credit History",
+      "manageMembers": "Manage Members",
+      "createServerDesc": "Launch a GPU server instantly",
+      "createStorageDesc": "Create shared storage for your team",
+      "manageMembersDesc": "Invite members to your workspace",
+      "viewBillingDesc": "See where and how credits are spent"
+    },
+    "status": {
+      "running": "Running",
+      "stopped": "Stopped",
+      "creating": "Creating",
+      "error": "Error"
+    },
+    "chart": {
+      "active": "Active",
+      "stopped": "Stopped",
+      "creditUsed": "Credit Used",
+      "servers": "Servers",
+      "storage": "Storage"
+    },
+    "notification": {
+      "credit": "Low Credit",
+      "creditMsg": "Your credits are about to run out.",
+      "gpuMsg": "GPU utilization exceeded 90%.",
+      "storage": "Storage Warning",
+      "storageMsg": "Your storage is almost full."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "unread": "{{n}} unread",
+      "viewAll": "View All"
+    },
+    "creditLowWarning": "Credit balance is running low.",
+    "creditTrendSubtitle": "Credit usage over the last 14 days",
+    "daysRemaining": "{{n}} days left",
+    "gpuUsageSubtitle": "Real-time GPU utilization of running servers",
+    "highLoad": "High Load",
+    "lastUpdated": "Last updated · 2026-07-15 15:50:00",
+    "manage": "Manage",
+    "storageSubtitle": "Capacity and usage by type",
+    "totalUsage": "Total Usage",
+    "noServers": "No running servers.",
+    "noStorage": "No storage created.",
+    "noActivity": "No recent activity."
+  },
+  "workspace": {
+    "credit": {
+      "balance": "Credit Balance",
+      "used": "This Month",
+      "runway": "Runway",
+      "runwayUnit": "days",
+      "runwayOk": "Sufficient credit remaining",
+      "runwayWarn": "Credit shortage expected ({{days}} days left)",
+      "runwayCritical": "Credit almost depleted!",
+      "points": "points"
+    },
+    "resource": {
+      "servers": "Servers",
+      "storage": "Storage",
+      "members": "Members"
+    },
+    "section": {
+      "overview": "Workspace Overview",
+      "members": "Members",
+      "creditHistory": "Credit History"
+    },
+    "member": {
+      "invite": "Invite Member",
+      "role": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      },
+      "drawer": {
+        "title": "Member Detail",
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "joinedAt": "Joined At",
+        "lastLogin": "Last Login",
+        "servers": "Servers",
+        "storage": "Storage",
+        "monthlyUsage": "Monthly Credit Usage",
+        "creditBalance": "Credit Balance",
+        "info": "Basic Info",
+        "resources": "Resources"
+      },
+      "col": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "volume": "Volume",
+        "shared": "Shared",
+        "credits": "Credits",
+        "joined": "Joined At",
+        "actions": "Actions"
+      },
+      "remove": "Remove Member",
+      "removeConfirmTitle": "Remove Member?",
+      "removeConfirmMsg": "{{name}} ({{email}}) will be removed from the workspace.",
+      "changeToAdmin": "Change to Admin",
+      "changeToOwner": "Change to Owner",
+      "changeToUser": "Change to Member"
+    },
+    "creditType": {
+      "all": "All",
+      "server": "Server",
+      "storage": "Storage",
+      "adminGrant": "Admin Grant",
+      "adminRevoke": "Admin Revoke"
+    },
+    "creditTable": {
+      "type": "Type",
+      "amount": "Amount",
+      "description": "Description",
+      "date": "Date",
+      "balance": "Balance"
+    },
+    "creditCol": {
+      "type": "Type",
+      "details": "Details",
+      "user": "User",
+      "amount": "Amount"
+    },
+    "settings": {
+      "title": "Workspace Settings",
+      "name": "Workspace Name",
+      "danger": "Danger Zone",
+      "delete": "Delete Workspace",
+      "deleteConfirmTitle": "Delete Workspace?",
+      "deleteConfirmMsg": "This action cannot be undone. All resources will be deleted."
+    },
+    "alert": {
+      "settingsTitle": "Alert Settings",
+      "recipientsTitle": "Alert Recipients",
+      "channelConsole": "Console",
+      "channelEmail": "Email"
+    },
+    "createdAt": "Created At",
+    "unit": {
+      "item": "",
+      "person": ""
+    }
+  },
+  "server": {
+    "creating": "Creating server...",
+    "noServers": "No servers created.",
+    "subtitle": "Create and manage GPU servers, and connect to your development environment instantly.",
+    "totalCount": "Total {{n}}",
+    "backBtn": "← Server List",
+    "status": {
+      "running": "Running",
+      "stopped": "Stopped",
+      "creating": "Creating",
+      "error": "Error",
+      "highLoad": "High Load",
+      "stoppedAt": "Stopped at: {{date}}"
+    },
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "nameAsc": "Name A–Z",
+      "nameDesc": "Name Z–A"
+    },
+    "action": {
+      "start": "Start",
+      "stop": "Stop",
+      "delete": "Delete",
+      "connect": "Connect",
+      "upgrade": "Upgrade",
+      "createNew": "New Server",
+      "detail": "View Detail",
+      "manage": "Manage"
+    },
+    "card": {
+      "gpu": "GPU",
+      "vram": "VRAM",
+      "storage": "Storage",
+      "cost": "Cost"
+    },
+    "detail": {
+      "backBtn": "← Server List",
+      "tab": {
+        "overview": "Overview",
+        "monitoring": "Monitoring",
+        "storage": "Storage",
+        "access": "Access"
+      },
+      "overview": {
+        "status": "Status",
+        "gpu": "GPU",
+        "vram": "VRAM",
+        "createdAt": "Created At",
+        "costPerHour": "Cost/Hour",
+        "image": "Image",
+        "serverName": "Server Name"
+      },
+      "monitoring": {
+        "gpuUsage": "GPU Utilization",
+        "memoryUsage": "Memory Usage",
+        "networkUsage": "Network Traffic",
+        "gpuTemp": "GPU Temperature",
+        "noData": "No monitoring data",
+        "gpuRam": "GPU / RAM",
+        "utilPct": "Utilization (%)",
+        "gpuLegend": "GPU",
+        "ramLegend": "RAM"
+      },
+      "storage": {
+        "local": "Local Storage",
+        "volume": "Volume Storage",
+        "type": "Type",
+        "size": "Size",
+        "status": "Status",
+        "mountPath": "Mount Path",
+        "addVolume": "Add Volume",
+        "noVolume": "No volume storage attached.",
+        "localDesc": "Ephemeral · Data lost on stop/delete",
+        "localCost": "Data lost on stop · {{rate}} cr/GB/h · {{cost}} cr/h",
+        "inUse": "GB in use / ",
+        "volumeDesc": "Persistent PVC · Data retained when stopped · Billed while stopped",
+        "volumeCost": "Billed while stopped · {{rate}} cr/GB/h",
+        "expandBtn": "Expand",
+        "expandTitle": "Request Capacity Expansion (cannot shrink)",
+        "currentPrefix": "Current ",
+        "volumeWarning": "Volume storage is billed even while the server is stopped.",
+        "additionalCost": "Additional charge: {{cost}} cr/h",
+        "autoSet": "Auto-configured based on image minimum {{min}}GB + buffer {{buffer}}GB.",
+        "minHint": "GB (min {{min}}GB)",
+        "optional": "(Optional)",
+        "sharedTitle": "Shared Storage",
+        "sharedSubtitle": "Persistent PVC · Shared across workspace",
+        "sharedDesc": "Persistent PVC · Shared with members · Data retained after server deletion",
+        "createShared": "+ Create and mount new shared storage",
+        "sharedPlaceholder": "e.g. team-shared-02",
+        "costEstimate": "Estimated charge: {{cost}} cr/h (0.15 cr/GB/h · billing continues after server deletion)"
+      },
+      "access": {
+        "jupyterlab": "JupyterLab",
+        "ssh": "SSH",
+        "openJupyterLab": "Open JupyterLab",
+        "copyCommand": "Copy",
+        "sshCommand": "SSH Command",
+        "sshCopied": "Copied",
+        "serverStopped": "Server is stopped.",
+        "jupyterlabDesc": "Browser-based Jupyter notebook and terminal",
+        "online": "Online",
+        "offline": "Offline",
+        "portLabel": "Port",
+        "urlPending": "URL will be generated after the server starts",
+        "offlineBtn": "Offline"
+      }
+    },
+    "upgrade": {
+      "title": "Upgrade Server",
+      "currentSpec": "Current Spec",
+      "newSpec": "New Spec",
+      "gpuSelect": "Select GPU",
+      "confirm": "Confirm Upgrade"
+    },
+    "delete": {
+      "title": "Delete Server",
+      "message": "Are you sure you want to delete server {{name}}?",
+      "warning": "Deleted servers cannot be recovered."
+    },
+    "stop": {
+      "title": "Stop Server",
+      "message": "Are you sure you want to stop server {{name}}?"
+    },
+    "cost": {
+      "perHour": "/hr",
+      "perDay": "/day",
+      "perMonth": "/mo",
+      "title": "Estimated Cost",
+      "unit": "cr",
+      "config": "Configuration",
+      "noImage": "Not selected",
+      "noStorage": "None",
+      "mount": "Mount",
+      "available": "~{{hours}}h available based on {{balance}} cr balance",
+      "recInfo": "Recommended VRAM: {{vram}} · Local: {{tmp}}GB"
+    },
+    "step": {
+      "selectImage": "Select Image",
+      "selectGpu": "Select GPU",
+      "selectStorage": "Select Storage",
+      "review": "Review",
+      "serverConfig": "Server Config"
+    },
+    "create": {
+      "title": "Create New Server",
+      "image": "Image",
+      "gpu": "GPU Type",
+      "storage": "Storage",
+      "serverName": "Server Name",
+      "namePlaceholder": "Enter server name",
+      "localStorage": "Local Storage",
+      "volumeStorage": "Volume Storage",
+      "review": "Review",
+      "confirm": "Create Server",
+      "configMode": "Configuration",
+      "envVars": "Environment Variables",
+      "manualConfig": "Manual Setup",
+      "manualConfigDesc": "Configure GPU, storage, and more manually.",
+      "noTemplate": "No Template",
+      "optional": "(Optional)",
+      "sharedStorage": "Shared Storage",
+      "templateAutoSet": "Auto-configured from template",
+      "useTemplate": "Use Template",
+      "backBtn": "← Server List",
+      "stepSubtitle": "Step-by-step setup",
+      "imageInstruction": "Select an image to use for the server.",
+      "nextStep": "Next Step →",
+      "selectedImage": "Selected Image",
+      "changeImage": "Change",
+      "nameConstraint": "Lowercase letters, numbers, and hyphens only. Max 40 characters.",
+      "envVarHint": "Enter one KEY=VALUE pair per line.",
+      "preparingMsg": "Preparing your server. This may take 2–5 minutes..."
+    },
+    "mode": {
+      "list": "List View",
+      "grid": "Grid View"
+    },
+    "gpu": {
+      "available": "Available",
+      "quantity": "Quantity",
+      "sort": {
+        "avail": "By Availability",
+        "price": "By Price",
+        "vram": "By VRAM"
+      }
+    },
+    "image": {
+      "sort": {
+        "rating": "By Rating",
+        "used": "Most Used"
+      },
+      "cat": {
+        "all": "All"
+      },
+      "tier": {
+        "all": "All",
+        "official": "Official",
+        "verified": "Verified"
+      }
+    },
+    "monitoring": {
+      "utilization": "Utilization"
+    },
+    "storage": {
+      "createNew": "Create New Storage",
+      "name": "Storage Name"
+    }
+  },
+  "storage": {
+    "type": {
+      "local": "Local",
+      "volume": "Volume",
+      "all": "All"
+    },
+    "status": {
+      "mounted": "Mounted",
+      "unmounted": "Unmounted",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "filter": {
+      "type": "Type",
+      "status": "Status",
+      "all": "All",
+      "warningOnly": "Warning Only"
+    },
+    "column": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "status": "Status",
+      "mountedServer": "Mounted Server",
+      "createdAt": "Created At",
+      "action": "Action"
+    },
+    "action": {
+      "mount": "Mount",
+      "unmount": "Unmount",
+      "delete": "Delete",
+      "expand": "Expand",
+      "create": "Create Storage",
+      "expandApply": "Apply",
+      "manage": "Manage"
+    },
+    "drawer": {
+      "createTitle": "Create Storage",
+      "detailTitle": "Storage Detail",
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "mountPath": "Mount Path",
+      "mountedServer": "Mounted Server",
+      "lastUnmountedAt": "Last Unmounted At:",
+      "cost": "Cost",
+      "namePlaceholder": "Enter storage name",
+      "sizePlaceholder": "Enter size (GB)"
+    },
+    "mount": {
+      "badge": "Mounted on {{count}} server(s)",
+      "server": "Server",
+      "selectServer": "Select server to mount"
+    },
+    "delete": {
+      "title": "Delete Storage",
+      "message": "Are you sure you want to delete storage {{name}}?",
+      "warning": "Deleted storage cannot be recovered.",
+      "sharedWarning": "This may affect other members using the shared storage.",
+      "irreversible": "This action cannot be undone."
+    },
+    "empty": "No storage created.",
+    "costInfo": "Cost Information",
+    "warning": {
+      "unmountFirst": "Please unmount before deleting.",
+      "noShrink": "Storage size cannot be reduced."
+    },
+    "subtitle": "Storage List",
+    "totalCount": "Total {{count}}",
+    "currentSize": "Current Size",
+    "newSize": "New Size",
+    "sizeChange": "Size Change",
+    "costMonthly": "Monthly Cost",
+    "additionalCost": "Additional Cost"
+  },
+  "admin": {
+    "dashboard": {
+      "subtitle": "Monitor the entire service status in real time.",
+      "lastUpdated": "Last updated · 2026-07-15 15:50:00",
+      "kpi": {
+        "totalUsers": "Total Users",
+        "activeServers": {
+          "label": "Active Servers",
+          "trend": "+2 vs. yesterday"
+        },
+        "activeStorage": "Active Storage",
+        "totalCredits": "Total Credits",
+        "activeUsers": {
+          "label": "Active Users",
+          "trend": "+5 vs. yesterday"
+        },
+        "gpuOccupancy": {
+          "label": "GPU Occupancy",
+          "trend": "+3% vs. yesterday"
+        },
+        "todayCredit": {
+          "label": "Today's Credit Usage",
+          "trend": "+8% vs. yesterday"
+        }
+      },
+      "card": {
+        "serverTrend": {
+          "title": "Server Trend",
+          "subtitle": "Last 7 days"
+        },
+        "creditTrend": {
+          "title": "Credit Usage Trend",
+          "subtitle": "Last 7 days"
+        },
+        "gpuOccupancy": {
+          "title": "GPU Occupancy",
+          "subtitle": "Occupancy by GPU type"
+        },
+        "userGrowth": {
+          "title": "User Growth",
+          "subtitle": "Monthly cumulative"
+        },
+        "storageDist": {
+          "title": "Storage Distribution",
+          "subtitle": "Total {{total}}TB"
+        },
+        "recentAlerts": "Recent Alerts",
+        "todayCredit": "Today's Credit Usage"
+      },
+      "series": {
+        "active": "Active",
+        "stopped": "Stopped",
+        "creditUsage": "Credit Usage",
+        "users": "Users",
+        "workspaces": "Workspaces"
+      },
+      "gpu": {
+        "inactive": "Inactive",
+        "nearSaturation": "Near Saturation",
+        "occupancyText": "{{pct}}% occupied · {{free}} free"
+      },
+      "credit": {
+        "netGrant": "Net Grant (Grant - Revoke)"
+      },
+      "tooltip": {
+        "activeServers": "Active Servers",
+        "creditUsage": "Credit Usage",
+        "stoppedServers": "Stopped Servers"
+      },
+      "chart": {
+        "serverStatus": "Server Status",
+        "storageDistribution": "Storage Distribution",
+        "creditUsage": "Today's Credit Usage",
+        "recentAlerts": "Recent Alerts",
+        "active": "Active",
+        "stopped": "Stopped",
+        "creditUsed": "Credit Used",
+        "all": "All",
+        "adminGrant": "Admin Grant",
+        "adminRevoke": "Admin Revoke",
+        "netGrant": "Net Grant (Grant - Revoke)"
+      },
+      "alertLevel": {
+        "info": "Info",
+        "warning": "Warning",
+        "critical": "Critical"
+      }
+    },
+    "user": {
+      "subtitle": "View and manage all users.",
+      "invite": "Invite User",
+      "filter": {
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "viewDetail": "View Detail",
+      "manage": "Manage",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "detail": {
+        "title": "User Detail"
+      },
+      "col": {
+        "nameEmail": "Name / Email",
+        "status": "Status",
+        "workspaces": "Workspaces",
+        "creditUsage": "Credit Usage",
+        "joined": "Joined At"
+      },
+      "drawer": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "joinedAt": "Joined At",
+        "lastLogin": "Last Login",
+        "workspaces": "Workspaces",
+        "servers": "Servers",
+        "monthlyUsage": "Monthly Credit Usage",
+        "creditBalance": "Credit Balance"
+      },
+      "deactivateModal": {
+        "title": "Confirm User Deactivation",
+        "message": "Are you sure you want to deactivate {{name}} ({{email}})?",
+        "warning": "Deactivation will immediately block login and pause all running servers. This can be reversed by an admin at any time."
+      }
+    },
+    "workspace": {
+      "pageTitle": "Workspace Management",
+      "subtitle": "View and manage all workspaces.",
+      "col": {
+        "name": "Workspace",
+        "status": "Status",
+        "owner": "Owner",
+        "members": "Members",
+        "creditBalance": "Credit Balance",
+        "lastActivity": "Last Activity"
+      },
+      "column": {
+        "createdAt": "Created At"
+      },
+      "creditManagement": "Credit Management",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "deactivateModal": {
+        "title": "Confirm Workspace Deactivation",
+        "message": "Are you sure you want to deactivate workspace {{name}}?",
+        "warning": "Deactivation will immediately block all member access and pause running servers. This can be reversed by an admin at any time."
+      }
+    },
+    "server": {
+      "pageTitle": "Server Management",
+      "backBtn": "← Server Management",
+      "subtitle": {
+        "servers": "Server List",
+        "templates": "Template List"
+      },
+      "col": {
+        "name": "Server",
+        "status": "Status",
+        "workspace": "Workspace",
+        "user": "User",
+        "uptime": "Uptime"
+      },
+      "template": {
+        "create": "Create Server Template",
+        "edit": "Edit Server Template",
+        "detail": {
+          "title": "Template Detail"
+        },
+        "section": {
+          "basic": "Basic Info",
+          "recommended": "Recommended Resources"
+        },
+        "field": {
+          "name": "Name",
+          "namePlaceholder": "Enter template name",
+          "descPlaceholder": "Enter description",
+          "vram": "Recommended VRAM",
+          "vramPlaceholder": "Enter VRAM",
+          "localStorage": "Recommended Local Storage (GB)",
+          "volumeStorage": "Recommended Volume Storage",
+          "baseImage": "Base Image",
+          "envVars": "Environment Variables",
+          "storageConfig": "Storage Config",
+          "capacityPlaceholder": "Enter capacity",
+          "recVram": "Recommended VRAM",
+          "visibility": "Visibility",
+          "usageCount": "Usage Count",
+          "createdAt": "Created At"
+        },
+        "action": {
+          "save": "Save Changes",
+          "create": "Create Template",
+          "createBtn": "Create Template",
+          "publish": "Publish",
+          "unpublish": "Unpublish"
+        },
+        "storage": {
+          "local": "Local Storage",
+          "shared": "Shared Storage",
+          "volume": "Volume Storage"
+        }
+      },
+      "delete": {
+        "serverTitle": "Delete Server",
+        "serverMessage": "Are you sure you want to delete server {{name}}?",
+        "templateTitle": "Delete Template",
+        "templateMessage": "Are you sure you want to delete template {{name}}?"
+      }
+    },
+    "gpu": {
+      "pageTitle": "GPU Management",
+      "subtitle": "Manage GPU types and pricing policies.",
+      "status": {
+        "unset": "Unset",
+        "nearSaturation": "Near Saturation",
+        "inactive": "Inactive"
+      },
+      "statusLabel": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "action": {
+        "activate": "Activate",
+        "deactivate": "Deactivate",
+        "publish": "Publish",
+        "unpublish": "Unpublish"
+      },
+      "detail": {
+        "drawerTitle": "{{name}} Detail",
+        "basicInfo": "Basic Info",
+        "model": "GPU Model",
+        "vram": "VRAM",
+        "total": "Total Count",
+        "occupied": "Occupied",
+        "visibility": "Visibility",
+        "status": "Status",
+        "price": "Unit Price",
+        "capacity": "Capacity",
+        "usageTitle": "GPU Usage",
+        "occupiedLabel": "Occupied",
+        "freeLabel": "Free",
+        "manageSection": "Manage"
+      },
+      "drawer": {
+        "model": "GPU Model",
+        "vram": "VRAM",
+        "totalCount": "Total Count",
+        "occupied": "Occupied",
+        "visibility": "Visibility",
+        "status": "Status",
+        "unitPrice": "Unit Price",
+        "capacity": "Capacity"
+      },
+      "usageChart": "GPU Usage",
+      "usageLabel": {
+        "occupied": "Occupied",
+        "available": "Available"
+      },
+      "deactivate": {
+        "title": "Deactivate GPU Type",
+        "message": "Are you sure you want to deactivate {{name}}?"
+      },
+      "deactivateModal": {
+        "title": "Deactivate GPU Type",
+        "message": "Are you sure you want to deactivate {{name}}?"
+      },
+      "pricing": {
+        "subtitle": "Edit Pricing Policy",
+        "registerBtn": "Register Pricing Policy",
+        "pendingAlert": "{{count}} GPU pricing polic(ies) are scheduled to apply.",
+        "pendingBanner": "{{count}} GPU pricing polic(ies) are scheduled to apply.",
+        "inactiveAt": "Inactive at: {{date}}",
+        "disabledAt": "Disabled at: {{date}}",
+        "createTitle": "Register Pricing Policy",
+        "createSubtitle": "Register a new GPU pricing policy.",
+        "editSubtitle": "Edit Pricing Policy",
+        "gpuSelectLabel": "Select GPU",
+        "versionHint": "Auto-generated after GPU selection.",
+        "preview": "Preview · Per 1 GPU",
+        "unit": {
+          "minute": "min",
+          "hour": "hr",
+          "day": "day"
+        },
+        "drawer": {
+          "versionName": "Version Name",
+          "autoGenerated": "Auto-generated",
+          "price": "Price",
+          "billingUnit": "Billing Unit",
+          "changeApplyDate": "Apply Date",
+          "preview": "Preview · Per 1 GPU",
+          "policyName": "Policy Name",
+          "applyDate": "Apply Date",
+          "status": "Status",
+          "pendingStatus": "Scheduled",
+          "currentActive": "Currently Active",
+          "history": {
+            "empty": "No change history.",
+            "pendingLabel": "v{{ver}} scheduled for: {{date}}",
+            "applyDate": "Apply Date",
+            "registeredAt": "Registered At",
+            "registeredBy": "Registered By"
+          },
+          "tabs": {
+            "editNew": "Edit New Version",
+            "createNew": "Create New Version",
+            "historyLabel": "Version History ({{count}})"
+          },
+          "billingUnitOptions": {
+            "min": "min",
+            "h": "hr",
+            "day": "day"
+          },
+          "perUnit": {
+            "min": "Per minute",
+            "h": "Per hour",
+            "day": "Per day"
+          },
+          "perDay": "Per day",
+          "per30Days": "30 days"
+        },
+        "create": {
+          "title": "Register Pricing Policy",
+          "subtitle": "Register a new GPU pricing policy.",
+          "gpuSelect": "Select GPU",
+          "versionAutoHint": "Auto-generated after GPU selection.",
+          "searchPlaceholder": "Search...",
+          "noResults": "No results found.",
+          "register": "Register"
+        }
+      }
+    },
+    "image": {
+      "pageTitle": "Image Management",
+      "subtitle": "Manage server images.",
+      "registerBtn": "Register Image",
+      "create": "Register Image",
+      "edit": "Edit Image",
+      "sync": {
+        "lastSynced": "Last synced: {{date}}",
+        "failed": "Sync failed"
+      },
+      "detail": {
+        "imageTitle": "Image List",
+        "categoryTitle": "Category Management",
+        "tierTitle": "Tier Management"
+      },
+      "action": {
+        "publish": "Publish",
+        "unpublish": "Unpublish"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "delete": {
+        "title": "Delete Image",
+        "message": "Are you sure you want to delete image {{name}}?",
+        "imageTitle": "Delete Image",
+        "imageMessage": "Are you sure you want to delete image {{name}}?",
+        "categoryTitle": "Delete Category",
+        "categoryMessage": "Are you sure you want to delete category {{name}}?",
+        "tierTitle": "Delete Tier",
+        "tierMessage": "Are you sure you want to delete tier {{name}}?"
+      },
+      "field": {
+        "name": "Image Name",
+        "category": "Category",
+        "tier": "Tier",
+        "description": "Description",
+        "desc": "Description",
+        "tags": "Tags",
+        "visibility": "Visibility",
+        "upload": "Drag and drop a file here, or click to upload",
+        "version": "Version",
+        "baseImage": "Base Image",
+        "thumbnail": "Thumbnail",
+        "packages": "Packages",
+        "path": "Path",
+        "recGpu": "Recommended GPU",
+        "recLocal": "Recommended Local Storage",
+        "color": "Color",
+        "imageCount": "Image Count",
+        "usageCount": "Usage Count"
+      },
+      "form": {
+        "createTitle": "Register Image",
+        "editTitle": "Edit Image",
+        "subtitle": "Enter image details.",
+        "fileSection": "Image File",
+        "basicSection": "Basic Info",
+        "classSection": "Classification",
+        "runtimeSection": "Runtime Settings",
+        "packagesSection": "Packages & Env Vars",
+        "dragOrClick": "Drag and drop a file here, or click to upload",
+        "fileHint": "Supported formats: .tar, .tar.gz",
+        "fileChangeHint": "Click to change file",
+        "namePlaceholder": "Enter image name",
+        "nameHint": "Only letters, numbers, and hyphens allowed.",
+        "descPlaceholder": "Enter image description",
+        "thumbnailHint": "Recommended size: 80×80px",
+        "tagsHint": "Press Enter to add a tag.",
+        "accessMethod": "Access Method",
+        "portInfo": "Port Info",
+        "portHint": "Default port: 8888",
+        "envVarLabel": "Environment Variables",
+        "envVarHint": "Applied as environment variables when the server starts.",
+        "envValuePlaceholder": "Value",
+        "packageListLabel": "Package List",
+        "registerBtn": "Register Image",
+        "saveBtn": "Save Changes"
+      },
+      "editor": {
+        "heading1": "Heading 1",
+        "heading2": "Heading 2",
+        "bold": "Bold",
+        "italic": "Italic",
+        "inlineCode": "Inline Code",
+        "codeBlock": "Code Block",
+        "list": "List",
+        "orderedList": "Ordered List",
+        "quote": "Quote",
+        "divider": "Divider"
+      },
+      "category": {
+        "manage": "Manage Categories",
+        "create": "Create Category",
+        "createBtn": "Create Category",
+        "createTitle": "Create Category",
+        "editTitle": "Edit Category",
+        "edit": "Edit Category",
+        "field": {
+          "name": "Name",
+          "namePlaceholder": "Enter category name",
+          "color": "Color",
+          "descPlaceholder": "Enter description",
+          "preview": "Preview"
+        },
+        "delete": {
+          "title": "Delete Category",
+          "message": "Are you sure you want to delete category {{name}}?"
+        }
+      },
+      "tier": {
+        "manage": "Manage Tiers",
+        "create": "Create Tier",
+        "createBtn": "Create Tier",
+        "createTitle": "Create Tier",
+        "editTitle": "Edit Tier",
+        "edit": "Edit Tier",
+        "field": {
+          "name": "Name",
+          "namePlaceholder": "Enter tier name",
+          "descPlaceholder": "Enter description"
+        },
+        "delete": {
+          "title": "Delete Tier",
+          "message": "Are you sure you want to delete tier {{name}}?"
+        }
+      }
+    },
+    "credit": {
+      "pageTitle": "Credit History",
+      "subtitle": "Manage workspace credits.",
+      "manageBtn": "Manage Credits",
+      "col": {
+        "workspace": "Workspace",
+        "type": "Type",
+        "user": "User",
+        "amount": "Amount"
+      },
+      "type": {
+        "grant": "Grant",
+        "revoke": "Revoke",
+        "serverUsage": "Server Usage",
+        "sharedUsage": "Shared Storage Usage",
+        "volumeUsage": "Volume Storage Usage"
+      },
+      "filter": {
+        "typeAll": "All",
+        "wsAll": "All Workspaces"
+      },
+      "drawer": {
+        "title": "Credit Management",
+        "subtitle": "Grant or revoke credits for a workspace.",
+        "workspaceSelect": "Select Workspace",
+        "wsSelect": "Select Workspace",
+        "typeLabel": "Type",
+        "typeGrant": "Grant",
+        "typeRevoke": "Revoke",
+        "amount": "Amount (cr)",
+        "amountLabel": "Amount (cr)",
+        "reason": "Reason",
+        "reasonLabel": "Reason",
+        "reasonPlaceholder": "Enter reason",
+        "preview": "Execution Preview",
+        "previewLabel": "Execution Preview",
+        "before": "Before",
+        "after": "After",
+        "execute": "Execute",
+        "executeBtn": "Execute",
+        "overLimit": "Exceeds credit limit.",
+        "noResults": "No results found."
+      },
+      "typeFilter": {
+        "all": "All",
+        "server": "Server",
+        "storage": "Storage",
+        "adminGrant": "Admin Grant",
+        "adminRevoke": "Admin Revoke"
+      }
+    },
+    "storage": {
+      "pageTitle": "Storage Management",
+      "subtitle": "View and manage all storage.",
+      "settingsSubtitle": "Manage storage settings.",
+      "unmountedAt": "Last Unmounted At:",
+      "col": {
+        "name": "Name",
+        "workspace": "Workspace",
+        "user": "User",
+        "usage": "Usage"
+      },
+      "filter": {
+        "type": "Type",
+        "status": "Status"
+      },
+      "detail": {
+        "drawerTitle": "{{name}} Storage Detail",
+        "name": "Name",
+        "type": "Type",
+        "workspace": "Workspace",
+        "owner": "Owner",
+        "email": "Email",
+        "mountServer": "Mounted Server",
+        "status": "Status",
+        "usage": "Usage"
+      },
+      "drawer": {
+        "name": "Name",
+        "type": "Type",
+        "size": "Size",
+        "status": "Status",
+        "owner": "Owner",
+        "workspace": "Workspace",
+        "mountedServer": "Mounted Server",
+        "lastUnmountedAt": "Last Unmounted At:",
+        "createdAt": "Created At"
+      },
+      "action": {
+        "expand": "Expand",
+        "delete": "Delete"
+      },
+      "pricing": {
+        "registerBtn": "Register Pricing Policy",
+        "pendingBanner": "{{count}} storage pricing polic(ies) are scheduled to apply.",
+        "createTitle": "Register Pricing Policy",
+        "createSubtitle": "Register a new storage pricing policy.",
+        "editSubtitle": "Edit Pricing Policy",
+        "preview": "Preview · Per 100GB",
+        "typeSelectLabel": "Select Storage Type",
+        "typeColHeader": "Storage Type",
+        "versionHint": "Auto-generated after storage type selection."
+      },
+      "noResults": "No results found."
+    },
+    "storagePricing": {
+      "subtitle": "Manage storage pricing policies.",
+      "column": {
+        "policyName": "Policy Name",
+        "status": "Status",
+        "target": "Target",
+        "content": "Policy Content",
+        "applyDate": "Apply Date",
+        "action": "Action"
+      },
+      "statusActive": "Active",
+      "registerBtn": "Register Pricing Policy",
+      "pendingAlert": "{{count}} storage pricing polic(ies) are scheduled to apply.",
+      "inactiveAt": "Inactive at: {{date}}",
+      "drawer": {
+        "versionName": "Version Name",
+        "autoGenerated": "Auto-generated",
+        "price": "Price",
+        "billingUnit": "Billing Unit",
+        "changeApplyDate": "Apply Date",
+        "preview": "Preview · Per 100GB",
+        "policyName": "Policy Name",
+        "applyDate": "Apply Date",
+        "status": "Status",
+        "pendingStatus": "Scheduled",
+        "currentActive": "Currently Active",
+        "history": {
+          "empty": "No change history.",
+          "pendingLabel": "v{{ver}} scheduled for: {{date}}",
+          "applyDate": "Apply Date",
+          "registeredAt": "Registered At",
+          "registeredBy": "Registered By"
+        },
+        "tabs": {
+          "editNew": "Edit New Version",
+          "createNew": "Create New Version",
+          "historyLabel": "Version History ({{count}})"
+        },
+        "billingUnitOptions": {
+          "h": "hr",
+          "min": "min",
+          "day": "day"
+        },
+        "perUnit": {
+          "h": "Per hour",
+          "min": "Per minute",
+          "day": "Per day"
+        },
+        "perDay": "Per day",
+        "per30Days": "30 days"
+      },
+      "create": {
+        "title": "Register Pricing Policy",
+        "subtitle": "Register a new storage pricing policy.",
+        "register": "Register"
+      }
+    },
+    "auditLog": {
+      "pageTitle": "Audit Log",
+      "subtitle": "View system-wide audit logs.",
+      "empty": "Screen layout not finalized",
+      "emptyDetail": "The details of the Audit Log feature are currently under review."
+    },
+    "systemSettings": {
+      "title": "System Settings",
+      "subtitle": "Manage platform SMTP and image repository integration settings.",
+      "logo": {
+        "main": "Main Logo",
+        "sub": "Sub Logo",
+        "favicon": "Favicon",
+        "hintHeader": "Header, login screen",
+        "hintCollapsed": "Collapsed sidebar",
+        "hintBrowser": "Browser tab icon"
+      }
+    },
+    "pricing": {
+      "col": {
+        "name": "Policy Name",
+        "status": "Status",
+        "target": "Target",
+        "content": "Policy Content",
+        "applyAt": "Apply Date",
+        "action": "Actions",
+        "gpu": "GPU"
+      },
+      "field": {
+        "version": "Version Name",
+        "price": "Price",
+        "billingUnit": "Billing Unit",
+        "applyAt": "Apply Date"
+      },
+      "history": {
+        "empty": "No change history.",
+        "current": "Currently Active",
+        "applyAt": "Apply Date",
+        "registeredAt": "Registered At",
+        "registeredBy": "Registered By"
+      },
+      "preview": {
+        "policyName": "Policy Name",
+        "applyAt": "Apply Date",
+        "status": "Status",
+        "pending": "Scheduled",
+        "perUnit": "Per {{unit}}",
+        "perUnitGpu": "Per 1 GPU",
+        "perDay": "Per day",
+        "per30day": "30 days"
+      },
+      "tab": {
+        "editNew": "Edit New Version",
+        "editPending": "Edit Pending Version",
+        "history": "Version History ({{count}})"
+      },
+      "unit": {
+        "minute": "min",
+        "hour": "hr",
+        "day": "day"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "action": {
+        "editVersion": "Edit Version",
+        "newVersion": "Create New Version"
+      },
+      "autoGenerate": "Auto-generated",
+      "pendingLabel": "v{{ver}} scheduled for: {{date}}"
+    }
+  }
+}

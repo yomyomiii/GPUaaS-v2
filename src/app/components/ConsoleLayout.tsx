@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Bell, HelpCircle, ChevronDown, LayoutDashboard, Server, FolderOpen,
   Database, Layers, Users, CreditCard, Settings, Activity, Image,
-  Cpu, LogOut, User, Globe, ChevronRight, Wallet, BellRing, Package,
+  Cpu, LogOut, User, ChevronRight, Wallet, BellRing, Package,
   ReceiptText, ShieldCheck, Mail, BarChart3, ArrowLeftRight, ClipboardList
 } from "lucide-react";
 import {
@@ -73,6 +74,7 @@ interface GNBProps {
   onAuditLog?: () => void;
 }
 export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230, onSwitchMode, notifCount = 3, onAuditLog }: GNBProps) {
+  const { t, i18n } = useTranslation();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +97,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
       {/* Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 8 }}>
         <div style={{ width: 26, height: 26, borderRadius: 6, backgroundColor: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ color: "white", fontSize: 13, fontWeight: 700, fontFamily: "monospace" }}>N</span>
+          <span style={{ color: "white", fontSize: 13, fontWeight: 700 }}>N</span>
         </div>
         <span style={{ color: "white", fontSize: 15, fontWeight: 700, letterSpacing: -0.3 }}>NeuroStack</span>
       </div>
@@ -104,7 +106,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
       {isAdmin && (
         <div style={{ backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 4, padding: "2px 8px", display: "flex", alignItems: "center", gap: 6 }}>
           <ShieldCheck size={12} color="white" />
-          <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, fontWeight: 500 }}>Admin Console</span>
+          <span style={{ color: "rgba(255,255,255,0.9)", fontSize: 11, fontWeight: 500 }}>{t("gnb.adminBadge")}</span>
         </div>
       )}
 
@@ -124,7 +126,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
       {isAdmin ? (
         <button onClick={onAuditLog} style={{ background: "none", border: "none", cursor: "pointer", padding: "3px 8px", borderRadius: 6, display: "flex", alignItems: "center", gap: 5 }}>
           <ClipboardList size={15} color="rgba(255,255,255,0.85)" />
-          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: 500 }}>Audit Log</span>
+          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: 500 }}>{t("gnb.adminLnb.auditLog")}</span>
         </button>
       ) : (
         <button style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
@@ -145,10 +147,18 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
       </button>
 
       {/* Language */}
-      <button style={{ background: "none", border: "none", cursor: "pointer", padding: "3px 6px", borderRadius: 4, display: "flex", alignItems: "center", gap: 4 }}>
-        <Globe size={14} color="rgba(255,255,255,0.8)" />
-        <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, fontWeight: 500 }}>KO</span>
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+        {(["ko", "en"] as const).map(lang => (
+          <button key={lang} onClick={() => { i18n.changeLanguage(lang); localStorage.setItem("i18nextLng", lang); }}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: "3px 7px", borderRadius: 4,
+              color: i18n.language === lang ? "white" : "rgba(255,255,255,0.5)",
+              fontSize: 11, fontWeight: i18n.language === lang ? 700 : 400,
+              backgroundColor: i18n.language === lang ? "rgba(255,255,255,0.2)" : "transparent",
+            }}>
+            {lang.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
       {/* Avatar */}
       <div ref={menuRef} style={{ position: "relative" }}>
@@ -172,8 +182,8 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
               <div style={{ fontSize: 12, color: GRAY_60 }}>yeomeyeom.ji@sdt.inc</div>
             </div>
             {[
-              { icon: <User size={14} />, label: "내 프로필" },
-              { icon: <BellRing size={14} />, label: "알림 설정" },
+              { icon: <User size={14} />, label: t("gnb.myProfile") },
+              { icon: <BellRing size={14} />, label: t("gnb.notificationSettings") },
             ].map(item => (
               <button key={item.label} style={{
                 display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 14px",
@@ -196,7 +206,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 <Settings size={14} />
-                {isAdmin ? "사용자 콘솔로 전환" : "어드민 콘솔로 전환"}
+                {isAdmin ? t("gnb.switchToUser") : t("gnb.switchToAdmin")}
               </button>
             )}
             <button style={{
@@ -208,7 +218,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
             >
               <LogOut size={14} />
-              로그아웃
+              {t("gnb.logout")}
             </button>
           </div>
         )}
@@ -228,20 +238,21 @@ interface UserLNBProps {
   onSwitchMode?: () => void;
 }
 export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
+  const { t } = useTranslation();
   const [wsExpanded, setWsExpanded] = useState(true);
 
   const isWorkspaceActive = active.startsWith("workspace");
   const isStorageActive = active === "storage";
 
   const topItems = [
-    { id: "dashboard" as UserScreen, icon: <LayoutDashboard size={16} />, label: "Dashboard" },
+    { id: "dashboard" as UserScreen, icon: <LayoutDashboard size={16} />, label: t("gnb.lnb.dashboard") },
   ];
 
   const workspaceSubs = [
-    { id: "workspace-overview" as UserScreen, label: "Overview" },
-    { id: "workspace-members" as UserScreen, label: "Members" },
-    { id: "workspace-credit" as UserScreen, label: "Credit" },
-    { id: "workspace-settings" as UserScreen, label: "Settings" },
+    { id: "workspace-overview" as UserScreen, label: t("gnb.lnb.workspaceOverview") },
+    { id: "workspace-members" as UserScreen, label: t("gnb.lnb.workspaceMembers") },
+    { id: "workspace-credit" as UserScreen, label: t("gnb.lnb.workspaceCredit") },
+    { id: "workspace-settings" as UserScreen, label: t("gnb.lnb.workspaceSettings") },
   ];
 
 
@@ -283,8 +294,8 @@ export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
           <Layers size={16} color={PRIMARY} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10, color: GRAY_60, fontWeight: 500, marginBottom: 2 }}>현재 워크스페이스</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>My Workspace</div>
+          <div style={{ fontSize: 10, color: GRAY_60, fontWeight: 500, marginBottom: 2 }}>{t("gnb.currentWorkspace")}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: GRAY_90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t("gnb.lnb.myWorkspace")}</div>
         </div>
         <ChevronDown size={14} color={GRAY_60} />
       </button>
@@ -306,7 +317,7 @@ export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}>
         <span style={{ display: "flex", alignItems: "center", gap: 9 }}>
           <span style={{ color: isWorkspaceActive ? PRIMARY : GRAY_60 }}><Layers size={16} /></span>
-          <span style={{ color: isWorkspaceActive ? PRIMARY : GRAY_90, fontWeight: isWorkspaceActive ? 600 : 400 }}>Workspace</span>
+          <span style={{ color: isWorkspaceActive ? PRIMARY : GRAY_90, fontWeight: isWorkspaceActive ? 600 : 400 }}>{t("gnb.lnb.workspace")}</span>
         </span>
         <ChevronDown size={13} color={GRAY_60} style={{ transform: wsExpanded ? "rotate(0)" : "rotate(-90deg)", transition: "transform 0.2s" }} />
       </div>
@@ -325,7 +336,7 @@ export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
         onMouseEnter={e => { if (active !== "server-list" && active !== "server-detail") e.currentTarget.style.backgroundColor = GRAY_5; }}
         onMouseLeave={e => { if (active !== "server-list" && active !== "server-detail") e.currentTarget.style.backgroundColor = "transparent"; }}>
         <span style={{ color: (active === "server-list" || active === "server-detail") ? PRIMARY : GRAY_60 }}><Server size={16} /></span>
-        Server
+        {t("gnb.lnb.server")}
       </button>
 
       {/* Storage */}
@@ -333,7 +344,7 @@ export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
         onMouseEnter={e => { if (!isStorageActive) e.currentTarget.style.backgroundColor = GRAY_5; }}
         onMouseLeave={e => { if (!isStorageActive) e.currentTarget.style.backgroundColor = "transparent"; }}>
         <span style={{ color: isStorageActive ? PRIMARY : GRAY_60 }}><Database size={16} /></span>
-        Storage
+        {t("gnb.lnb.storage")}
       </button>
 
       {/* 하단 프로필 + 콘솔 전환 */}
@@ -356,7 +367,7 @@ export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; e.currentTarget.style.color = GRAY_90; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = GRAY_60; }}>
             <ArrowLeftRight size={13} />
-            <span>Admin Console로 전환</span>
+            <span>{t("gnb.switchConsole.toAdmin")}</span>
           </button>
         )}
       </div>
@@ -382,6 +393,7 @@ interface AdminLNBProps {
 }
 
 export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set() }: AdminLNBProps) {
+  const { t } = useTranslation();
   const [storageExp, setStorageExp] = useState(true);
   const [serverExp, setServerExp] = useState(false);
   const [imageExp, setImageExp] = useState(false);
@@ -439,64 +451,66 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
       display: "flex", flexDirection: "column", padding: "12px 8px", gap: 1, flexShrink: 0,
       overflowY: "auto",
     }}>
-      <NavItem id="admin-dashboard" icon={<LayoutDashboard size={16} />} label="Dashboard" />
+      <NavItem id="admin-dashboard" icon={<LayoutDashboard size={16} />} label={t("gnb.adminLnb.dashboard")} />
       {/* User Management */}
       <div style={{ opacity: disabledMenus.has("admin-users") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-users") ? "none" : "auto" }}>
-        <NavItem id="admin-users" icon={<Users size={16} />} label="User Management" />
+        <NavItem id="admin-users" icon={<Users size={16} />} label={t("gnb.adminLnb.userManagement")} />
       </div>
       {/* Workspace Management */}
       <div style={{ opacity: disabledMenus.has("admin-workspaces") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-workspaces") ? "none" : "auto" }}>
-        <NavItem id="admin-workspaces" icon={<Layers size={16} />} label="Workspace Management" />
+        <NavItem id="admin-workspaces" icon={<Layers size={16} />} label={t("gnb.adminLnb.workspaceManagement")} />
       </div>
       {/* Server Management */}
       <div style={{ opacity: disabledMenus.has("admin-servers") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-servers") ? "none" : "auto" }}>
-        <SectionHeader icon={<Server size={16} />} label="Server Management"
+        <SectionHeader icon={<Server size={16} />} label={t("gnb.adminLnb.serverManagement")}
           active={active === "admin-servers" || active === "admin-templates"}
           expanded={serverExp} onClick={() => setServerExp(!serverExp)} />
         {serverExp && <>
-          <SubItem id="admin-servers" label="Servers" />
-          <SubItem id="admin-templates" label="Server Templates" />
+          <SubItem id="admin-servers" label={t("gnb.adminLnb.servers")} />
+          <SubItem id="admin-templates" label={t("gnb.adminLnb.serverTemplates")} />
         </>}
 
       </div>
       {/* Storage Management */}
       <div style={{ opacity: disabledMenus.has("admin-storage") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-storage") ? "none" : "auto" }}>
-        <SectionHeader icon={<Database size={16} />} label="Storage Management"
+        <SectionHeader icon={<Database size={16} />} label={t("gnb.adminLnb.storageManagement")}
           active={active.startsWith("admin-storage")} expanded={storageExp}
           onClick={() => { setStorageExp(!storageExp); }} />
         {storageExp && <>
-          <SubItem id="admin-storage" label="Storage" />
-          <SubItem id="admin-storage-pricing" label="Storage Pricing Policy" />
-          <SubItem id="admin-storage-policy" label="Storage Settings" />
+          <SubItem id="admin-storage" label={t("gnb.adminLnb.storage")} />
+          <SubItem id="admin-storage-pricing" label={t("gnb.adminLnb.storagePricing")} />
+          <SubItem id="admin-storage-policy" label={t("gnb.adminLnb.storageSettings")} />
         </>}
       </div>
       {/* Image Management */}
       <div style={{ opacity: disabledMenus.has("admin-images") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-images") ? "none" : "auto" }}>
-        <SectionHeader icon={<Image size={16} />} label="Image Management"
+        <SectionHeader icon={<Image size={16} />} label={t("gnb.adminLnb.imageManagement")}
           active={active.startsWith("admin-images") || active.startsWith("admin-categories") || active === "admin-tiers"}
           expanded={imageExp} onClick={() => setImageExp(!imageExp)} />
         {imageExp && <>
-          <SubItem id="admin-images" label="Image" />
-          <SubItem id="admin-categories" label="Category" />
-          <SubItem id="admin-tiers" label="Tier" />
+          <SubItem id="admin-images" label={t("gnb.adminLnb.image")} />
+          <SubItem id="admin-categories" label={t("gnb.adminLnb.category")} />
+          <SubItem id="admin-tiers" label={t("gnb.adminLnb.tier")} />
         </>}
       </div>
       {/* GPU Type Management */}
       <div style={{ opacity: disabledMenus.has("admin-gpu") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-gpu") ? "none" : "auto" }}>
-        <SectionHeader icon={<Cpu size={16} />} label="GPU Management"
+        <SectionHeader icon={<Cpu size={16} />} label={t("gnb.adminLnb.gpuManagement")}
           active={active.startsWith("admin-gpu")} expanded={gpuExp}
           onClick={() => setGpuExp(!gpuExp)} />
         {gpuExp && <>
-          <SubItem id="admin-gpu-types" label="GPU" />
-          <SubItem id="admin-gpu-pricing" label="GPU Pricing Policy" />
+          <SubItem id="admin-gpu-types" label={t("gnb.adminLnb.gpu")} />
+          <SubItem id="admin-gpu-pricing" label={t("gnb.adminLnb.gpuPricing")} />
         </>}
       </div>
       {/* Credit */}
       <div style={{ opacity: disabledMenus.has("admin-credits") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-credits") ? "none" : "auto" }}>
-        <NavItem id="admin-credits" icon={<CreditCard size={16} />} label="Credit History" />
+        <NavItem id="admin-credits" icon={<CreditCard size={16} />} label={t("gnb.adminLnb.creditHistory")} />
       </div>
+      {/* Audit Log */}
+      <NavItem id="admin-audit-log" icon={<ClipboardList size={16} />} label={t("gnb.adminLnb.auditLog")} />
       {/* System Settings */}
-      <NavItem id="admin-settings-auth" icon={<Settings size={16} />} label="System Settings" />
+      <NavItem id="admin-settings-auth" icon={<Settings size={16} />} label={t("gnb.adminLnb.systemSettings")} />
 
       {/* 하단 프로필 + 콘솔 전환 */}
       <div style={{ marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${GRAY_10}` }}>
@@ -518,7 +532,7 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; e.currentTarget.style.color = GRAY_90; }}
             onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = GRAY_60; }}>
             <ArrowLeftRight size={13} />
-            <span>User Console로 전환</span>
+            <span>{t("gnb.switchConsole.toUser")}</span>
           </button>
         )}
       </div>
@@ -645,14 +659,14 @@ export function Table({ headers, rows, onRowClick, colWidths, spacerGaps }: {
 
   if (spacerGaps) {
     const thStyle = (i: number): React.CSSProperties => ({
-      width: "1px", whiteSpace: "nowrap",
-      padding: i === 0 ? "10px 0 10px 16px" : i === n - 1 ? "10px 20px 10px 0" : "10px 0",
+      width: "1px", maxWidth: "max-content", whiteSpace: "nowrap",
+      padding: i === 0 ? "10px 0 10px 16px" : i === n - 1 ? "10px 16px 10px 0" : "10px 0",
       fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left",
       borderBottom: `1px solid ${GRAY_10}`,
     });
     const tdStyle = (j: number): React.CSSProperties => ({
-      width: "1px",
-      padding: j === 0 ? "12px 0 12px 16px" : j === n - 1 ? "12px 20px 12px 0" : "12px 0",
+      width: "1px", maxWidth: "max-content",
+      padding: j === 0 ? "12px 0 12px 16px" : j === n - 1 ? "12px 16px 12px 0" : "12px 0",
       fontSize: 13, color: GRAY_90, borderBottom: `1px solid ${GRAY_10}`,
     });
     const spacerThStyle: React.CSSProperties = { borderBottom: `1px solid ${GRAY_10}` };
