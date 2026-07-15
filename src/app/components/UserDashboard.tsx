@@ -253,7 +253,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
         {/* 중요 알림 */}
         <SectionCard title={t('dashboard.notifications.title', '주요 알림')} subtitle={t('dashboard.notifications.unread', { n: 2 })} action={
-          <button type="button" onClick={() => onNavigate("workspace-settings")} style={{ fontSize: 11, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
+          <button type="button" onClick={() => onNavigate("workspace-overview")} style={{ fontSize: 11, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
             {t('dashboard.notifications.viewAll', '전체')} <ChevronRight size={12} />
           </button>
         }>

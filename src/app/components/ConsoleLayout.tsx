@@ -229,7 +229,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
 
 // ─── User LNB ─────────────────────────────────────────────────────────────────
 type UserScreen = "dashboard" | "workspace-overview" | "workspace-members" | "workspace-credit"
-  | "workspace-settings" | "server-list" | "server-detail"
+  | "server-list" | "server-detail"
   | "storage";
 
 interface UserLNBProps {
@@ -252,7 +252,6 @@ export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
     { id: "workspace-overview" as UserScreen, label: t("gnb.lnb.workspaceOverview") },
     { id: "workspace-members" as UserScreen, label: t("gnb.lnb.workspaceMembers") },
     { id: "workspace-credit" as UserScreen, label: t("gnb.lnb.workspaceCredit") },
-    { id: "workspace-settings" as UserScreen, label: t("gnb.lnb.workspaceSettings") },
   ];
 
 

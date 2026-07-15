@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Plus, Crown, Shield, User, CreditCard, Mail, Smartphone,
   Server, Zap, Layers, MoreHorizontal, Clock,
-  UserPlus, Settings, Database, Info, ChevronUp, ChevronDown, Search, X,
+  UserPlus, Database, Info, ChevronUp, ChevronDown, Search, X,
 } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, PRIMARY_20, GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90, RED, GREEN, BLUE, YELLOW,
@@ -56,23 +56,7 @@ const settingsHistory = [
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type AlertKey = "credit" | "gpu_usage" | "gpu_vram" | "storage_temp" | "storage_local" | "storage_shared";
-type AlertCfg = {
-  enabled: boolean;
-  threshold: number;
-  channels: { inapp: boolean; email: boolean };
-  recipients: { owner: boolean; admin: boolean; user: boolean };
-};
 type MemberSortField = "name" | "email" | "role" | "servers" | "inactive" | "local" | "shared" | "credits" | "joined" | null;
-
-const alertDefs: { key: AlertKey; labelKey: string; descKey: string; hasThreshold: boolean; unit: string }[] = [
-  { key: "credit",         labelKey: "workspace.alert.credit.label",        descKey: "workspace.alert.credit.desc",        hasThreshold: true, unit: "cr 이하" },
-  { key: "gpu_usage",      labelKey: "workspace.alert.gpu_usage.label",     descKey: "workspace.alert.gpu_usage.desc",     hasThreshold: true, unit: "% 이상" },
-  { key: "gpu_vram",       labelKey: "workspace.alert.gpu_vram.label",      descKey: "workspace.alert.gpu_vram.desc",      hasThreshold: true, unit: "% 이상" },
-  { key: "storage_temp",   labelKey: "workspace.alert.storage_temp.label",  descKey: "workspace.alert.storage_temp.desc",  hasThreshold: true, unit: "GB 이하" },
-  { key: "storage_local",  labelKey: "workspace.alert.storage_local.label", descKey: "workspace.alert.storage_local.desc", hasThreshold: true, unit: "GB 이하" },
-  { key: "storage_shared", labelKey: "workspace.alert.storage_shared.label",descKey: "workspace.alert.storage_shared.desc",hasThreshold: true, unit: "GB 이하" },
-];
 
 // ─── InfoTooltip ──────────────────────────────────────────────────────────────
 function InfoTooltip({ items, emptyLabel }: { items: string[]; emptyLabel?: string }) {
@@ -310,7 +294,7 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
           {/* 기본 정보 — card */}
           <section>
             <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('workspace.member.drawer.info')}</div>
-            <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 16, columnGap: 20 }}>
+            <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 16, columnGap: 20 }}>
               {[
                 { label: t('workspace.member.drawer.name'), key: "name", value: m.name },
                 { label: t('workspace.member.drawer.email'), key: "email", value: m.email },
@@ -513,18 +497,8 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
   };
   const [tab, setTab] = useState(initialTab);
 
-  const [alertConfig, setAlertConfig] = useState<Record<AlertKey, AlertCfg>>({
-    credit:         { enabled: true,  threshold: 5000,  channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
-    gpu_usage:      { enabled: true,  threshold: 80,    channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: true  } },
-    gpu_vram:       { enabled: true,  threshold: 90,    channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: true  } },
-    storage_temp:   { enabled: false, threshold: 10,    channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
-    storage_local:  { enabled: false, threshold: 10,    channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
-    storage_shared: { enabled: false, threshold: 50,    channels: { inapp: true,  email: false }, recipients: { owner: true,  admin: true,  user: false } },
-  });
-
   const [sortField, setSortField] = useState<MemberSortField>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [notifRecipients, setNotifRecipients] = useState({ owner: true, admin: true, user: false });
   const [creditTypeFilter, setCreditTypeFilter] = useState<CreditType | "전체">("전체");
   const [creditSearch, setCreditSearch] = useState("");
   const [openMemberMenu, setOpenMemberMenu] = useState<string | null>(null);
@@ -536,18 +510,6 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
 
   useEffect(() => { setTab(initialTab); }, [initialTab]);
   const handleTabChange = (t: string) => { setTab(t); onTabChange?.(t); };
-
-  // ── Alert helpers ──
-  const toggleAlert = (key: AlertKey) =>
-    setAlertConfig(p => ({ ...p, [key]: { ...p[key], enabled: !p[key].enabled } }));
-  const toggleChannel = (key: AlertKey, ch: "inapp" | "email") =>
-    setAlertConfig(p => ({ ...p, [key]: { ...p[key], channels: { ...p[key].channels, [ch]: !p[key].channels[ch] } } }));
-  const toggleRecipient = (key: AlertKey, r: "owner" | "admin" | "user") =>
-    setAlertConfig(p => ({ ...p, [key]: { ...p[key], recipients: { ...p[key].recipients, [r]: !p[key].recipients[r] } } }));
-  const setThreshold = (key: AlertKey, v: number) =>
-    setAlertConfig(p => ({ ...p, [key]: { ...p[key], threshold: v } }));
-  const toggleNotifRecipient = (r: "owner" | "admin" | "user") =>
-    setNotifRecipients(p => ({ ...p, [r]: !p[r] }));
 
   // ── Sort helpers ──
   const handleSort = (field: MemberSortField) => {
@@ -591,7 +553,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
     </span>
   );
 
-  const allTabs = ["Overview", `Members (${members.length})`, "Credit", "Settings"];
+  const allTabs = ["Overview", `Members (${members.length})`, "Credit"];
   const visibleTabs = hideTabs ? allTabs.filter(t => !hideTabs.some(h => t === h || t.startsWith(h + " ("))) : allTabs;
 
   return (
@@ -1052,85 +1014,6 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
         </div>
       )}
 
-      {tab === "Settings" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 680 }}>
-          <SectionCard title={t('workspace.alert.settingsTitle')} bodyStyle={{ padding: "6px 20px" }}>
-            {alertDefs.map((def, i) => {
-              const cfg = alertConfig[def.key];
-              return (
-                <div key={def.key} style={{ padding: "14px 0", borderBottom: i < alertDefs.length - 1 ? `1px solid ${GRAY_5}` : "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{t(def.labelKey)}</div>
-                      <div style={{ fontSize: 11, color: GRAY_60, marginTop: 2 }}>{t(def.descKey)}</div>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                      <input
-                        type="number"
-                        min={def.key === "credit" ? 100 : def.key.startsWith("storage") ? 1 : 1}
-                        max={def.key === "credit" ? 9999999 : def.key.startsWith("storage") ? 9999 : 99}
-                        step={def.key === "credit" ? 100 : 1}
-                        value={cfg.threshold}
-                        onChange={e => setThreshold(def.key, Number(e.target.value))}
-                        style={{ width: def.key === "credit" ? 72 : 54, fontSize: 13, fontWeight: 600, border: `1px solid ${GRAY_30}`, borderRadius: 6, padding: "3px 6px", textAlign: "center", color: GRAY_90, outline: "none" }}
-                      />
-                      <span style={{ fontSize: 11, color: GRAY_60 }}>{def.unit}</span>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-                      {(["inapp", "email"] as Array<"inapp" | "email">).map(ch => (
-                        <div key={ch} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 11, color: GRAY_60 }}>{ch === "inapp" ? t('workspace.alert.channelConsole') : t('workspace.alert.channelEmail')}</span>
-                          <button type="button"
-                            onClick={() => toggleChannel(def.key, ch)}
-                            style={{
-                              width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer",
-                              backgroundColor: cfg.channels[ch] ? PRIMARY : GRAY_40,
-                              position: "relative", transition: "background 0.2s",
-                            }}>
-                            <span style={{ position: "absolute", top: 2, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: cfg.channels[ch] ? 18 : 2 }} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </SectionCard>
-
-          <SectionCard title={t('workspace.alert.recipientsTitle')} bodyStyle={{ padding: "6px 20px" }}>
-            {(() => {
-              const byRole = (role: string) => members.filter(m => m.role === role);
-              const emailDesc = (list: typeof members) =>
-                list.length === 0 ? "None"
-                : list.length === 1 ? list[0].email
-                : `${list[0].email} +${list.length - 1} more`;
-              return ([
-                { key: "owner" as const, label: "Owner", desc: emailDesc(byRole("workspace.owner")), icon: <Crown size={13} />, bg: PRIMARY_10, color: PRIMARY },
-                { key: "admin" as const, label: "Admin", desc: emailDesc(byRole("workspace.admin")), icon: <Shield size={13} />, bg: "rgb(255,246,230)", color: "rgb(180,80,0)" },
-                { key: "user"  as const, label: "User",  desc: emailDesc(byRole("workspace.user")),  icon: <User  size={13} />, bg: GRAY_5,     color: GRAY_60 },
-              ] as const).map((r, i) => (
-              <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", borderBottom: i < 2 ? `1px solid ${GRAY_5}` : "none" }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: r.bg, display: "flex", alignItems: "center", justifyContent: "center", color: r.color, flexShrink: 0 }}>
-                  {r.icon}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{r.label}</div>
-                  <div style={{ fontSize: 11, color: GRAY_60 }}>{r.desc}</div>
-                </div>
-                <button type="button"
-                  onClick={() => toggleNotifRecipient(r.key)}
-                  style={{ width: 40, height: 22, borderRadius: 11, border: "none", cursor: "pointer", backgroundColor: notifRecipients[r.key] ? PRIMARY : GRAY_40, position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
-                  <span style={{ position: "absolute", top: 3, width: 16, height: 16, borderRadius: "50%", backgroundColor: "white", transition: "left 0.2s", left: notifRecipients[r.key] ? 21 : 3 }} />
-                </button>
-              </div>
-            ));
-            })()}
-          </SectionCard>
-        </div>
-      )}
     </PageContainer>
     {detailMember && <MemberDetailDrawer m={detailMember} onClose={() => setDetailMember(null)} />}
     </>

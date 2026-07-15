@@ -332,7 +332,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
 
                 {/* Actions */}
                 <div style={{ width: 210, flexShrink: 0, display: "flex", gap: 6, alignItems: "center", justifyContent: "flex-end" }}>
-                  <button type="button" style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('storage.drawer.detailTitle')}</button>
+                  <button type="button" style={{ height: 28, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.viewDetail')}</button>
                   {(item.type === "Volume" || item.type === "Shared") && (
                     <div style={{ position: "relative" }}>
                       {openMenuId === item.name && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}

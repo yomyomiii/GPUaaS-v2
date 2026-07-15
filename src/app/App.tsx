@@ -38,7 +38,6 @@ export default function App() {
         "workspace-overview": "Overview",
         "workspace-members": "Members",
         "workspace-credit": "Credit",
-        "workspace-settings": "Settings",
       };
       setWorkspaceTab(tabMap[screen] ?? "Overview");
     }
@@ -87,7 +86,6 @@ export default function App() {
                       "Overview": "workspace-overview",
                       "Members": "workspace-members",
                       "Credit": "workspace-credit",
-                      "Settings": "workspace-settings",
                     };
                     const screen = reverseMap[tab];
                     if (screen) setUserScreen(screen);

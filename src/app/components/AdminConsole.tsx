@@ -499,12 +499,34 @@ export function AdminUserManagement() {
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.user.detail.title', { name: selectedUser.name })}</span>
-              <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                  style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                  onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                  onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                    <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </span>
+                </button>
+                {openMenuId === "__drawer__" && menuAnchor && (
+                  <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                    {selectedUser.status === "active"
+                    ? <button type="button" onClick={() => { setSelectedUser(null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.user.deactivate')}</button>
+                    : <button type="button" onClick={() => { setSelectedUser(null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.user.activate')}</button>
+                  }
+                  </div>
+                )}
+              </div>
+                <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {[
                     { label: t('admin.user.drawer.name'), value: selectedUser.name },
                     { label: t('admin.user.drawer.email'), value: selectedUser.email },
@@ -534,15 +556,7 @@ export function AdminUserManagement() {
                   </div>
                 </section>
               )}
-              <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  {selectedUser.status === "active"
-                    ? <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.user.deactivate')}</button>
-                    : <button type="button" onClick={() => setSelectedUser(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.user.activate')}</button>
-                  }
-                </div>
-              </section>
+
             </div>
           </div>
         </>
@@ -1072,12 +1086,35 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.server.template.detail.title', { name: selectedTemplate.name })}</span>
-              <button type="button" onClick={() => setSelectedTemplate(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                  style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                  onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                  onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                    <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </span>
+                </button>
+                {openMenuId === "__drawer__" && menuAnchor && (
+                  <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                    <button type="button" onClick={() => { setTplForm({ name: selectedTemplate.name, desc: selectedTemplate.desc, image: selectedTemplate.image, recVram: selectedTemplate.recVram, tmp: selectedTemplate.tmp, hasLocal: selectedTemplate.hasLocal, local: selectedTemplate.local, hasShared: selectedTemplate.hasShared, shared: selectedTemplate.shared, envVars: selectedTemplate.envVars, status: selectedTemplate.status }); setEditingTemplateId(selectedTemplate.id); setView("edit-template"); setSelectedTemplate(null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
+                    {selectedTemplate.status === "Private" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Public" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Public" } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.server.template.action.publish')}</button>}
+                    {selectedTemplate.status === "Public" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Private" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Private" } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.server.template.action.unpublish')}</button>}
+                    <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                    <button type="button" onClick={() => { setDeletingTemplate(selectedTemplate); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
+                  </div>
+                )}
+              </div>
+                <button type="button" onClick={() => setSelectedTemplate(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
                     { label: t('admin.server.template.field.name'), value: selectedTemplate.name },
                     { label: t('admin.server.template.field.visibility'), value: <Badge color={selectedTemplate.status === "Public" ? "primary" : "neutral"}>{selectedTemplate.status}</Badge> },
@@ -1101,7 +1138,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               )}
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.server.template.field.storageConfig')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span style={{ fontSize: 13, color: GRAY_60 }}>{t('admin.server.template.storage.local')}</span>
                     <span style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>{selectedTemplate.tmp} GB</span>
@@ -1123,18 +1160,10 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               {selectedTemplate.envVars && (
                 <section>
                   <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.server.template.field.envVars')}</div>
-                  <pre style={{ fontSize: 12, color: GRAY_70, backgroundColor: GRAY_5, borderRadius: 8, padding: "12px 16px", margin: 0, fontFamily: "'Roboto Mono', monospace", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{selectedTemplate.envVars}</pre>
+                  <pre style={{ fontSize: 12, color: GRAY_70, border: `1px solid ${GRAY_10}`, borderRadius: 8, padding: "12px 16px", margin: 0, fontFamily: "'Roboto Mono', monospace", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{selectedTemplate.envVars}</pre>
                 </section>
               )}
-              <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                  <button type="button" onClick={() => { setTplForm({ name: selectedTemplate.name, desc: selectedTemplate.desc, image: selectedTemplate.image, recVram: selectedTemplate.recVram, tmp: selectedTemplate.tmp, hasLocal: selectedTemplate.hasLocal, local: selectedTemplate.local, hasShared: selectedTemplate.hasShared, shared: selectedTemplate.shared, envVars: selectedTemplate.envVars, status: selectedTemplate.status }); setEditingTemplateId(selectedTemplate.id); setView("edit-template"); setSelectedTemplate(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
-                  {selectedTemplate.status === "Private" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Public" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Public" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.server.template.action.publish')}</button>}
-                  {selectedTemplate.status === "Public" && <button type="button" onClick={() => { setTemplates(ts => ts.map(x => x.id === selectedTemplate.id ? { ...x, status: "Private" } : x)); setSelectedTemplate(t => t ? { ...t, status: "Private" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.server.template.action.unpublish')}</button>}
-                  <button type="button" onClick={() => setDeletingTemplate(selectedTemplate)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
-                </div>
-              </section>
+
             </div>
           </div>
         </>
@@ -1341,12 +1370,35 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.gpu.detail.drawerTitle', { name: selectedGpu.name })}</span>
-              <button type="button" onClick={() => setSelectedGpu(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                  style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                  onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                  onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                    <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </span>
+                </button>
+                {openMenuId === "__drawer__" && menuAnchor && (
+                  <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                    {!selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: true } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.publish')}</button>}
+                    {selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: false } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.unpublish')}</button>}
+                    <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                    {selectedGpu.on && <button type="button" onClick={() => { setDeactivatingGpu(selectedGpu); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.deactivate')}</button>}
+                    {!selectedGpu.on && <button type="button" onClick={() => { toggleOn(selectedGpu.name); setSelectedGpu(g => g ? { ...g, on: true } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.gpu.action.activate')}</button>}
+                  </div>
+                )}
+              </div>
+                <button type="button" onClick={() => setSelectedGpu(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.gpu.detail.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {((): { label: string; value: React.ReactNode }[] => {
                     const p = prices.find(p => p.name === selectedGpu.name);
                     return [
@@ -1369,7 +1421,7 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
               </section>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.gpu.detail.usageTitle')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 20px" }}>
+                <div style={{ padding: "16px 20px" }}>
                   {(() => {
                     const pct = Math.round(selectedGpu.occupied / selectedGpu.total * 100);
                     const pctColor = pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN;
@@ -1391,15 +1443,7 @@ function GPUTypesContent({ prices }: { prices: GpuPrice[] }) {
                   })()}
                 </div>
               </section>
-              <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.gpu.detail.manageSection')}</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                  {!selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: true } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.gpu.action.publish')}</button>}
-                  {selectedGpu.pub && <button type="button" onClick={() => { togglePub(selectedGpu.name); setSelectedGpu(g => g ? { ...g, pub: false } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.gpu.action.unpublish')}</button>}
-                  {selectedGpu.on && <button type="button" onClick={() => setDeactivatingGpu(selectedGpu)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.gpu.action.deactivate')}</button>}
-                  {!selectedGpu.on && <button type="button" onClick={() => { toggleOn(selectedGpu.name); setSelectedGpu(g => g ? { ...g, on: true } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.gpu.action.activate')}</button>}
-                </div>
-              </section>
+
             </div>
           </div>
         </>
@@ -2333,12 +2377,35 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.image.detail.imageTitle', { name: selectedImage.name })}</span>
-              <button type="button" onClick={() => setSelectedImage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                  style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                  onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                  onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                  <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                    <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </span>
+                </button>
+                {openMenuId === "__drawer__" && menuAnchor && (
+                  <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                    <button type="button" onClick={() => { setImgForm({ name: selectedImage.name, path: selectedImage.path, desc: selectedImage.desc, tier: selectedImage.tier, category: selectedImage.category, status: selectedImage.status, thumb: selectedImage.thumb, recGpu: selectedImage.recGpu, recTmp: selectedImage.recTmp, recLocal: selectedImage.recLocal, tags: selectedImage.tags, packages: selectedImage.packages, access: selectedImage.access || [], ports: selectedImage.ports || "", envKeys: selectedImage.envKeys || "" }); const parsed = (selectedImage.envKeys || "").split(",").map(k => ({ key: k.trim(), value: "" })).filter(ev => ev.key); setEnvVars(parsed.length > 0 ? parsed : [{ key: "", value: "" }]); setEditingImageId(selectedImage.id); setView("edit-image"); setSelectedImage(null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
+                    {selectedImage.status === "Private" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Public" } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.image.action.publish')}</button>}
+                    {selectedImage.status === "Public" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Private" } : null); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.image.action.unpublish')}</button>}
+                    <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                    <button type="button" onClick={() => { setDeletingImage(selectedImage); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
+                  </div>
+                )}
+              </div>
+                <button type="button" onClick={() => setSelectedImage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
                     { label: t('admin.image.field.name'), value: selectedImage.name },
                     { label: t('admin.image.field.path'), value: <span style={{ fontSize: 11, fontFamily: "'Roboto Mono', monospace", color: GRAY_70 }}>{selectedImage.path}</span> },
@@ -2375,18 +2442,10 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
               {selectedImage.packages && (
                 <section>
                   <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.image.field.packages')}</div>
-                  <pre style={{ fontSize: 12, color: GRAY_70, backgroundColor: GRAY_5, borderRadius: 8, padding: "12px 16px", margin: 0, fontFamily: "'Roboto Mono', monospace", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word", maxHeight: 160, overflowY: "auto" }}>{selectedImage.packages}</pre>
+                  <pre style={{ fontSize: 12, color: GRAY_70, border: `1px solid ${GRAY_10}`, borderRadius: 8, padding: "12px 16px", margin: 0, fontFamily: "'Roboto Mono', monospace", lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-word", maxHeight: 160, overflowY: "auto" }}>{selectedImage.packages}</pre>
                 </section>
               )}
-              <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-                  <button type="button" onClick={() => { setImgForm({ name: selectedImage.name, path: selectedImage.path, desc: selectedImage.desc, tier: selectedImage.tier, category: selectedImage.category, status: selectedImage.status, thumb: selectedImage.thumb, recGpu: selectedImage.recGpu, recTmp: selectedImage.recTmp, recLocal: selectedImage.recLocal, tags: selectedImage.tags, packages: selectedImage.packages, access: selectedImage.access || [], ports: selectedImage.ports || "", envKeys: selectedImage.envKeys || "" }); const parsed = (selectedImage.envKeys || "").split(",").map(k => ({ key: k.trim(), value: "" })).filter(ev => ev.key); setEnvVars(parsed.length > 0 ? parsed : [{ key: "", value: "" }]); setEditingImageId(selectedImage.id); setView("edit-image"); setSelectedImage(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
-                  {selectedImage.status === "Private" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Public" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.image.action.publish')}</button>}
-                  {selectedImage.status === "Public" && <button type="button" onClick={() => { toggleStatus(selectedImage.id); setSelectedImage(i => i ? { ...i, status: "Private" } : null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('admin.image.action.unpublish')}</button>}
-                  <button type="button" onClick={() => setDeletingImage(selectedImage)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
-                </div>
-              </section>
+
             </div>
           </div>
         </>
@@ -2397,12 +2456,33 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.image.detail.categoryTitle', { name: selectedCategory.name })}</span>
-              <button type="button" onClick={() => setSelectedCategory(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                  {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                  <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                    style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                    onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                    onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                    <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                      <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                    </span>
+                  </button>
+                  {openMenuId === "__drawer__" && menuAnchor && (
+                    <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                      <button type="button" onClick={() => { setOpenMenuId(null); openCatEdit(selectedCategory); setSelectedCategory(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
+                      <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                      <button type="button" onClick={() => { setOpenMenuId(null); setDeletingCategory(selectedCategory); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
+                    </div>
+                  )}
+                </div>
+                <button type="button" onClick={() => setSelectedCategory(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
                     { label: t('common.field.name'), value: <span style={{ fontSize: 12, fontWeight: 600, color: selectedCategory.color, backgroundColor: `${selectedCategory.color}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedCategory.name}</span> },
                     { label: t('admin.image.field.imageCount'), value: t('common.unit.count', { count: images.filter(img => img.category === selectedCategory.name).length }) },
@@ -2416,13 +2496,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                   ))}
                 </div>
               </section>
-              <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => { openCatEdit(selectedCategory); setSelectedCategory(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
-                  <button type="button" onClick={() => setDeletingCategory(selectedCategory)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
-                </div>
-              </section>
+
             </div>
           </div>
         </>
@@ -2433,12 +2507,33 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.image.detail.tierTitle', { name: selectedTier.name })}</span>
-              <button type="button" onClick={() => setSelectedTier(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ position: "relative" }}>
+                  {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                  <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                    style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                    onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                    onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                    <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                      <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                    </span>
+                  </button>
+                  {openMenuId === "__drawer__" && menuAnchor && (
+                    <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                      <button type="button" onClick={() => { setOpenMenuId(null); openTierEdit(selectedTier); setSelectedTier(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.edit')}</button>
+                      <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                      <button type="button" onClick={() => { setOpenMenuId(null); setDeletingTier(selectedTier); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
+                    </div>
+                  )}
+                </div>
+                <button type="button" onClick={() => setSelectedTier(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {([
                     { label: t('common.field.name'), value: <span style={{ fontSize: 12, fontWeight: 600, color: selectedTier.color, backgroundColor: `${selectedTier.color}18`, padding: "2px 8px", borderRadius: 99 }}>{selectedTier.name}</span> },
                     { label: t('admin.image.field.imageCount'), value: t('common.unit.count', { count: images.filter(img => img.tier === selectedTier.name).length }) },
@@ -2452,13 +2547,7 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
                   ))}
                 </div>
               </section>
-              <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => { openTierEdit(selectedTier); setSelectedTier(null); }} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('common.action.edit')}</button>
-                  <button type="button" onClick={() => setDeletingTier(selectedTier)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
-                </div>
-              </section>
+
             </div>
           </div>
         </>
@@ -3151,12 +3240,35 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
           <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: 560, backgroundColor: "white", boxShadow: "-8px 0 40px rgba(0,0,0,0.16)", zIndex: 401, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "0 24px", height: 56, borderBottom: `1px solid ${GRAY_10}`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: GRAY_90 }}>{t('admin.storage.detail.drawerTitle', { name: selectedStorage.name })}</span>
-              <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                {selectedStorage.type !== "Local" && (
+                  <div style={{ position: "relative" }}>
+                    {openMenuId === "__drawer__" && <div onClick={() => setOpenMenuId(null)} style={{ position: "fixed", inset: 0, zIndex: 410 }} />}
+                    <button type="button" onClick={(e) => { if (openMenuId !== "__drawer__") { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); } setOpenMenuId(openMenuId === "__drawer__" ? null : "__drawer__"); }}
+                      style={{ height: 32, fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: openMenuId === "__drawer__" ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                      onMouseEnter={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                      onMouseLeave={e => { if (openMenuId !== "__drawer__") e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                      <span style={{ padding: "0 8px 0 10px" }}>{t('common.action.manage')}</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: openMenuId === "__drawer__" ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${openMenuId === "__drawer__" ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                        <ChevronDown size={11} color={PRIMARY} style={{ transform: openMenuId === "__drawer__" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                      </span>
+                    </button>
+                    {openMenuId === "__drawer__" && menuAnchor && (
+                      <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 411, minWidth: 140, padding: "4px 0" }}>
+                        <button type="button" onClick={() => { setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.storage.action.expand')}</button>
+                        <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />
+                        <button type="button" onClick={() => { setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left" as const, fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 32, padding: "0 14px", borderRadius: 8, border: `1px solid ${GRAY_10}`, cursor: "pointer", backgroundColor: "white", color: GRAY_60, fontSize: 13, fontWeight: 500, display: "flex", alignItems: "center" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>{t('common.action.close')}</button>
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 24 }}>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.basicInfo')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
+                <div style={{ padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 14, columnGap: 20 }}>
                   {((): { label: string; value: React.ReactNode }[] => {
                     const typeColor = selectedStorage.type === "Volume" ? PRIMARY : selectedStorage.type === "Shared" ? GREEN : BLUE;
                     return [
@@ -3179,7 +3291,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
               </section>
               <section>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('admin.storage.detail.usage')}</div>
-                <div style={{ backgroundColor: GRAY_5, borderRadius: 12, padding: "16px 20px" }}>
+                <div style={{ padding: "16px 20px" }}>
                   {(() => {
                     const pct = Math.round(selectedStorage.used / selectedStorage.capacity * 100);
                     const pctColor = pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN;
@@ -3197,15 +3309,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                   })()}
                 </div>
               </section>
-              {selectedStorage.type !== "Local" && (
-                <section style={{ borderTop: `1px solid ${GRAY_10}`, paddingTop: 16 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 12 }}>{t('common.section.manage')}</div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>{t('admin.storage.action.expand')}</button>
-                    <button type="button" onClick={() => setSelectedStorage(null)} style={{ height: 36, padding: "0 16px", borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontSize: 13, fontWeight: 600, fontFamily: "inherit" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>{t('common.action.delete')}</button>
-                  </div>
-                </section>
-              )}
+
             </div>
           </div>
         </>
