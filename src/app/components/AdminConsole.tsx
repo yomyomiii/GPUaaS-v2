@@ -3153,7 +3153,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
           {/* Local Storage */}
           <Card style={{ padding: "24px" }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Local Storage</div>
-            <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Temporary storage automatically assigned per server. Data is lost on server stop or deletion.</div>
+            <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Local storage automatically assigned per server. Data is lost on server stop or deletion.</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0" }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: GRAY_90 }}>Storage Buffer</div>
