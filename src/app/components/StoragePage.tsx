@@ -143,7 +143,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
   const [newCapacity, setNewCapacity] = useState(100);
   const [createForm, setCreateForm] = useState({ name: "", capacity: 100 });
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"전체" | "Local" | "Volume" | "Shared">("전체");
+  const [typeFilter, setTypeFilter] = useState<"all" | "Local" | "Volume" | "Shared">("all");
   type SortKey = "type" | "name" | "mount" | "used" | "total" | "usage" | "cost" | "createdAt";
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({ key: "name", dir: "asc" });
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -192,7 +192,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
   ]).filter(item => !deletedItemNames.has(item.name));
 
   const filtered = allItems
-    .filter(item => typeFilter === "전체" || item.type === typeFilter)
+    .filter(item => typeFilter === "all" || item.type === typeFilter)
     .filter(item => !search || item.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
       const mul = sort.dir === "asc" ? 1 : -1;
@@ -209,7 +209,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
   return (
     <>
     <PageContainer
-      title="Storage"
+      title={t('gnb.lnb.storage')}
       subtitle={t('storage.subtitle')}
       actions={
         <PrimaryBtn size="small" onClick={() => { setCreateForm({ name: "", capacity: 100 }); setDrawer({ type: "create" }); }}>
@@ -235,7 +235,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
           </div>
           {/* Type filter — segmented control */}
           <div style={{ display: "flex", backgroundColor: GRAY_10, borderRadius: 10, padding: 3, gap: 2 }}>
-            {(["전체", "Local", "Volume", "Shared"] as const).map(tf => (
+            {(["all", "Local", "Volume", "Shared"] as const).map(tf => (
               <button key={tf} type="button" onClick={() => setTypeFilter(tf)} style={{
                 padding: "5px 12px", borderRadius: 7, fontSize: 12, border: "none", cursor: "pointer",
                 fontWeight: typeFilter === tf ? 600 : 400,
@@ -243,7 +243,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                 color: typeFilter === tf ? GRAY_90 : GRAY_60,
                 boxShadow: typeFilter === tf ? "0 1px 3px rgba(0,0,0,0.10)" : "none",
                 transition: "all 0.15s",
-              }}>{tf === "전체" ? t('storage.filter.all') : tf}</button>
+              }}>{tf === "all" ? t('storage.filter.all') : tf}</button>
             ))}
           </div>
         </div>
@@ -256,24 +256,24 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
             {t('storage.column.type')} <SortBtn k="type" />
           </div>
           <div style={{ width: 200, flexShrink: 0, display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Storage <SortBtn k="name" /></span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('storage.column.storageName')} <SortBtn k="name" /></span>
             <span style={{ color: GRAY_30 }}>/</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Mount <SortBtn k="mount" /></span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('storage.column.mount')} <SortBtn k="mount" /></span>
           </div>
           <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Used <SortBtn k="used" /></span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('storage.column.used')} <SortBtn k="used" /></span>
             <span style={{ color: GRAY_30 }}>/</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Total <SortBtn k="total" /></span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('storage.column.total')} <SortBtn k="total" /></span>
             <span style={{ color: GRAY_30 }}>/</span>
-            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>Usage <SortBtn k="usage" /></span>
+            <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('storage.column.usage')} <SortBtn k="usage" /></span>
           </div>
           <div style={{ width: 120, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-            Cost/h <SortBtn k="cost" />
+            {t('storage.column.costPerHour')} <SortBtn k="cost" />
           </div>
           <div style={{ width: 160, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
             {t('storage.column.createdAt')} <SortBtn k="createdAt" />
           </div>
-          <div style={{ width: 210, flexShrink: 0 }}>Actions</div>
+          <div style={{ width: 210, flexShrink: 0 }}>{t('storage.column.actions')}</div>
         </div>
       )}
 

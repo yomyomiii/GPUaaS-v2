@@ -72,7 +72,7 @@
     },
     "unit": {
       "count": "개",
-      "times": "회"
+      "times": "{{count}}회"
     },
     "alertLevel": {
       "info": "정보",
@@ -164,6 +164,9 @@
       "servers": "서버",
       "storage": "스토리지"
     },
+    "credit": {
+      "gpuServer": "GPU (서버)"
+    },
     "notification": {
       "credit": "크레딧 부족",
       "creditMsg": "크레딧이 곧 소진될 예정입니다.",
@@ -197,8 +200,7 @@
       "runwayUnit": "일",
       "runwayOk": "잔여 크레딧 충분",
       "runwayWarn": "크레딧 부족 예상 ({{days}}일 남음)",
-      "runwayCritical": "크레딧 소진 임박!",
-      "points": "포인트"
+      "runwayCritical": "크레딧 소진 임박!"
     },
     "resource": {
       "servers": "서버",
@@ -209,6 +211,11 @@
       "overview": "워크스페이스 현황",
       "members": "멤버",
       "creditHistory": "크레딧 내역"
+    },
+    "tab": {
+      "overview": "개요",
+      "members": "멤버",
+      "credit": "크레딧"
     },
     "member": {
       "invite": "멤버 초대",
@@ -250,10 +257,12 @@
     },
     "creditType": {
       "all": "전체",
-      "server": "서버",
-      "storage": "스토리지",
       "adminGrant": "관리자 지급",
-      "adminRevoke": "관리자 회수"
+      "adminRevoke": "관리자 회수",
+      "serverUsage": "서버 사용",
+      "volumeUsage": "볼륨 스토리지 사용",
+      "sharedUsage": "공유 스토리지 사용",
+      "localUsage": "로컬 스토리지 사용"
     },
     "creditTable": {
       "type": "유형",
@@ -323,7 +332,11 @@
       "gpu": "GPU",
       "vram": "VRAM",
       "storage": "스토리지",
-      "cost": "비용"
+      "cost": "비용",
+      "uptime": "가동 시간",
+      "local": "로컬",
+      "volume": "볼륨",
+      "shared": "공유"
     },
     "detail": {
       "backBtn": "← 서버 목록",
@@ -469,7 +482,7 @@
       "grid": "그리드 보기"
     },
     "gpu": {
-      "available": "사용 가능",
+      "available": "{{count}}개 사용 가능",
       "quantity": "수량",
       "sort": {
         "avail": "여유 순",
@@ -500,6 +513,11 @@
     }
   },
   "storage": {
+    "name": {
+      "local": "로컬 스토리지",
+      "volume": "볼륨 스토리지",
+      "shared": "공유 스토리지"
+    },
     "type": {
       "local": "로컬",
       "volume": "볼륨",
@@ -524,7 +542,14 @@
       "status": "상태",
       "mountedServer": "마운트된 서버",
       "createdAt": "생성일",
-      "action": "작업"
+      "action": "작업",
+      "storageName": "스토리지",
+      "mount": "마운트",
+      "used": "사용 중",
+      "total": "최대",
+      "usage": "사용률",
+      "costPerHour": "비용/h",
+      "actions": "작업"
     },
     "action": {
       "mount": "마운트",
@@ -570,12 +595,13 @@
     "totalCount": "총 {{count}}개",
     "currentSize": "현재 용량",
     "newSize": "새 용량",
-    "sizeChange": "용량 변경",
-    "costMonthly": "월 비용",
+    "sizeChange": "{{from}}GB → {{to}}GB",
+    "costMonthly": "월 비용: {{amount}} cr",
     "additionalCost": "추가 비용"
   },
   "admin": {
     "dashboard": {
+      "pageTitle": "어드민 대시보드",
       "subtitle": "서비스 전체 현황을 실시간 모니터링합니다.",
       "lastUpdated": "마지막 업데이트 · 2026년 7월 15일 15:50",
       "kpi": {
@@ -639,9 +665,9 @@
         "netGrant": "순 지급 (지급 - 회수)"
       },
       "tooltip": {
-        "activeServers": "활성 서버 수",
-        "creditUsage": "크레딧 사용량",
-        "stoppedServers": "정지 서버 수"
+        "activeServers": "활성 서버 수: {{count}}",
+        "creditUsage": "크레딧 사용량: {{value}}",
+        "stoppedServers": "정지된 서버 수: {{count}}"
       },
       "chart": {
         "serverStatus": "서버 현황",
@@ -675,14 +701,15 @@
       "deactivate": "비활성화",
       "activate": "활성화",
       "detail": {
-        "title": "사용자 상세"
+        "title": "{{name}} 상세"
       },
       "col": {
         "nameEmail": "이름 / 이메일",
         "status": "상태",
         "workspaces": "워크스페이스",
         "creditUsage": "크레딧 사용",
-        "joined": "가입일"
+        "joined": "가입일",
+        "actions": "작업"
       },
       "drawer": {
         "name": "이름",
@@ -711,7 +738,8 @@
         "owner": "소유자",
         "members": "멤버",
         "creditBalance": "크레딧 잔액",
-        "lastActivity": "최근 활동"
+        "lastActivity": "최근 활동",
+        "actions": "작업"
       },
       "column": {
         "createdAt": "생성 일시"
@@ -728,6 +756,10 @@
     "server": {
       "pageTitle": "서버 관리",
       "backBtn": "← 서버 관리",
+      "tab": {
+        "servers": "서버",
+        "templates": "서버 템플릿"
+      },
       "subtitle": {
         "servers": "서버 목록",
         "templates": "템플릿 목록"
@@ -737,7 +769,17 @@
         "status": "상태",
         "workspace": "워크스페이스",
         "user": "사용자",
-        "uptime": "가동 시간"
+        "uptime": "가동 시간",
+        "actions": "작업"
+      },
+      "templateCol": {
+        "template": "템플릿",
+        "visibility": "공개 여부",
+        "image": "이미지",
+        "recVram": "권장 VRAM",
+        "recStorage": "권장 스토리지",
+        "uses": "사용 횟수",
+        "actions": "작업"
       },
       "template": {
         "create": "서버 템플릿 생성",
@@ -1053,7 +1095,8 @@
         "revoke": "회수",
         "serverUsage": "서버 사용",
         "sharedUsage": "공유 스토리지 사용",
-        "volumeUsage": "볼륨 스토리지 사용"
+        "volumeUsage": "볼륨 스토리지 사용",
+        "localUsage": "로컬 스토리지 사용"
       },
       "filter": {
         "typeAll": "전체",

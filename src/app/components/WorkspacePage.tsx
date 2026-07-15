@@ -19,19 +19,20 @@ const members = [
   { name: "장민준", email: "minjun.jang@sdt.inc", role: "workspace.user", avatar: "장", joined: "2026-05-22", online: false, usedCr: 730, activeServers: [], inactiveServers: ["data-analysis-01"], localStorages: [], sharedStorages: [] },
 ];
 
-type CreditType = "관리자 지급" | "관리자 회수" | "서버 사용" | "볼륨 스토리지 사용" | "공유 스토리지 사용";
+type CreditType = "adminGrant" | "adminRevoke" | "serverUsage" | "volumeUsage" | "sharedUsage" | "localUsage";
 
 const creditHistory: { date: string; time: string; desc: string; type: CreditType; amount: number; by: string; byEmail?: string }[] = [
-  { date: "2026-07-09", time: "10:15:02", desc: "서비스 크레딧 장애 보상",            type: "관리자 지급",       amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
-  { date: "2026-07-08", time: "23:00:00", desc: "pytorch-dev-01 컴퓨팅 청구",       type: "서버 사용",        amount:   -240, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-08", time: "23:00:00", desc: "llm-finetuning 컴퓨팅 청구",       type: "서버 사용",        amount:   -576, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
-  { date: "2026-07-07", time: "23:00:00", desc: "stable-diffusion 컴퓨팅 청구",     type: "서버 사용",        amount:   -120, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
-  { date: "2026-07-07", time: "23:00:00", desc: "local-vol-01 볼륨 스토리지 청구",  type: "볼륨 스토리지 사용", amount:    -32, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-07", time: "23:00:00", desc: "pytorch-data 볼륨 스토리지 청구",  type: "볼륨 스토리지 사용", amount:    -16, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-07", time: "23:00:00", desc: "local-vol-02 볼륨 스토리지 청구",  type: "볼륨 스토리지 사용", amount:    -16, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
-  { date: "2026-07-06", time: "23:00:00", desc: "shared-team-01 공유 스토리지 청구", type: "공유 스토리지 사용", amount:    -96, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-03", time: "09:22:11", desc: "프로모션 크레딧 베타 참여 보상",    type: "관리자 지급",       amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc"     },
-  { date: "2026-06-30", time: "14:05:33", desc: "정책 위반 크레딧 회수",             type: "관리자 회수",       amount:  -2000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-07-09", time: "10:15:02", desc: "서비스 크레딧 장애 보상",             type: "adminGrant",   amount:  10000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
+  { date: "2026-07-08", time: "23:00:00", desc: "pytorch-dev-01 컴퓨팅 청구",        type: "serverUsage",  amount:   -240, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-08", time: "23:00:00", desc: "llm-finetuning 컴퓨팅 청구",        type: "serverUsage",  amount:   -576, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-07", time: "23:00:00", desc: "stable-diffusion 컴퓨팅 청구",      type: "serverUsage",  amount:   -120, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-07", time: "23:00:00", desc: "local-vol-01 볼륨 스토리지 청구",   type: "volumeUsage",  amount:    -32, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", desc: "pytorch-data 볼륨 스토리지 청구",   type: "volumeUsage",  amount:    -16, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", desc: "local-vol-02 볼륨 스토리지 청구",   type: "volumeUsage",  amount:    -16, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-07", time: "23:00:00", desc: "shared-team-01 공유 스토리지 청구",  type: "sharedUsage",  amount:    -96, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", desc: "pytorch-dev-01 로컬 스토리지 청구",  type: "localUsage",   amount:     -5, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-03", time: "09:22:11", desc: "프로모션 크레딧 베타 참여 보상",     type: "adminGrant",   amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc"     },
+  { date: "2026-06-30", time: "14:05:33", desc: "정책 위반 크레딧 회수",              type: "adminRevoke",  amount:  -2000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
 ];
 
 const CREDIT_NOW = 45230;
@@ -397,79 +398,6 @@ function RoleDonut({ data, total, size }: { data: { name: string; value: number;
 }
 
 // ─── Mini Donut Chart ─────────────────────────────────────────────────────────
-function MiniDonut({ segments, size = 64 }: { segments: { value: number; color: string }[]; size?: number }) {
-  const total = segments.reduce((s, g) => s + g.value, 0);
-  const r = (size - 10) / 2;
-  const cx = size / 2, cy = size / 2;
-  let angle = -Math.PI / 2;
-  const paths = segments.map(({ value, color }) => {
-    const sweep = (value / total) * Math.PI * 2;
-    const x1 = cx + r * Math.cos(angle), y1 = cy + r * Math.sin(angle);
-    angle += sweep;
-    const x2 = cx + r * Math.cos(angle), y2 = cy + r * Math.sin(angle);
-    const large = sweep > Math.PI ? 1 : 0;
-    return <path key={color} d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`} fill={color} />;
-  });
-  return (
-    <svg width={size} height={size} style={{ flexShrink: 0 }}>
-      {paths}
-      <circle cx={cx} cy={cy} r={r * 0.55} fill="white" />
-    </svg>
-  );
-}
-
-// ─── Credit Line Chart ────────────────────────────────────────────────────────
-const creditDailyData = [
-  { day:  1, server:  850, storage: 120 },
-  { day:  2, server:  920, storage: 120 },
-  { day:  3, server:  780, storage: 120 },
-  { day:  4, server: 1100, storage: 130 },
-  { day:  5, server:  960, storage: 120 },
-  { day:  6, server:  840, storage: 120 },
-  { day:  7, server: 1050, storage: 130 },
-  { day:  8, server:  890, storage: 120 },
-  { day:  9, server: 1020, storage: 120 },
-  { day: 10, server:  750, storage: 130 },
-  { day: 11, server:  880, storage: 120 },
-  { day: 12, server:  940, storage: 120 },
-  { day: 13, server:  910, storage: 120 },
-];
-
-function CreditLineChart() {
-  const VW = 500, VH = 96;
-  const pad = { t: 8, r: 4, b: 20, l: 4 };
-  const W = VW - pad.l - pad.r, H = VH - pad.t - pad.b;
-  const n = creditDailyData.length;
-  const maxVal = Math.max(...creditDailyData.map(d => d.server));
-  const base = pad.t + H;
-  const px = (i: number) => pad.l + (i / (n - 1)) * W;
-  const py = (v: number) => pad.t + H * (1 - v / maxVal);
-  const sPts = creditDailyData.map((d, i) => `${px(i).toFixed(1)},${py(d.server).toFixed(1)}`).join(" ");
-  const stPts = creditDailyData.map((d, i) => `${px(i).toFixed(1)},${py(d.storage).toFixed(1)}`).join(" ");
-  const sArea = `${px(0)},${base} ${sPts} ${px(n - 1)},${base}`;
-  const stArea = `${px(0)},${base} ${stPts} ${px(n - 1)},${base}`;
-  const tickDays = [1, 4, 7, 10, 13];
-  return (
-    <svg width="100%" viewBox={`0 0 ${VW} ${VH}`} style={{ display: "block", marginTop: 10 }}>
-      {[0.33, 0.66, 1].map(r => (
-        <line key={r} x1={pad.l} y1={pad.t + H * (1 - r)} x2={VW - pad.r} y2={pad.t + H * (1 - r)}
-          stroke={GRAY_10} strokeWidth={1} />
-      ))}
-      <polygon points={sArea}  fill={PRIMARY} opacity={0.07} />
-      <polygon points={stArea} fill={BLUE}    opacity={0.15} />
-      <polyline points={sPts}  fill="none" stroke={PRIMARY} strokeWidth={2}   strokeLinejoin="round" strokeLinecap="round" />
-      <polyline points={stPts} fill="none" stroke={BLUE}    strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" strokeDasharray="4 3" />
-      <line x1={pad.l} y1={base} x2={VW - pad.r} y2={base} stroke={GRAY_10} strokeWidth={1} />
-      {tickDays.map(day => {
-        const idx = creditDailyData.findIndex(d => d.day === day);
-        return idx === -1 ? null : (
-          <text key={day} x={px(idx)} y={VH - 4} fontSize={9} fill={GRAY_40} textAnchor="middle">7/{day}</text>
-        );
-      })}
-    </svg>
-  );
-}
-
 // ─── Chip Toggle ──────────────────────────────────────────────────────────────
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -488,22 +416,23 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
 export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, onBack }: { initialTab?: string; onTabChange?: (tab: string) => void; hideTabs?: string[]; onBack?: () => void }) {
   const { t } = useTranslation();
   const creditTypeLabel = (type: CreditType): string => {
-    if (type === "관리자 지급") return t('workspace.creditType.adminGrant');
-    if (type === "관리자 회수") return t('workspace.creditType.adminRevoke');
-    if (type === "서버 사용") return t('workspace.creditType.server');
-    if (type === "볼륨 스토리지 사용") return t('workspace.creditType.storage');
-    if (type === "공유 스토리지 사용") return t('workspace.creditType.storage');
+    if (type === "adminGrant")   return t('workspace.creditType.adminGrant');
+    if (type === "adminRevoke")  return t('workspace.creditType.adminRevoke');
+    if (type === "serverUsage")  return t('workspace.creditType.serverUsage');
+    if (type === "volumeUsage")  return t('workspace.creditType.volumeUsage');
+    if (type === "sharedUsage")  return t('workspace.creditType.sharedUsage');
+    if (type === "localUsage")   return t('workspace.creditType.localUsage');
     return type;
   };
   const [tab, setTab] = useState(initialTab);
 
   const [sortField, setSortField] = useState<MemberSortField>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [creditTypeFilter, setCreditTypeFilter] = useState<CreditType | "전체">("전체");
+  const [creditTypeFilter, setCreditTypeFilter] = useState<CreditType | "all">("all");
   const [creditSearch, setCreditSearch] = useState("");
   const [openMemberMenu, setOpenMemberMenu] = useState<string | null>(null);
   const [memberSearch, setMemberSearch] = useState("");
-  const [memberRoleFilter, setMemberRoleFilter] = useState<"전체" | "Owner" | "Admin" | "User">("전체");
+  const [memberRoleFilter, setMemberRoleFilter] = useState<"all" | "Owner" | "Admin" | "User">("all");
   const [detailMember, setDetailMember] = useState<typeof members[0] | null>(null);
   const [deletingMember, setDeletingMember] = useState<typeof members[0] | null>(null);
   const [deletedEmails, setDeletedEmails] = useState<Set<string>>(new Set());
@@ -543,7 +472,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
 
   const roleFilterMap: Record<string, string> = { Owner: "workspace.owner", Admin: "workspace.admin", User: "workspace.user" };
   const filteredMembers = sortedMembers
-    .filter(m => memberRoleFilter === "전체" || m.role === roleFilterMap[memberRoleFilter])
+    .filter(m => memberRoleFilter === "all" || m.role === roleFilterMap[memberRoleFilter])
     .filter(m => !memberSearch || m.name.includes(memberSearch) || m.email.toLowerCase().includes(memberSearch.toLowerCase()));
 
   // ── Sort button (used in Members header) ──
@@ -553,21 +482,34 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
     </span>
   );
 
-  const allTabs = ["Overview", `Members (${members.length})`, "Credit"];
-  const visibleTabs = hideTabs ? allTabs.filter(t => !hideTabs.some(h => t === h || t.startsWith(h + " ("))) : allTabs;
+  const tabKeyToLabel = (key: string) => {
+    if (key === "Overview") return t('workspace.tab.overview');
+    if (key === "Members")  return `${t('workspace.tab.members')} (${members.length})`;
+    if (key === "Credit")   return t('workspace.tab.credit');
+    return key;
+  };
+  const tabLabelToKey = (label: string) => {
+    if (label === t('workspace.tab.overview')) return "Overview";
+    if (label.startsWith(t('workspace.tab.members'))) return "Members";
+    if (label === t('workspace.tab.credit')) return "Credit";
+    return label;
+  };
+  const allTabKeys = ["Overview", "Members", "Credit"];
+  const visibleTabKeys = hideTabs ? allTabKeys.filter(k => !hideTabs.some(h => k === h || k === h.replace(/ \(\d+\)$/, ""))) : allTabKeys;
+  const visibleTabs = visibleTabKeys.map(tabKeyToLabel);
 
   return (
     <>
     <PageContainer
-      title="Workspace"
+      title={t('gnb.lnb.workspace')}
       subtitle={`My Workspace — ${t('workspace.section.overview')}`}
       backNav={onBack && (
         <button type="button" onClick={onBack} style={{ display: "flex", alignItems: "center", gap: 6, color: GRAY_60, background: "none", border: "none", cursor: "pointer", fontSize: 13, padding: 0 }}>
-          ← Workspace Management
+          ← {t('admin.workspace.pageTitle')}
         </button>
       )}
     >
-      <TabBar tabs={visibleTabs} active={tab === "Members" ? `Members (${members.length})` : tab} onChange={t => handleTabChange(t.replace(/ \(\d+\)$/, ""))} />
+      <TabBar tabs={visibleTabs} active={tabKeyToLabel(tab)} onChange={label => handleTabChange(tabLabelToKey(label))} />
 
       {tab === "Overview" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -751,11 +693,12 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {creditHistory.slice(0, 3).map((r, i, arr) => {
                   const meta = {
-                    "관리자 지급":      { bg: "rgb(230,248,237)", color: GREEN,   node: <CreditCard size={12} color={GREEN} />   },
-                    "관리자 회수":      { bg: "rgb(254,242,242)", color: RED,     node: <CreditCard size={12} color={RED} />     },
-                    "서버 사용":       { bg: PRIMARY_10,          color: PRIMARY, node: <Server size={11} color={PRIMARY} />     },
-                    "볼륨 스토리지 사용": { bg: "rgb(235,245,255)", color: BLUE,    node: <Database size={11} color={BLUE} />      },
-                    "공유 스토리지 사용": { bg: "rgb(255,251,235)", color: YELLOW,  node: <Database size={11} color={YELLOW} />    },
+                    "adminGrant":  { bg: "rgb(230,248,237)", color: GREEN,      node: <CreditCard size={12} color={GREEN} />        },
+                    "adminRevoke": { bg: "rgb(254,242,242)", color: RED,        node: <CreditCard size={12} color={RED} />          },
+                    "serverUsage": { bg: PRIMARY_10,          color: PRIMARY,    node: <Server size={11} color={PRIMARY} />          },
+                    "volumeUsage": { bg: "rgb(235,245,255)", color: BLUE,       node: <Database size={11} color={BLUE} />           },
+                    "sharedUsage": { bg: "rgb(255,251,235)", color: YELLOW,     node: <Database size={11} color={YELLOW} />         },
+                    "localUsage":  { bg: "rgb(236,252,250)", color: "#0d9488",  node: <Database size={11} color="#0d9488" />        },
                   }[r.type];
                   return (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 44, borderBottom: i < arr.length - 1 ? `1px solid ${GRAY_10}` : "none" }}>
@@ -785,10 +728,10 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                   style={{ height: 32, paddingLeft: 28, paddingRight: 10, border: `1px solid ${GRAY_30}`, borderRadius: 8, fontSize: 12, width: 180, outline: "none", fontFamily: "inherit" }} />
               </div>
               <div style={{ display: "flex", backgroundColor: GRAY_10, borderRadius: 10, padding: 3, gap: 2 }}>
-                {(["전체", "Owner", "Admin", "User"] as const).map(f => (
+                {(["all", "Owner", "Admin", "User"] as const).map(f => (
                   <button key={f} type="button" onClick={() => setMemberRoleFilter(f)}
                     style={{ padding: "5px 12px", borderRadius: 7, fontSize: 11, border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: memberRoleFilter === f ? 600 : 400, backgroundColor: memberRoleFilter === f ? "white" : "transparent", color: memberRoleFilter === f ? GRAY_90 : GRAY_60, boxShadow: memberRoleFilter === f ? "0 1px 3px rgba(0,0,0,0.10)" : "none", transition: "all 0.15s" }}>
-                    {f === "전체" ? t('common.status.all') : f}
+                    {f === "all" ? t('common.status.all') : f}
                   </button>
                 ))}
               </div>
@@ -800,10 +743,10 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
           <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 20px", fontSize: 12, fontWeight: 600, color: GRAY_60, backgroundColor: GRAY_10, borderRadius: 10 }}>
             <div style={{ width: 44, flexShrink: 0 }} />
             <div style={{ width: 140, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
-              Name / Email <SortBtn field="name" />
+              {t('admin.user.col.nameEmail')} <SortBtn field="name" />
             </div>
             <div style={{ width: 90, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
-              Role <SortBtn field="role" />
+              {t('common.field.role')} <SortBtn field="role" />
             </div>
             <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
@@ -857,74 +800,20 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
 
       {tab === "Credit" && (
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Credit summary */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 14 }}>
-            {/* Card 1: 잔액 */}
-            <Card style={{ padding: "22px 24px" }}>
-              <div style={{ marginBottom: 6 }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>{t('workspace.credit.balance')}</span>
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginBottom: 2 }}>{CREDIT_NOW.toLocaleString()} cr</div>
-              <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>{t('workspace.credit.balance')}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <MiniDonut segments={[{ value: 44230, color: PRIMARY }, { value: 1000, color: YELLOW }]} />
-                <div style={{ flex: 1 }}>
-                  {[
-                    { label: t('workspace.credit.balance'), amount: 44230, color: PRIMARY },
-                    { label: t('workspace.credit.points'), amount: 1000, color: YELLOW },
-                  ].map(({ label, amount, color }) => (
-                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
-                      <span style={{ flex: 1, fontSize: 12, color: GRAY_70 }}>{label}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color }}>{amount.toLocaleString()} cr</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-
-            {/* Card 2: 이번달 사용 + 라인 차트 */}
-            <Card style={{ padding: "22px 24px" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
-                <div>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_60 }}>{t('workspace.credit.used')}</span>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: GRAY_90, marginTop: 4, marginBottom: 2 }}>12,450 cr</div>
-                </div>
-                <div style={{ display: "flex", gap: 20, marginTop: 2 }}>
-                  {([
-                    { label: t('workspace.creditType.server'), amount: 10890, color: PRIMARY, dashed: false },
-                    { label: t('workspace.resource.storage'), amount: 1560, color: BLUE, dashed: true },
-                  ] as const).map(({ label, amount, color, dashed }) => (
-                    <div key={label} style={{ textAlign: "right" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end", marginBottom: 3 }}>
-                        <svg width={16} height={8} style={{ flexShrink: 0 }}>
-                          <line x1={0} y1={4} x2={16} y2={4} stroke={color} strokeWidth={dashed ? 1.5 : 2}
-                            strokeDasharray={dashed ? "4 2" : undefined} strokeLinecap="round" />
-                        </svg>
-                        <span style={{ fontSize: 11, color: GRAY_60 }}>{label}</span>
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 700, color }}>{amount.toLocaleString()} cr</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <CreditLineChart />
-            </Card>
-          </div>
-
           {/* 크레딧 이력 */}
           {(() => {
-            const typeFilters: (CreditType | "전체")[] = ["전체", "관리자 지급", "관리자 회수", "서버 사용", "볼륨 스토리지 사용", "공유 스토리지 사용"];
+            const typeFilters: (CreditType | "all")[] = ["all", "adminGrant", "adminRevoke", "serverUsage", "volumeUsage", "sharedUsage", "localUsage"];
             const typeMeta: Record<CreditType, { bg: string; color: string; icon: React.ReactNode }> = {
-              "관리자 지급":      { bg: "rgb(230,248,237)", color: GREEN,   icon: <CreditCard size={12} color={GREEN} />   },
-              "관리자 회수":      { bg: "rgb(254,242,242)", color: RED,     icon: <CreditCard size={12} color={RED} />     },
-              "서버 사용":       { bg: PRIMARY_10,          color: PRIMARY, icon: <Server size={12} color={PRIMARY} />     },
-              "볼륨 스토리지 사용":       { bg: "rgb(235,245,255)", color: BLUE,    icon: <Database size={12} color={BLUE} />      },
-              "공유 스토리지 사용": { bg: "rgb(255,251,235)", color: YELLOW,  icon: <Database size={12} color={YELLOW} />    },
+              "adminGrant":  { bg: "rgb(230,248,237)", color: GREEN,      icon: <CreditCard size={12} color={GREEN} />        },
+              "adminRevoke": { bg: "rgb(254,242,242)", color: RED,        icon: <CreditCard size={12} color={RED} />          },
+              "serverUsage": { bg: PRIMARY_10,          color: PRIMARY,    icon: <Server size={12} color={PRIMARY} />          },
+              "volumeUsage": { bg: "rgb(235,245,255)", color: BLUE,       icon: <Database size={12} color={BLUE} />           },
+              "sharedUsage": { bg: "rgb(255,251,235)", color: YELLOW,     icon: <Database size={12} color={YELLOW} />         },
+              "localUsage":  { bg: "rgb(236,252,250)", color: "#0d9488",  icon: <Database size={12} color="#0d9488" />        },
             };
-            const isAdmin = (type: CreditType) => type === "관리자 지급" || type === "관리자 회수";
+            const isAdmin = (type: CreditType) => type === "adminGrant" || type === "adminRevoke";
             const filtered = creditHistory
-              .filter(r => creditTypeFilter === "전체" || r.type === creditTypeFilter)
+              .filter(r => creditTypeFilter === "all" || r.type === creditTypeFilter)
               .filter(r => !creditSearch || r.desc.includes(creditSearch) || r.by.includes(creditSearch));
             const thBase: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left", whiteSpace: "nowrap", borderBottom: `1px solid ${GRAY_10}`, backgroundColor: GRAY_5, width: "1px" };
             const tdBase: React.CSSProperties = { fontSize: 13, color: GRAY_90, verticalAlign: "middle", borderBottom: `1px solid ${GRAY_10}`, whiteSpace: "nowrap", width: "1px" };
@@ -943,7 +832,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                       {typeFilters.map(f => (
                         <button key={f} type="button" onClick={() => setCreditTypeFilter(f)}
                           style={{ padding: "5px 12px", borderRadius: 7, fontSize: 11, border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: creditTypeFilter === f ? 600 : 400, backgroundColor: creditTypeFilter === f ? "white" : "transparent", color: creditTypeFilter === f ? GRAY_90 : GRAY_60, boxShadow: creditTypeFilter === f ? "0 1px 3px rgba(0,0,0,0.10)" : "none", transition: "all 0.15s" }}>
-                          {f === "전체" ? t('workspace.creditType.all') : f === "관리자 지급" ? t('workspace.creditType.adminGrant') : f === "관리자 회수" ? t('workspace.creditType.adminRevoke') : f === "서버 사용" ? t('workspace.creditType.server') : f === "볼륨 스토리지 사용" ? t('workspace.resource.storage') : t('workspace.resource.storage')}
+                          {f === "all" ? t('workspace.creditType.all') : creditTypeLabel(f as CreditType)}
                         </button>
                       ))}
                     </div>

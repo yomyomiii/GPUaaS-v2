@@ -72,7 +72,7 @@
     },
     "unit": {
       "count": "",
-      "times": "times"
+      "times": "{{count}} times"
     },
     "alertLevel": {
       "info": "Info",
@@ -164,6 +164,9 @@
       "servers": "Servers",
       "storage": "Storage"
     },
+    "credit": {
+      "gpuServer": "GPU (Server)"
+    },
     "notification": {
       "credit": "Low Credit",
       "creditMsg": "Your credits are about to run out.",
@@ -197,8 +200,7 @@
       "runwayUnit": "days",
       "runwayOk": "Sufficient credit remaining",
       "runwayWarn": "Credit shortage expected ({{days}} days left)",
-      "runwayCritical": "Credit almost depleted!",
-      "points": "points"
+      "runwayCritical": "Credit almost depleted!"
     },
     "resource": {
       "servers": "Servers",
@@ -209,6 +211,11 @@
       "overview": "Workspace Overview",
       "members": "Members",
       "creditHistory": "Credit History"
+    },
+    "tab": {
+      "overview": "Overview",
+      "members": "Members",
+      "credit": "Credit"
     },
     "member": {
       "invite": "Invite Member",
@@ -250,10 +257,12 @@
     },
     "creditType": {
       "all": "All",
-      "server": "Server",
-      "storage": "Storage",
       "adminGrant": "Admin Grant",
-      "adminRevoke": "Admin Revoke"
+      "adminRevoke": "Admin Revoke",
+      "serverUsage": "Server Usage",
+      "volumeUsage": "Volume Storage Usage",
+      "sharedUsage": "Shared Storage Usage",
+      "localUsage": "Local Storage Usage"
     },
     "creditTable": {
       "type": "Type",
@@ -323,7 +332,11 @@
       "gpu": "GPU",
       "vram": "VRAM",
       "storage": "Storage",
-      "cost": "Cost"
+      "cost": "Cost",
+      "uptime": "Uptime",
+      "local": "Local",
+      "volume": "Volume",
+      "shared": "Shared"
     },
     "detail": {
       "backBtn": "← Server List",
@@ -469,7 +482,7 @@
       "grid": "Grid View"
     },
     "gpu": {
-      "available": "Available",
+      "available": "{{count}} Available",
       "quantity": "Quantity",
       "sort": {
         "avail": "By Availability",
@@ -500,6 +513,11 @@
     }
   },
   "storage": {
+    "name": {
+      "local": "Local Storage",
+      "volume": "Volume Storage",
+      "shared": "Shared Storage"
+    },
     "type": {
       "local": "Local",
       "volume": "Volume",
@@ -524,7 +542,14 @@
       "status": "Status",
       "mountedServer": "Mounted Server",
       "createdAt": "Created At",
-      "action": "Action"
+      "action": "Action",
+      "storageName": "Storage",
+      "mount": "Mount",
+      "used": "Used",
+      "total": "Total",
+      "usage": "Usage",
+      "costPerHour": "Cost/h",
+      "actions": "Actions"
     },
     "action": {
       "mount": "Mount",
@@ -570,12 +595,13 @@
     "totalCount": "Total {{count}}",
     "currentSize": "Current Size",
     "newSize": "New Size",
-    "sizeChange": "Size Change",
-    "costMonthly": "Monthly Cost",
+    "sizeChange": "{{from}}GB → {{to}}GB",
+    "costMonthly": "Monthly Cost: {{amount}} cr",
     "additionalCost": "Additional Cost"
   },
   "admin": {
     "dashboard": {
+      "pageTitle": "Admin Dashboard",
       "subtitle": "Monitor the entire service status in real time.",
       "lastUpdated": "Last updated · 2026-07-15 15:50:00",
       "kpi": {
@@ -639,9 +665,9 @@
         "netGrant": "Net Grant (Grant - Revoke)"
       },
       "tooltip": {
-        "activeServers": "Active Servers",
-        "creditUsage": "Credit Usage",
-        "stoppedServers": "Stopped Servers"
+        "activeServers": "Active Servers: {{count}}",
+        "creditUsage": "Credit Usage: {{value}}",
+        "stoppedServers": "Stopped Servers: {{count}}"
       },
       "chart": {
         "serverStatus": "Server Status",
@@ -675,14 +701,15 @@
       "deactivate": "Deactivate",
       "activate": "Activate",
       "detail": {
-        "title": "User Detail"
+        "title": "{{name}} Details"
       },
       "col": {
         "nameEmail": "Name / Email",
         "status": "Status",
         "workspaces": "Workspaces",
         "creditUsage": "Credit Usage",
-        "joined": "Joined At"
+        "joined": "Joined At",
+        "actions": "Actions"
       },
       "drawer": {
         "name": "Name",
@@ -711,7 +738,8 @@
         "owner": "Owner",
         "members": "Members",
         "creditBalance": "Credit Balance",
-        "lastActivity": "Last Activity"
+        "lastActivity": "Last Activity",
+        "actions": "Actions"
       },
       "column": {
         "createdAt": "Created At"
@@ -728,6 +756,10 @@
     "server": {
       "pageTitle": "Server Management",
       "backBtn": "← Server Management",
+      "tab": {
+        "servers": "Servers",
+        "templates": "Server Templates"
+      },
       "subtitle": {
         "servers": "Server List",
         "templates": "Template List"
@@ -737,7 +769,17 @@
         "status": "Status",
         "workspace": "Workspace",
         "user": "User",
-        "uptime": "Uptime"
+        "uptime": "Uptime",
+        "actions": "Actions"
+      },
+      "templateCol": {
+        "template": "Template",
+        "visibility": "Visibility",
+        "image": "Image",
+        "recVram": "Rec. vRAM",
+        "recStorage": "Rec. Storage",
+        "uses": "Uses",
+        "actions": "Actions"
       },
       "template": {
         "create": "Create Server Template",
@@ -1053,7 +1095,8 @@
         "revoke": "Revoke",
         "serverUsage": "Server Usage",
         "sharedUsage": "Shared Storage Usage",
-        "volumeUsage": "Volume Storage Usage"
+        "volumeUsage": "Volume Storage Usage",
+        "localUsage": "Local Storage Usage"
       },
       "filter": {
         "typeAll": "All",

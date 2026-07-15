@@ -36,16 +36,16 @@ const creditTrend = [
 ];
 
 const costBreakdown = [
-  { name: "GPU (서버)",      value: 9840, color: PRIMARY },
-  { name: "Volume Storage", value: 780,  color: PRIMARY },
-  { name: "Shared Storage", value: 460,  color: GREEN },
-  { name: "Local Storage",  value: 320,  color: BLUE },
+  { name: "dashboard.credit.gpuServer", value: 9840, color: PRIMARY },
+  { name: "storage.name.volume",        value: 780,  color: PRIMARY },
+  { name: "storage.name.shared",        value: 460,  color: GREEN },
+  { name: "storage.name.local",         value: 320,  color: BLUE },
 ];
 
 const storageUsage = [
-  { name: "Local Storage",  used: 57.8, total: 110,  color: BLUE },
-  { name: "Volume Storage", used: 103.6, total: 140, color: PRIMARY },
-  { name: "Shared Storage", used: 920, total: 1700,  color: GREEN },
+  { name: "storage.name.local",  used: 57.8, total: 110,  color: BLUE },
+  { name: "storage.name.volume", used: 103.6, total: 140, color: PRIMARY },
+  { name: "storage.name.shared", used: 920, total: 1700,  color: GREEN },
 ];
 
 // ─── SVG Donut chart (replaces recharts PieChart — no clipping) ───────────────
@@ -118,7 +118,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
       title={t('gnb.lnb.dashboard')}
       subtitle={t('gnb.lnb.myWorkspace')}
       actions={
-        <span style={{ fontSize: 12, color: GRAY_60 }}>{t('dashboard.lastUpdated', '마지막 업데이트 · 2026년 7월 13일 14:32')}</span>
+        <span style={{ fontSize: 12, color: GRAY_60 }}>{t('dashboard.lastUpdated')}</span>
       }
     >
       {/* ── 크레딧 경고 배너 (잔액 30% 미만 시) ── */}
@@ -232,7 +232,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
       {/* ── Row 1: 크레딧 사용 추이 + [중요 알림 / 빠른 이동] ── */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14, marginBottom: 14 }}>
-        <SectionCard title={t('dashboard.section.creditUsage')} subtitle={t('dashboard.creditTrendSubtitle', '최근 14일 서버 및 스토리지 크레딧 사용 현황')}>
+        <SectionCard title={t('dashboard.section.creditUsage')} subtitle={t('dashboard.creditTrendSubtitle')}>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 14, fontSize: 12, marginBottom: 16 }}>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: GRAY_40, display: "inline-block" }} />{t('dashboard.chart.creditUsed')}</span>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ width: 10, height: 3, borderRadius: 2, backgroundColor: PRIMARY, display: "inline-block" }} />{t('dashboard.section.serverUsage')}</span>
@@ -252,16 +252,16 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
         </SectionCard>
 
         {/* 중요 알림 */}
-        <SectionCard title={t('dashboard.notifications.title', '주요 알림')} subtitle={t('dashboard.notifications.unread', { n: 2 })} action={
+        <SectionCard title={t('dashboard.notifications.title')} subtitle={t('dashboard.notifications.unread', { n: 2 })} action={
           <button type="button" onClick={() => onNavigate("workspace-overview")} style={{ fontSize: 11, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
-            {t('dashboard.notifications.viewAll', '전체')} <ChevronRight size={12} />
+            {t('dashboard.notifications.viewAll')} <ChevronRight size={12} />
           </button>
         }>
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
-              { time: "18:30", type: t('dashboard.notification.storage', '스토리지'), msg: t('dashboard.notification.storageMsg', "model-checkpoint 공유 스토리지 사용량이 99% (198 / 200 GB)에 도달했습니다."), typeColor: PRIMARY, read: false },
-              { time: "11:02", type: t('dashboard.notification.credit', '크레딧'),   msg: t('dashboard.notification.creditMsg', "크레딧 잔액이 설정한 임계값(50,000cr) 미만입니다. 현재 잔액: 45,230cr"), typeColor: PRIMARY, read: false },
-              { time: "7/12",  type: "GPU",      msg: t('dashboard.notification.gpuMsg', "llm-finetuning 서버의 GPU 점유율이 95%를 초과했습니다."), typeColor: PRIMARY, read: true },
+              { time: "18:30", type: t('dashboard.notification.storage'), msg: t('dashboard.notification.storageMsg'), typeColor: PRIMARY, read: false },
+              { time: "11:02", type: t('dashboard.notification.credit'),   msg: t('dashboard.notification.creditMsg'), typeColor: PRIMARY, read: false },
+              { time: "7/12",  type: "GPU",      msg: t('dashboard.notification.gpuMsg'), typeColor: PRIMARY, read: true },
             ].map((n, i, arr) => (
               <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 0", borderBottom: i < arr.length - 1 ? `1px solid rgb(248,248,248)` : "none" }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: n.read ? "transparent" : n.typeColor, marginTop: 4, flexShrink: 0, display: "inline-block" }} />
@@ -280,8 +280,8 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
       {/* ── Row 2: 서버 GPU 점유율 + 스토리지 현황 ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-        <SectionCard title={t('dashboard.section.serverUsage')} subtitle={t('dashboard.gpuUsageSubtitle', '실행 중인 서버의 실시간 GPU 점유율')} action={
-          <button type="button" onClick={() => onNavigate("server-list")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>{t('dashboard.manage', '관리')} <ChevronRight size={13} /></button>
+        <SectionCard title={t('dashboard.section.serverUsage')} subtitle={t('dashboard.gpuUsageSubtitle')} action={
+          <button type="button" onClick={() => onNavigate("server-list")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>{t('dashboard.manage')} <ChevronRight size={13} /></button>
         }>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {servers.filter(s => s.status === "running").map(s => {
@@ -315,8 +315,8 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
           </div>
         </SectionCard>
 
-        <SectionCard title={t('dashboard.section.resourceOverview')} subtitle={t('dashboard.storageSubtitle', '유형별 용량 및 사용률')} action={
-          <button type="button" onClick={() => onNavigate("storage")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>{t('dashboard.manage', '관리')} <ChevronRight size={13} /></button>
+        <SectionCard title={t('dashboard.section.resourceOverview')} subtitle={t('dashboard.storageSubtitle')} action={
+          <button type="button" onClick={() => onNavigate("storage")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>{t('dashboard.manage')} <ChevronRight size={13} /></button>
         }>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {storageUsage.map(s => {
@@ -326,7 +326,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 5 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <Database size={12} color={s.color} />
-                      <span style={{ color: GRAY_90, fontWeight: 500 }}>{s.name}</span>
+                      <span style={{ color: GRAY_90, fontWeight: 500 }}>{t(s.name)}</span>
                     </div>
                     <span style={{ color: pct >= 90 ? RED : pct >= 70 ? YELLOW : GREEN, fontWeight: 600 }}>
                       {s.used >= 1000 ? `${(s.used / 1000).toFixed(1)} TB` : `${s.used} GB`} / {s.total >= 1000 ? `${(s.total / 1000).toFixed(1)} TB` : `${s.total} GB`}
@@ -353,7 +353,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
                 <div key={item.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: `1px solid rgb(245,245,245)` }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: item.color }} />
-                    <span style={{ fontSize: 12, color: GRAY_70 }}>{item.name}</span>
+                    <span style={{ fontSize: 12, color: GRAY_70 }}>{t(item.name)}</span>
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_90 }}>{item.value.toLocaleString()} cr</div>
@@ -365,13 +365,13 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
           </div>
         </SectionCard>
 
-        <SectionCard title={t('dashboard.section.quickActions', '빠른 실행')}>
+        <SectionCard title={t('dashboard.section.quickActions')}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[
-              { id: "create-server",  icon: <Server size={18} />,     label: t('dashboard.quickAction.createServer'),  desc: t('dashboard.quickAction.createServerDesc', 'GPU 서버 즉시 시작'),               screen: "server-create",     color: PRIMARY },
-              { id: "create-storage", icon: <Database size={18} />,   label: t('dashboard.quickAction.createStorage'), desc: t('dashboard.quickAction.createStorageDesc', '멤버와 함께 쓰는 스토리지 만들기'),  screen: "storage",           color: BLUE },
-              { id: "manage-members", icon: <Users size={18} />,      label: t('dashboard.quickAction.manageMembers'), desc: t('dashboard.quickAction.manageMembersDesc', '멤버를 워크스페이스에 초대하기'),    screen: "workspace-members", color: GREEN },
-              { id: "view-billing",   icon: <CreditCard size={18} />, label: t('dashboard.quickAction.viewBilling'),   desc: t('dashboard.quickAction.viewBillingDesc', '크레딧을 어디에 얼마나 썼는지 확인'),  screen: "workspace-credit",  color: YELLOW },
+              { id: "create-server",  icon: <Server size={18} />,     label: t('dashboard.quickAction.createServer'),  desc: t('dashboard.quickAction.createServerDesc'),   screen: "server-create",     color: PRIMARY },
+              { id: "create-storage", icon: <Database size={18} />,   label: t('dashboard.quickAction.createStorage'), desc: t('dashboard.quickAction.createStorageDesc'),  screen: "storage",           color: BLUE },
+              { id: "manage-members", icon: <Users size={18} />,      label: t('dashboard.quickAction.manageMembers'), desc: t('dashboard.quickAction.manageMembersDesc'),  screen: "workspace-members", color: GREEN },
+              { id: "view-billing",   icon: <CreditCard size={18} />, label: t('dashboard.quickAction.viewBilling'),   desc: t('dashboard.quickAction.viewBillingDesc'),    screen: "workspace-credit",  color: YELLOW },
             ].map(action => (
               <button type="button" key={action.id} onClick={() => onNavigate(action.screen)} style={{
                 display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8,

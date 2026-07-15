@@ -45,9 +45,9 @@ const gpuOccupancy = [
 ];
 
 const storageDist = [
-  { name: "Local Storage",  value: 110,  color: BLUE    },
-  { name: "Volume Storage", value: 498,  color: PRIMARY },
-  { name: "Shared Storage", value: 1700, color: GREEN   },
+  { name: "storage.name.local",  value: 110,  color: BLUE    },
+  { name: "storage.name.volume", value: 498,  color: PRIMARY },
+  { name: "storage.name.shared", value: 1700, color: GREEN   },
 ];
 
 // ─── SVG Donut for storage distribution (no recharts clipping) ───────────────
@@ -126,7 +126,7 @@ export function AdminDashboard() {
 
   return (
     <PageContainer
-      title="Admin Dashboard"
+      title={t('admin.dashboard.pageTitle')}
       subtitle={t('admin.dashboard.subtitle')}
       actions={
         <span style={{ fontSize: 12, color: GRAY_60 }}>{t('admin.dashboard.lastUpdated')}</span>
@@ -271,7 +271,7 @@ export function AdminDashboard() {
               <div key={d.name} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: d.color }} />
-                  <span style={{ color: GRAY_70 }}>{d.name}</span>
+                  <span style={{ color: GRAY_70 }}>{t(d.name)}</span>
                 </div>
                 <span style={{ fontWeight: 600, color: GRAY_90 }}>{d.value >= 1000 ? `${(d.value / 1000).toFixed(1)}TB` : `${d.value}GB`}</span>
               </div>
@@ -436,7 +436,7 @@ export function AdminUserManagement() {
             <SortableHeader k="credits" label={t('admin.user.col.creditUsage')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             <SortableHeader k="lastLogin" label={t('admin.user.drawer.lastLogin')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             <SortableHeader k="joined" label={t('admin.user.col.joined')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            "Actions",
+            t('admin.user.col.actions'),
           ]}
           rows={users.map(u => {
             const creditLow = (u.totalCr - u.usedCr) < 5000;
@@ -534,8 +534,8 @@ export function AdminUserManagement() {
                     { label: t('admin.user.drawer.status'), value: <Badge color={selectedUser.status === "active" ? "success" : "neutral"}>{selectedUser.status === "active" ? t('common.status.active') : t('common.status.inactive')}</Badge> },
                     { label: t('admin.user.drawer.joinedAt'), value: selectedUser.joined },
                     { label: t('admin.user.drawer.lastLogin'), value: selectedUser.lastLogin },
-                    { label: t('admin.user.drawer.workspaces'), value: `${selectedUser.workspaces}개` },
-                    { label: t('admin.user.drawer.servers'), value: `${selectedUser.servers}개` },
+                    { label: t('admin.user.drawer.workspaces'), value: t('common.count.n', { count: selectedUser.workspaces }) },
+                    { label: t('admin.user.drawer.servers'), value: t('common.count.n', { count: selectedUser.servers }) },
                     { label: t('admin.user.drawer.monthlyUsage'), value: `${selectedUser.usedCr.toLocaleString()} cr` },
                     { label: t('admin.user.drawer.creditBalance'), value: `${selectedUser.totalCr.toLocaleString()} cr` },
                   ].map(({ label, value }) => (
@@ -620,7 +620,7 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
 
   return (
     <>
-    <PageContainer title="Workspace Management" subtitle={t('admin.workspace.subtitle')}>
+    <PageContainer title={t('admin.workspace.pageTitle')} subtitle={t('admin.workspace.subtitle')}>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
@@ -655,7 +655,7 @@ export function AdminWorkspaceManagement({ onDetail }: { onDetail: () => void })
             <SortableHeader k="credits" label={t('admin.workspace.col.creditBalance')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             <SortableHeader k="createdAt" label={t('admin.workspace.column.createdAt')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
             <SortableHeader k="lastActivity" label={t('admin.workspace.col.lastActivity')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-            "Actions",
+            t('admin.workspace.col.actions'),
           ]}
           rows={workspaces.map(w => {
             const isLow = w.credits < 5000;
@@ -885,7 +885,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
       subtitle={tab === "Server Templates" ? t('admin.server.subtitle.templates') : t('admin.server.subtitle.servers')}
       actions={tab === "Server Templates" ? <PrimaryBtn size="small" onClick={() => { setTplForm({ ...blankTpl }); setEditingTemplateId(null); setView("create-template"); }}><Plus size={14} /> {t('admin.server.template.action.createBtn')}</PrimaryBtn> : undefined}
     >
-      <TabBar tabs={["Servers", "Server Templates"]} active={tab} onChange={setTab} />
+      <TabBar tabs={[t('admin.server.tab.servers'), t('admin.server.tab.templates')]} active={tab === "Server Templates" ? t('admin.server.tab.templates') : t('admin.server.tab.servers')} onChange={newTab => setTab(newTab === t('admin.server.tab.templates') ? "Server Templates" : "Servers")} />
       {tab === "Servers" && <>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
@@ -902,7 +902,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
           <div style={{ position: "relative" }}>
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
               style={{ height: 34, paddingLeft: 10, paddingRight: 26, border: `1px solid ${filterStatus !== "All" ? PRIMARY : GRAY_30}`, borderRadius: 8, fontSize: 12, color: filterStatus !== "All" ? PRIMARY : GRAY_70, fontFamily: "inherit", fontWeight: filterStatus !== "All" ? 600 : 400, backgroundColor: filterStatus !== "All" ? PRIMARY_10 : "white", outline: "none", cursor: "pointer", appearance: "none" as const }}>
-              {[["All", t('common.status.all')], ["running", "Running"], ["stopped", "Stopped"], ["creating", "Creating"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              {[["All", t('common.status.all')], ["running", t('server.status.running')], ["stopped", t('server.status.stopped')], ["creating", t('server.status.creating')]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
             <ChevronDown size={11} color={filterStatus !== "All" ? PRIMARY : GRAY_60} style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           </div>
@@ -920,7 +920,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
             <SortableHeader k="owner" label={t('admin.server.col.user')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
             <SortableHeader k="uptime" label={t('admin.server.col.uptime')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
             <SortableHeader k="createdAt" label={t('common.field.createdAt')} sortKey={sortKey} sortDir={sortDir} onSort={handleServerSort} />,
-            "Actions",
+            t('admin.server.col.actions'),
           ]}
           rows={servers.map(s => {
             const isRunning = s.status === "running";
@@ -1005,14 +1005,14 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
           <Table
             spacerGaps
             headers={[
-              <SortableHeader k="name" label="Template" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
-              <SortableHeader k="visibility" label="Visibility" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
-              <SortableHeader k="image" label="Image" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
-              <SortableHeader k="recVram" label="Rec. vRAM" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
-              "Rec. Storage",
-              <SortableHeader k="uses" label="Uses" sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="name" label={t('admin.server.templateCol.template')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="visibility" label={t('admin.server.templateCol.visibility')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="image" label={t('admin.server.templateCol.image')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              <SortableHeader k="recVram" label={t('admin.server.templateCol.recVram')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
+              t('admin.server.templateCol.recStorage'),
+              <SortableHeader k="uses" label={t('admin.server.templateCol.uses')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
               <SortableHeader k="createdAt" label={t('admin.workspace.column.createdAt')} sortKey={tplSortKey} sortDir={tplSortDir} onSort={handleTplSort} />,
-              "Actions",
+              t('admin.server.templateCol.actions'),
             ]}
             rows={[...templates].sort((a, b) => {
               let va: string | number = "", vb: string | number = "";
@@ -2618,21 +2618,22 @@ export function AdminCreditManagement() {
   const [histSortDir,   setHistSortDir]   = useState<"asc" | "desc">("desc");
 
   const typeMeta: Record<PlatformCreditType, { bg: string; color: string; icon: React.ReactNode }> = {
-    "관리자 지급":        { bg: "rgb(230,248,237)", color: GREEN,   icon: <CreditCard size={12} color={GREEN} />   },
-    "관리자 회수":        { bg: "rgb(254,242,242)", color: RED,     icon: <CreditCard size={12} color={RED} />     },
-    "서버 사용":          { bg: PRIMARY_10,          color: PRIMARY, icon: <Server size={12} color={PRIMARY} />     },
-    "볼륨 스토리지 사용": { bg: "rgb(235,245,255)", color: BLUE,    icon: <Database size={12} color={BLUE} />      },
-    "공유 스토리지 사용": { bg: "rgb(255,251,235)", color: YELLOW,  icon: <Database size={12} color={YELLOW} />    },
+    "관리자 지급":      { bg: "rgb(230,248,237)", color: GREEN,      icon: <CreditCard size={12} color={GREEN} />       },
+    "관리자 회수":      { bg: "rgb(254,242,242)", color: RED,        icon: <CreditCard size={12} color={RED} />         },
+    "서버 사용":        { bg: PRIMARY_10,          color: PRIMARY,    icon: <Server size={12} color={PRIMARY} />         },
+    "볼륨 스토리지 사용": { bg: "rgb(235,245,255)", color: BLUE,       icon: <Database size={12} color={BLUE} />          },
+    "공유 스토리지 사용": { bg: "rgb(255,251,235)", color: YELLOW,     icon: <Database size={12} color={YELLOW} />        },
+    "로컬 스토리지 사용": { bg: "rgb(236,252,250)", color: "#0d9488",  icon: <Database size={12} color="#0d9488" />       },
   };
 
   const histWsOptions   = Array.from(new Set(platformCreditHistory.map(r => r.wsName)));
   const histTypeOptions: [string, string][] = [
     ["All", t('admin.credit.filter.typeAll')], ["관리자 지급", t('admin.credit.type.grant')], ["관리자 회수", t('admin.credit.type.revoke')],
-    ["서버 사용", t('admin.credit.type.serverUsage')], ["볼륨 스토리지 사용", t('admin.credit.type.volumeUsage')], ["공유 스토리지 사용", t('admin.credit.type.sharedUsage')],
+    ["서버 사용", t('admin.credit.type.serverUsage')], ["볼륨 스토리지 사용", t('admin.credit.type.volumeUsage')], ["공유 스토리지 사용", t('admin.credit.type.sharedUsage')], ["로컬 스토리지 사용", t('admin.credit.type.localUsage')],
   ];
   const typeLabel: Record<PlatformCreditType, string> = {
     "관리자 지급": t('admin.credit.type.grant'), "관리자 회수": t('admin.credit.type.revoke'),
-    "서버 사용": t('admin.credit.type.serverUsage'), "볼륨 스토리지 사용": t('admin.credit.type.volumeUsage'), "공유 스토리지 사용": t('admin.credit.type.sharedUsage'),
+    "서버 사용": t('admin.credit.type.serverUsage'), "볼륨 스토리지 사용": t('admin.credit.type.volumeUsage'), "공유 스토리지 사용": t('admin.credit.type.sharedUsage'), "로컬 스토리지 사용": t('admin.credit.type.localUsage'),
   };
   const histWsOptionPairs: [string, string][] = [[t('admin.credit.filter.wsAll'), t('admin.credit.filter.wsAll')], ...histWsOptions.map(w => [w, w] as [string, string])];
 
@@ -3152,7 +3153,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
 
           {/* Local Storage */}
           <Card style={{ padding: "24px" }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Local Storage</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>{t('storage.name.local')}</div>
             <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Local storage automatically assigned per server. Data is lost on server stop or deletion.</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0" }}>
               <div style={{ flex: 1 }}>
@@ -3172,7 +3173,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
 
           {/* Volume Storage */}
           <Card style={{ padding: "24px" }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Volume Storage</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>{t('storage.name.volume')}</div>
             <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Persistent local storage attached to servers. Billed even while the server is stopped.</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid rgb(242,242,242)` }}>
               <div style={{ flex: 1 }}>
@@ -3203,7 +3204,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
 
           {/* Shared Storage */}
           <Card style={{ padding: "24px" }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>Shared Storage</div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: GRAY_90, marginBottom: 4 }}>{t('storage.name.shared')}</div>
             <div style={{ fontSize: 12, color: GRAY_60, marginBottom: 16 }}>Workspace-level shared storage settings.</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid rgb(242,242,242)` }}>
               <div style={{ flex: 1 }}>
@@ -3320,7 +3321,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
 
 
 // ─── Credit History ───────────────────────────────────────────────────────────
-type PlatformCreditType = "관리자 지급" | "관리자 회수" | "서버 사용" | "볼륨 스토리지 사용" | "공유 스토리지 사용";
+type PlatformCreditType = "관리자 지급" | "관리자 회수" | "서버 사용" | "볼륨 스토리지 사용" | "공유 스토리지 사용" | "로컬 스토리지 사용";
 
 const platformCreditHistory: {
   date: string; time: string; wsId: string; wsName: string;
@@ -3330,12 +3331,14 @@ const platformCreditHistory: {
   { date: "2026-07-08", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "서버 사용",        desc: "pytorch-dev-01 컴퓨팅 청구",            amount:   -240, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
   { date: "2026-07-08", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "llm-finetuning 컴퓨팅 청구",            amount:   -576, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
   { date: "2026-07-08", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "stable-diffusion 컴퓨팅 청구",          amount:   -120, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
-  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "볼륨 스토리지 사용", desc: "local-vol-01 볼륨 스토리지 청구",       amount:    -32, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "볼륨 스토리지 사용", desc: "pytorch-data 볼륨 스토리지 청구",       amount:    -16, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
-  { date: "2026-07-07", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "볼륨 스토리지 사용", desc: "local-vol-02 볼륨 스토리지 청구",       amount:    -16, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
-  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "공유 스토리지 사용", desc: "shared-team-01 공유 스토리지 청구",     amount:    -96, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "볼륨 스토리지 사용", desc: "local-vol-01 볼륨 스토리지 청구",     amount:    -32, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "볼륨 스토리지 사용", desc: "pytorch-data 볼륨 스토리지 청구",     amount:    -16, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "볼륨 스토리지 사용", desc: "local-vol-02 볼륨 스토리지 청구",     amount:    -16, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "공유 스토리지 사용", desc: "shared-team-01 공유 스토리지 청구",   amount:    -96, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "로컬 스토리지 사용", desc: "pytorch-dev-01 로컬 스토리지 청구",   amount:     -5, by: "지염염", byEmail: "yeomeyeom.ji@sdt.inc"     },
+  { date: "2026-07-07", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "로컬 스토리지 사용", desc: "llm-finetuning 로컬 스토리지 청구",   amount:     -8, by: "이지현", byEmail: "jihyun.lee@sdt.inc"       },
   { date: "2026-07-07", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "서버 사용",        desc: "bert-finetune 컴퓨팅 청구",             amount:   -480, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
-  { date: "2026-07-06", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "공유 스토리지 사용", desc: "shared-team-01 공유 스토리지 청구",     amount:    -96, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
+  { date: "2026-07-06", time: "23:00:00", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "공유 스토리지 사용", desc: "shared-team-01 공유 스토리지 청구",   amount:    -96, by: "김태민", byEmail: "taemin.kim@sdt.inc"       },
   { date: "2026-07-05", time: "17:58:30", wsId: "ws-c2f4d8e3", wsName: "ML Research Lab", type: "관리자 회수",      desc: "정책 위반 크레딧 회수",                 amount:  -2000, by: "이지수", byEmail: "jisu.lee@sdt.inc"         },
   { date: "2026-07-03", time: "09:22:11", wsId: "ws-a3f8b2c1", wsName: "My Workspace",    type: "관리자 지급",      desc: "프로모션 크레딧 베타 참여 보상",        amount:  20000, by: "박성민", byEmail: "sungmin.park@sdt.inc"     },
   { date: "2026-07-02", time: "23:00:00", wsId: "ws-d7e9a1b5", wsName: "Team Alpha",      type: "서버 사용",        desc: "data-preprocess 컴퓨팅 청구",           amount:   -360, by: "최유진", byEmail: "yujin.choi@sdt.inc"       },
@@ -3379,6 +3382,7 @@ function LogoSlot({ id, label, desc, hint, src, onUpload, onRemove }: {
 }
 
 export function AdminSystemSettings() {
+  const { t } = useTranslation();
   const [mainLogo,    setMainLogo]    = useState<string | null>(null);
   const [subLogo,     setSubLogo]     = useState<string | null>(null);
   const [faviconLogo, setFaviconLogo] = useState<string | null>(null);
