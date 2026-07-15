@@ -26,8 +26,10 @@ export const GREEN        = "rgb(34,197,94)";     // success / running
 export const GREEN_10     = "rgb(240,253,244)";   // success bg
 export const BLUE         = "rgb(36,142,213)";    // info / creating
 export const BLUE_10      = "rgb(211,232,247)";   // info bg
-export const YELLOW       = "rgb(255,177,68)";    // warning
-export const YELLOW_10    = "rgb(255,251,235)";   // warning bg
+export const YELLOW       = "rgb(255,177,68)";    // gauge 70–90% (§2 바 차트)
+export const YELLOW_10    = "rgb(255,251,235)";   // gauge bg
+export const ORANGE       = "rgb(249,115,22)";    // warning inline msg (§3)
+export const ORANGE_10    = "rgb(255,247,237)";   // warning inline msg bg
 
 // ─── Typography ───────────────────────────────────────────────────────────────
 export const FONT_SANS    = "'Pretendard Variable', Pretendard, -apple-system, sans-serif";

@@ -3,12 +3,12 @@ import {
   Bell, HelpCircle, ChevronDown, LayoutDashboard, Server, FolderOpen,
   Database, Layers, Users, CreditCard, Settings, Activity, Image,
   Cpu, LogOut, User, Globe, ChevronRight, Wallet, BellRing, Package,
-  ReceiptText, ShieldCheck, Mail, BarChart3, ArrowLeftRight
+  ReceiptText, ShieldCheck, Mail, BarChart3, ArrowLeftRight, ClipboardList
 } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, PRIMARY_20, PRIMARY_80,
   GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
-  RED, GREEN, BLUE, YELLOW,
+  RED, RED_10, GREEN, BLUE, YELLOW, YELLOW_10, ORANGE, ORANGE_10,
   RADIUS_CARD, RADIUS_LG, RADIUS_XL, RADIUS_MD, RADIUS_SM, RADIUS_FULL,
   SHADOW_CARD, SHADOW_CARD_HOVER, SHADOW_DROPDOWN,
   TRANSITION_FAST, TRANSITION_NORMAL,
@@ -19,7 +19,7 @@ import {
 export {
   PRIMARY, PRIMARY_10, PRIMARY_20, PRIMARY_80,
   GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
-  RED, GREEN, BLUE, YELLOW,
+  RED, RED_10, GREEN, BLUE, YELLOW, YELLOW_10, ORANGE, ORANGE_10,
 };
 
 // ─── Badge ───────────────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ export function Badge({ color = "neutral", variant = "filled", children }: Badge
     primary: { bg: PRIMARY_10, text: PRIMARY, border: PRIMARY },
     success: { bg: "rgb(240,253,244)", text: GREEN, border: GREEN },
     danger:  { bg: "rgb(254,242,242)", text: RED, border: RED },
-    warning: { bg: "rgb(255,251,235)", text: YELLOW, border: YELLOW },
+    warning: { bg: ORANGE_10, text: ORANGE, border: ORANGE },
     info:    { bg: "rgb(211,232,247)", text: BLUE, border: BLUE },
     neutral: { bg: "rgb(249,249,249)", text: GRAY_70, border: GRAY_40 },
   };
@@ -70,8 +70,9 @@ interface GNBProps {
   creditBalance?: number;
   onSwitchMode?: () => void;
   notifCount?: number;
+  onAuditLog?: () => void;
 }
-export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230, onSwitchMode, notifCount = 3 }: GNBProps) {
+export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230, onSwitchMode, notifCount = 3, onAuditLog }: GNBProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -119,17 +120,24 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
         </div>
       )}
 
-      {/* Notification bell */}
-      <button style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
-        <Bell size={18} color="rgba(255,255,255,0.85)" />
-        {notifCount > 0 && (
-          <span style={{
-            position: "absolute", top: 1, right: 1, width: 14, height: 14, borderRadius: "50%",
-            backgroundColor: RED, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 9, fontWeight: 700, color: "white",
-          }}>{notifCount}</span>
-        )}
-      </button>
+      {/* Audit Log (admin) / Notification bell (user) */}
+      {isAdmin ? (
+        <button onClick={onAuditLog} style={{ background: "none", border: "none", cursor: "pointer", padding: "3px 8px", borderRadius: 6, display: "flex", alignItems: "center", gap: 5 }}>
+          <ClipboardList size={15} color="rgba(255,255,255,0.85)" />
+          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: 500 }}>Audit Log</span>
+        </button>
+      ) : (
+        <button style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
+          <Bell size={18} color="rgba(255,255,255,0.85)" />
+          {notifCount > 0 && (
+            <span style={{
+              position: "absolute", top: 1, right: 1, width: 14, height: 14, borderRadius: "50%",
+              backgroundColor: RED, display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 9, fontWeight: 700, color: "white",
+            }}>{notifCount}</span>
+          )}
+        </button>
+      )}
 
       {/* Help */}
       <button style={{ background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
@@ -212,16 +220,14 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
 // ─── User LNB ─────────────────────────────────────────────────────────────────
 type UserScreen = "dashboard" | "workspace-overview" | "workspace-members" | "workspace-credit"
   | "workspace-settings" | "server-list" | "server-detail"
-  | "storage"
-  | "notifications";
+  | "storage";
 
 interface UserLNBProps {
   active: UserScreen;
   onNav: (screen: UserScreen) => void;
-  unreadCount?: number;
   onSwitchMode?: () => void;
 }
-export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLNBProps) {
+export function UserLNB({ active, onNav, onSwitchMode }: UserLNBProps) {
   const [wsExpanded, setWsExpanded] = useState(true);
 
   const isWorkspaceActive = active.startsWith("workspace");
@@ -330,22 +336,6 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
         Storage
       </button>
 
-      {/* Notifications */}
-      <button onClick={() => onNav("notifications")} style={navItemStyle(active === "notifications")}
-        onMouseEnter={e => { if (active !== "notifications") e.currentTarget.style.backgroundColor = GRAY_5; }}
-        onMouseLeave={e => { if (active !== "notifications") e.currentTarget.style.backgroundColor = "transparent"; }}>
-        <span style={{ color: active === "notifications" ? PRIMARY : GRAY_60 }}><BellRing size={16} /></span>
-        <span style={{ flex: 1 }}>Notifications</span>
-        {unreadCount > 0 && (
-          <span style={{
-            backgroundColor: "rgb(220,38,38)", color: "white", fontSize: 10, fontWeight: 700,
-            borderRadius: 999, padding: "1px 6px", lineHeight: "16px", minWidth: 18, textAlign: "center",
-          }}>
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
-      </button>
-
       {/* 하단 프로필 + 콘솔 전환 */}
       <div style={{ marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${GRAY_10}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 10px", marginBottom: 4 }}>
@@ -378,9 +368,9 @@ export function UserLNB({ active, onNav, unreadCount = 0, onSwitchMode }: UserLN
 type AdminScreen = "admin-dashboard" | "admin-users" | "admin-workspaces" | "admin-servers"
   | "admin-storage" | "admin-storage-pricing" | "admin-storage-policy" | "admin-images" | "admin-categories"
   | "admin-templates" | "admin-tiers" | "admin-gpu-types" | "admin-gpu-pricing"
-  | "admin-credits" | "admin-credit-history"
-  | "admin-notif" | "admin-notif-settings"
-  | "admin-settings-auth" | "admin-settings-terms" | "admin-settings-storage-integration";
+  | "admin-credits"
+  | "admin-settings-auth" | "admin-settings-terms" | "admin-settings-storage-integration"
+  | "admin-audit-log";
 
 export type { UserScreen, AdminScreen };
 
@@ -396,8 +386,6 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
   const [serverExp, setServerExp] = useState(false);
   const [imageExp, setImageExp] = useState(false);
   const [gpuExp, setGpuExp] = useState(false);
-  const [creditExp, setCreditExp] = useState(active.startsWith("admin-credit"));
-  const [notifExp, setNotifExp] = useState(active.startsWith("admin-notif"));
 
 
   const navItemStyle = (isActive: boolean) => ({
@@ -478,8 +466,8 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
           onClick={() => { setStorageExp(!storageExp); }} />
         {storageExp && <>
           <SubItem id="admin-storage" label="Storage" />
-          <SubItem id="admin-storage-pricing" label="Storage Pricing" />
-          <SubItem id="admin-storage-policy" label="Storage Policy" />
+          <SubItem id="admin-storage-pricing" label="Storage Pricing Policy" />
+          <SubItem id="admin-storage-policy" label="Storage Settings" />
         </>}
       </div>
       {/* Image Management */}
@@ -495,33 +483,17 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
       </div>
       {/* GPU Type Management */}
       <div style={{ opacity: disabledMenus.has("admin-gpu") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-gpu") ? "none" : "auto" }}>
-        <SectionHeader icon={<Cpu size={16} />} label="GPU Type Management"
+        <SectionHeader icon={<Cpu size={16} />} label="GPU Management"
           active={active.startsWith("admin-gpu")} expanded={gpuExp}
           onClick={() => setGpuExp(!gpuExp)} />
         {gpuExp && <>
-          <SubItem id="admin-gpu-types" label="GPU Type" />
-          <SubItem id="admin-gpu-pricing" label="GPU Type Pricing" />
+          <SubItem id="admin-gpu-types" label="GPU" />
+          <SubItem id="admin-gpu-pricing" label="GPU Pricing Policy" />
         </>}
       </div>
       {/* Credit */}
       <div style={{ opacity: disabledMenus.has("admin-credits") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-credits") ? "none" : "auto" }}>
-        <SectionHeader icon={<CreditCard size={16} />} label="Credit Management"
-          active={active.startsWith("admin-credit")} expanded={creditExp}
-          onClick={() => setCreditExp(!creditExp)} />
-        {creditExp && <>
-          <SubItem id="admin-credits"        label="Credit" />
-          <SubItem id="admin-credit-history" label="Credit History" />
-        </>}
-      </div>
-      {/* Notification Management */}
-      <div style={{ opacity: disabledMenus.has("admin-notif") ? 0.35 : 1, pointerEvents: disabledMenus.has("admin-notif") ? "none" : "auto" }}>
-        <SectionHeader icon={<BellRing size={16} />} label="Notification Management"
-          active={active.startsWith("admin-notif")} expanded={notifExp}
-          onClick={() => setNotifExp(!notifExp)} />
-        {notifExp && <>
-          <SubItem id="admin-notif"          label="Notification" />
-          <SubItem id="admin-notif-settings" label="Notification Settings" />
-        </>}
+        <NavItem id="admin-credits" icon={<CreditCard size={16} />} label="Credit History" />
       </div>
       {/* System Settings */}
       <NavItem id="admin-settings-auth" icon={<Settings size={16} />} label="System Settings" />
@@ -555,12 +527,13 @@ export function AdminLNB({ active, onNav, onSwitchMode, disabledMenus = new Set(
 }
 
 // ─── Page Container ───────────────────────────────────────────────────────────
-export function PageContainer({ title, subtitle, actions, children }: {
-  title: string; subtitle?: string; actions?: React.ReactNode; children: React.ReactNode;
+export function PageContainer({ title, subtitle, actions, backNav, children }: {
+  title: string; subtitle?: string; actions?: React.ReactNode; backNav?: React.ReactNode; children: React.ReactNode;
 }) {
   return (
     <div style={{ flex: 1, overflow: "auto", backgroundColor: GRAY_5, padding: PAGE_PADDING }}>
       <div style={{ maxWidth: PAGE_MAX_WIDTH }}>
+        {backNav && <div style={{ marginBottom: 12 }}>{backNav}</div>}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 600, color: GRAY_90, margin: 0, lineHeight: 1.4 }}>{title}</h1>
@@ -673,13 +646,13 @@ export function Table({ headers, rows, onRowClick, colWidths, spacerGaps }: {
   if (spacerGaps) {
     const thStyle = (i: number): React.CSSProperties => ({
       width: "1px", whiteSpace: "nowrap",
-      padding: i === 0 ? "10px 0 10px 16px" : i === n - 1 ? "10px 16px 10px 0" : "10px 0",
+      padding: i === 0 ? "10px 0 10px 16px" : i === n - 1 ? "10px 20px 10px 0" : "10px 0",
       fontSize: 12, fontWeight: 600, color: GRAY_60, textAlign: "left",
       borderBottom: `1px solid ${GRAY_10}`,
     });
     const tdStyle = (j: number): React.CSSProperties => ({
       width: "1px",
-      padding: j === 0 ? "12px 0 12px 16px" : j === n - 1 ? "12px 16px 12px 0" : "12px 0",
+      padding: j === 0 ? "12px 0 12px 16px" : j === n - 1 ? "12px 20px 12px 0" : "12px 0",
       fontSize: 13, color: GRAY_90, borderBottom: `1px solid ${GRAY_10}`,
     });
     const spacerThStyle: React.CSSProperties = { borderBottom: `1px solid ${GRAY_10}` };

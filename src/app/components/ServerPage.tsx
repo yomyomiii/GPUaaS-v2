@@ -1,18 +1,24 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   ComposedChart, Area, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import {
-  Plus, Play, Square, Trash2, ExternalLink, AlertTriangle, ChevronRight, ChevronUp,
+  Plus, Play, Square, Trash2, ExternalLink, AlertTriangle, ChevronRight, ChevronUp, ChevronDown,
   Terminal, Cpu, Database, HardDrive, Share2, Zap, Clock, Calendar, CreditCard, LayoutGrid, List, Search, Star, Layers,
 } from "lucide-react";
 import {
-  PRIMARY, PRIMARY_10, PRIMARY_80, GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
-  RED, GREEN, BLUE, YELLOW, Badge, StatusDot, Card, PrimaryBtn, TabBar, PageContainer, SectionCard, ListCard,
+  PRIMARY, PRIMARY_10, PRIMARY_20, PRIMARY_80, GRAY_5, GRAY_10, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
+  RED, RED_10, GREEN, BLUE, YELLOW, YELLOW_10, ORANGE, ORANGE_10, Badge, StatusDot, Card, PrimaryBtn, TabBar, PageContainer, SectionCard, ListCard,
 } from "./ConsoleLayout";
 
 const PURPLE = "rgb(124, 58, 237)";
 const PURPLE_10 = "rgb(237, 233, 254)";
+
+const SERVER_STATUS = {
+  running:  { label: "Running",  dotColor: GREEN,   msg: null },
+  stopped:  { label: "Stopped",  dotColor: GRAY_30, msg: null },
+  creating: { label: "Creating", dotColor: PURPLE,  msg: "서버를 준비하고 있습니다. 약 2~5분 소요됩니다..." },
+} satisfies Record<string, { label: string; dotColor: string; msg: string | null }>;
 
 // 관리자 콘솔에서 설정 가능한 로컬 스토리지 여유 용량 (이미지 최소 요구량 + 이 값이 기본값)
 const LOCAL_STORAGE_BUFFER_GB = 5;
@@ -178,7 +184,7 @@ function ImageGalleryPicker({ images, selectedId, onSelect }: {
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search size={13} color={GRAY_60} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input type="text" placeholder="이름, 태그 검색" value={search} onChange={e => setSearch(e.target.value)}
+          <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
             style={{ width: "100%", height: 36, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, outline: "none", boxSizing: "border-box", color: GRAY_90 }} />
         </div>
         <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
@@ -289,7 +295,7 @@ function GPUPicker({ options, selectedName, onSelect, gpuCount, onCountChange }:
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div style={{ position: "relative", flex: 1 }}>
           <Search size={12} color={GRAY_60} style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          <input type="text" placeholder="GPU 이름 검색" value={search} onChange={e => setSearch(e.target.value)}
+          <input type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
             style={{ width: "100%", height: 32, paddingLeft: 26, paddingRight: 10, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, outline: "none", boxSizing: "border-box", color: GRAY_90 }} />
         </div>
         <div style={{ display: "flex", gap: 2, backgroundColor: GRAY_5, padding: "3px", borderRadius: 8 }}>
@@ -345,18 +351,49 @@ function GPUPicker({ options, selectedName, onSelect, gpuCount, onCountChange }:
   );
 }
 
+// ─── Confirm Modal ────────────────────────────────────────────────────────────
+function ConfirmModal({ title, message, confirmLabel, onConfirm, onCancel }: {
+  title: string; message: React.ReactNode; confirmLabel: string;
+  onConfirm: () => void; onCancel: () => void;
+}) {
+  return (
+    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ backgroundColor: "white", borderRadius: 14, padding: "28px 32px", width: 420, boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: GRAY_90, marginBottom: 16 }}>{title}</div>
+        <div style={{ height: 1, backgroundColor: GRAY_10, marginBottom: 20 }} />
+        <div style={{ fontSize: 14, color: GRAY_70, lineHeight: 1.7, marginBottom: 28 }}>{message}</div>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button type="button" onClick={onCancel} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontFamily: "inherit" }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>취소</button>
+          <button type="button" onClick={onConfirm} style={{ height: 36, padding: "0 16px", fontSize: 13, fontWeight: 600, borderRadius: 8, border: "none", backgroundColor: RED, color: "white", cursor: "pointer", fontFamily: "inherit" }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}>{confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Server Card (list item) ──────────────────────────────────────────────────
-function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => void }) {
+function ServerCard({ s, onDetail, onDeleteRequest }: { s: typeof servers[0]; onDetail: () => void; onDeleteRequest: () => void }) {
   const avgUtil = s.gpuUtil.length ? Math.round(s.gpuUtil.reduce((a, b) => a + b, 0) / s.gpuUtil.length) : 0;
   const isRunning = s.status === "running";
   const isHigh = avgUtil > 90;
-  const [gpuOpen, setGpuOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<{ top: number; right: number } | null>(null);
 
   return (
     <Card hover style={{ padding: 0, overflow: "hidden" }}>
 
       <div style={{ padding: "20px 24px" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: (isRunning || s.status === "creating" || s.status === "stopped") ? 16 : 0 }}>
+        {s.status === "creating" && SERVER_STATUS.creating.msg && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, fontSize: 12, color: PRIMARY, width: "100%", marginBottom: 16, boxSizing: "border-box" }}>
+            <AlertTriangle size={12} color={PRIMARY} style={{ flexShrink: 0 }} />
+            {SERVER_STATUS.creating.msg}
+          </div>
+        )}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: (isRunning || s.status === "stopped") ? 16 : 0 }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10, flex: 1, minWidth: 0 }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
@@ -378,85 +415,98 @@ function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => voi
               </div>
               <div style={{ fontSize: 12, color: GRAY_60, paddingLeft: 18 }}>{s.image} &nbsp;·&nbsp; {s.gpu} × {s.gpuCnt} &nbsp;·&nbsp; VRAM {s.vram}</div>
               {s.status === "stopped" && s.stoppedAt && (
-                <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 8px", backgroundColor: "rgb(242,242,242)", borderRadius: 6, fontSize: 11, color: GRAY_60, marginLeft: 18, marginTop: 4 }}>
-                  {s.stoppedAt} 중지됨
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", backgroundColor: YELLOW_10, borderRadius: 10, fontSize: 11, color: YELLOW, marginLeft: 18, marginTop: 4 }}>
+                  <Clock size={10} color={YELLOW} />
+                  중지 일시: {s.stoppedAt}
                 </div>
               )}
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginLeft: 12 }}>
-            <AccessBtn label="접속" icon={<Terminal size={12} />} url={s.jupyterUrl} enabled={isRunning} />
-            <button type="button" onClick={onDetail} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = "white"; }}>
-              상세 <ChevronRight size={12} />
+            <button type="button" onClick={onDetail} style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: "none", backgroundColor: PRIMARY_10, color: PRIMARY, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "inherit", transition: "background 0.15s" }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+              상세 보기 <ChevronRight size={12} />
             </button>
+            {isRunning && <AccessBtn label="접속" icon={<Terminal size={12} />} url={s.jupyterUrl} enabled={isRunning} />}
+            {s.status === "stopped" && (
+              <button type="button" onClick={() => {}} style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                시작
+              </button>
+            )}
             {isRunning && (
-              <button type="button" style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: `1px solid ${GRAY_30}`, backgroundColor: "white", color: GRAY_70, cursor: "pointer", fontSize: 12 }}>
-                <Square size={12} /> 중지
+              <button type="button" onClick={() => {}} style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: "rgba(239,68,68,0.08)", color: RED, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.14)"; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.08)"; }}>
+                중지
               </button>
             )}
             {s.status === "stopped" && (
-              <>
-                <button type="button" style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: `1px solid ${GREEN}`, backgroundColor: "rgb(240,253,244)", color: GREEN, cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
-                  <Play size={12} /> 시작
+              <div style={{ position: "relative" }}>
+                {menuOpen && <div onClick={() => setMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />}
+                <button type="button" onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setMenuAnchor({ top: r.bottom + 4, right: window.innerWidth - r.right }); setMenuOpen(o => !o); }}
+                  style={{ height: 32, fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: menuOpen ? PRIMARY_20 : PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s", display: "inline-flex", alignItems: "center", padding: 0, overflow: "hidden" }}
+                  onMouseEnter={e => { if (!menuOpen) e.currentTarget.style.backgroundColor = PRIMARY_20; }}
+                  onMouseLeave={e => { if (!menuOpen) e.currentTarget.style.backgroundColor = PRIMARY_10; }}>
+                  <span style={{ padding: "0 8px 0 10px" }}>관리</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: menuOpen ? "rgb(207,204,255)" : PRIMARY_20, alignSelf: "stretch", padding: "0 6px", borderLeft: `1px solid ${menuOpen ? "rgb(190,186,255)" : PRIMARY_20}`, transition: "background 0.15s" }}>
+                    <ChevronDown size={11} color={PRIMARY} style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
+                  </span>
                 </button>
-                <button type="button" style={{ display: "flex", alignItems: "center", gap: 4, padding: "6px 12px", borderRadius: 8, border: `1px solid rgb(220,38,38)`, backgroundColor: "rgb(255,242,242)", color: "rgb(220,38,38)", cursor: "pointer", fontSize: 12, fontWeight: 600 }}>
-                  <Trash2 size={12} /> 삭제
-                </button>
-              </>
+                {menuOpen && menuAnchor && (
+                  <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 130, padding: "4px 0" }}>
+                    <button type="button" onClick={() => { setMenuOpen(false); onDeleteRequest(); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>
+                      삭제
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
 
         {isRunning && (
           <div style={{ marginBottom: 16, padding: "12px 16px", backgroundColor: "rgba(0,0,0,0.018)", borderRadius: 10 }}>
-            <div
-              onClick={() => setGpuOpen(o => !o)}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", marginBottom: gpuOpen ? 12 : 0 }}
-            >
-              <span style={{ fontSize: 11, fontWeight: 600, color: GRAY_60, letterSpacing: "0.04em" }}>GPU 모니터링</span>
-              <ChevronUp size={13} color={GRAY_60} style={{ transform: gpuOpen ? "rotate(0deg)" : "rotate(180deg)", transition: "transform 0.15s" }} />
-            </div>
-            {gpuOpen && (
-              <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
-                {s.gpuUtil.map((u, i) => {
-                  const uColor = u > 90 ? RED : u > 75 ? YELLOW : PRIMARY;
-                  const vramPct = Math.min(100, Math.max(0, s.vramUsedPct + (i % 2 === 0 ? 2 : -2)));
-                  const vColor = vramPct > 90 ? RED : vramPct > 75 ? YELLOW : BLUE;
-                  return (
-                    <div key={i} style={{ display: "flex", alignItems: "stretch", flex: 1, minWidth: 0 }}>
-                      {i > 0 && <div style={{ width: 32, flexShrink: 0 }} />}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 10, fontWeight: 600, color: GRAY_60, marginBottom: 8, letterSpacing: "0.04em" }}>GPU {i}</div>
-                        <div style={{ marginBottom: 10 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
-                            <span>점유율</span><span style={{ fontWeight: 700, color: uColor }}>{u}%</span>
-                          </div>
-                          <UtilBar pct={u} color={uColor} height={7} />
+            <div style={{ display: "flex", alignItems: "stretch", gap: 0 }}>
+              {s.gpuUtil.map((u, i) => {
+                const uColor = u > 90 ? RED : u > 75 ? YELLOW : PRIMARY;
+                const vramPct = Math.min(100, Math.max(0, s.vramUsedPct + (i % 2 === 0 ? 2 : -2)));
+                const vColor = vramPct > 90 ? RED : vramPct > 75 ? YELLOW : BLUE;
+                return (
+                  <div key={i} style={{ display: "flex", alignItems: "stretch", flex: 1, minWidth: 0 }}>
+                    {i > 0 && <div style={{ width: 32, flexShrink: 0 }} />}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: GRAY_60, marginBottom: 8, letterSpacing: "0.04em" }}>GPU {i}</div>
+                      <div style={{ marginBottom: 10 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
+                          <span>점유율</span><span style={{ fontWeight: 700, color: uColor }}>{u}%</span>
                         </div>
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
-                            <span>VRAM</span><span style={{ fontWeight: 700, color: vColor }}>{vramPct}%</span>
-                          </div>
-                          <UtilBar pct={vramPct} color={vColor} height={7} />
+                        <UtilBar pct={u} color={uColor} height={7} />
+                      </div>
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: GRAY_60, marginBottom: 4 }}>
+                          <span>VRAM</span><span style={{ fontWeight: 700, color: vColor }}>{vramPct}%</span>
                         </div>
+                        <UtilBar pct={vramPct} color={vColor} height={7} />
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
-        {(isRunning || s.status === "creating" || s.status === "stopped") && (
+        {(isRunning || s.status === "stopped") && (
           <div style={{ display: "flex", gap: 28, fontSize: 12 }}>
             {isRunning ? (
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Calendar size={12} color={GRAY_60} /><span>Created At <strong style={{ color: GRAY_90 }}>{s.created}</strong></span></div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Clock size={12} color={GRAY_60} /><span>Uptime <strong style={{ color: GRAY_90 }}>{s.uptime}</strong></span></div>
-                <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={12} color={PRIMARY} /><span>소비 속도 <strong style={{ color: PRIMARY }}>{s.rate} cr/h</strong></span></div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={12} color={GRAY_60} /><span>가격 <strong style={{ color: GRAY_90 }}>{s.rate} cr/h</strong></span></div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><HardDrive size={12} color={GRAY_60} /><span>Local <strong>{s.tmpUsed}GB</strong> / {s.tmpStorage}</span></div>
                 {s.localStorage !== "none" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={12} color={BLUE} /><span>Volume <strong>{s.localUsed}GB</strong> / {s.localStorage}</span></div>
@@ -465,8 +515,6 @@ function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => voi
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Share2 size={12} color={GREEN} /><span>Shared · <strong>{s.sharedStorage}</strong></span></div>
                 )}
               </>
-            ) : s.status === "creating" ? (
-              <div style={{ fontSize: 12, color: PURPLE }}>서버를 준비하고 있습니다. 약 2~5분 소요됩니다...</div>
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Calendar size={12} color={GRAY_60} /><span>Created At <strong style={{ color: GRAY_90 }}>{s.created}</strong></span></div>
             )}
@@ -478,7 +526,7 @@ function ServerCard({ s, onDetail }: { s: typeof servers[0]; onDetail: () => voi
 }
 
 // ─── Server Detail ────────────────────────────────────────────────────────────
-function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: () => void }) {
+function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof servers[0]; onBack: () => void; onDeleteRequest: () => void }) {
   const [tab, setTab] = useState("Monitoring");
   const [upgradeLocal, setUpgradeLocal] = useState(false);
   const [newLocalGB, setNewLocalGB] = useState(100);
@@ -505,8 +553,8 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {server.status === "stopped" && <PrimaryBtn size="small"><Play size={13} /> 시작</PrimaryBtn>}
-            {isRunning && <PrimaryBtn size="small" variant="secondary"><Square size={13} /> 정지</PrimaryBtn>}
-            <PrimaryBtn size="small" variant="danger"><Trash2 size={13} /> 삭제</PrimaryBtn>
+            {isRunning && <PrimaryBtn size="small" variant="secondary"><Square size={13} /> 중지</PrimaryBtn>}
+            <PrimaryBtn size="small" variant="danger" onClick={onDeleteRequest}><Trash2 size={13} /> 삭제</PrimaryBtn>
           </div>
         </div>
 
@@ -520,7 +568,7 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
               { label: "로컬 스토리지", value: server.tmpStorage },
               ...(server.localStorage !== "none" ? [{ label: "볼륨 스토리지", value: server.localStorage }] : []),
               ...(server.sharedStorage !== "none" ? [{ label: "공유 스토리지", value: server.sharedStorage }] : []),
-              { label: "생성일", value: server.created },
+              { label: "생성 일시", value: server.created },
             ].map(({ label, value }, i, arr) => (
               <div key={label} style={{
                 flex: 1, minWidth: 0,
@@ -534,13 +582,13 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
             ))}
           </div>
           <div style={{ borderTop: `1px solid ${GRAY_10}`, padding: "10px 24px", backgroundColor: GRAY_5, display: "flex", alignItems: "center", gap: 10 }}>
-            <AccessBtn label="접속" icon={<Terminal size={13} />} url={server.jupyterUrl} enabled={isRunning} />
+            {isRunning && <AccessBtn label="접속" icon={<Terminal size={13} />} url={server.jupyterUrl} enabled={isRunning} />}
             {isRunning ? (
               <>
                 <div style={{ width: 1, height: 16, backgroundColor: GRAY_30, margin: "0 6px" }} />
                 <div style={{ display: "flex", gap: 20, fontSize: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Clock size={11} color={GRAY_60} /><span>Uptime <strong style={{ color: GRAY_90 }}>{server.uptime}</strong></span></div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={11} color={PRIMARY} /><span>소비 <strong style={{ color: PRIMARY }}>{server.rate} cr/h</strong></span></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Zap size={11} color={GRAY_60} /><span>사용량 <strong style={{ color: GRAY_90 }}>{server.rate} cr/h</strong></span></div>
                   <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><HardDrive size={11} color={GRAY_60} /><span>Local <strong>{server.tmpUsed}GB</strong> / {server.tmpStorage}</span></div>
                   {server.localStorage !== "none" && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5, color: GRAY_70 }}><Database size={11} color={BLUE} /><span>Volume <strong>{server.localUsed}GB</strong> / {server.localStorage}</span></div>
@@ -623,9 +671,9 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
             </SectionCard>
             {server.localStorage !== "none" && (
               <SectionCard title="볼륨 스토리지" subtitle="정지 중도 과금 · 0.1 cr/GB/h" action={<div style={{ display: "flex", gap: 8 }}><PrimaryBtn size="xsmall" variant="secondary" onClick={() => setUpgradeLocal(!upgradeLocal)}>용량 상향</PrimaryBtn><PrimaryBtn size="xsmall" variant="danger"><Trash2 size={12} /></PrimaryBtn></div>}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(240,248,253)", borderRadius: 10, marginBottom: 12 }}>
-                  <AlertTriangle size={12} color={BLUE} />
-                  <span style={{ fontSize: 12, color: GRAY_70 }}>서버 정지 중에도 볼륨 스토리지 요금이 발생합니다.</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10, marginBottom: 12 }}>
+                  <AlertTriangle size={12} color={PRIMARY} />
+                  <span style={{ fontSize: 12, color: PRIMARY }}>서버 정지 중에도 볼륨 스토리지 요금이 발생합니다.</span>
                 </div>
                 <UtilBar pct={server.localUsed / parseInt(server.localStorage) * 100} height={10} />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12, color: GRAY_70 }}>
@@ -639,7 +687,7 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
                       <span style={{ fontSize: 13, color: GRAY_60 }}>현재 {server.localStorage} →</span>
                       <input type="number" value={newLocalGB} onChange={e => setNewLocalGB(Number(e.target.value))} min={parseInt(server.localStorage) + 10} style={{ width: 80, height: 36, padding: "0 10px", borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 13, textAlign: "center" }} />
                       <span style={{ fontSize: 13, color: GRAY_70 }}>GB</span>
-                      <div style={{ fontSize: 12, color: YELLOW, backgroundColor: "rgb(255,251,235)", padding: "5px 10px", borderRadius: 8 }}>
+                      <div style={{ fontSize: 12, color: ORANGE, backgroundColor: ORANGE_10, padding: "5px 10px", borderRadius: 8 }}>
                         추가 과금: {((newLocalGB - parseInt(server.localStorage)) * 0.1).toFixed(1)} cr/h
                       </div>
                     </div>
@@ -666,9 +714,9 @@ function ServerDetail({ server, onBack }: { server: typeof servers[0]; onBack: (
         {tab === "Access" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {!isRunning && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(240,248,253)", borderRadius: 10 }}>
-                <AlertTriangle size={12} color={BLUE} />
-                <span style={{ flex: 1, fontSize: 12, color: GRAY_70 }}>서버가 실행 중이지 않습니다. 접속하려면 서버를 시작하세요.</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", backgroundColor: PRIMARY_10, borderRadius: 10 }}>
+                <AlertTriangle size={12} color={PRIMARY} />
+                <span style={{ flex: 1, fontSize: 12, color: PRIMARY }}>서버가 실행 중이지 않습니다. 접속하려면 서버를 시작하세요.</span>
                 <PrimaryBtn size="xsmall" style={{ marginLeft: "auto" }}><Play size={11} /> 서버 시작</PrimaryBtn>
               </div>
             )}
@@ -916,8 +964,8 @@ function ModeToggle({ imageTemplate, useTemplate, onSelectTemplate, onSelectManu
           {imageTemplate ? (
             <div style={{ fontSize: 11, color: GRAY_60, lineHeight: 1.5 }}>
               <strong style={{ color: PRIMARY }}>{imageTemplate.name}</strong><br />
-              권장 vRAM: {imageTemplate.recVram} · 임시: {imageTemplate.recTmp}GB
-              {imageTemplate.hasLocal ? ` · 로컬: ${imageTemplate.localGB}GB` : ""}
+              권장 vRAM: {imageTemplate.recVram} · Local: {imageTemplate.recTmp}GB
+              {imageTemplate.hasLocal ? ` · Volume: ${imageTemplate.localGB}GB` : ""}
             </div>
           ) : (
             <div style={{ fontSize: 11, color: GRAY_40 }}>이 이미지에는 템플릿이 없습니다</div>
@@ -1293,19 +1341,35 @@ export function ServerPage() {
   const [selectedServer, setSelectedServer] = useState(servers[0]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"전체" | "running" | "stopped" | "creating">("전체");
+  const [deletingServer, setDeletingServer] = useState<typeof servers[0] | null>(null);
+  const [deletedServerIds, setDeletedServerIds] = useState<Set<string>>(new Set());
 
   if (view === "create-step") return <ServerCreateStep onBack={() => setView("list")} />;
   if (view === "create-onepage") return <ServerCreateOnePage onBack={() => setView("list")} />;
-  if (view === "detail") return <ServerDetail server={selectedServer} onBack={() => setView("list")} />;
+  if (view === "detail") return (
+    <>
+      <ServerDetail server={selectedServer} onBack={() => setView("list")} onDeleteRequest={() => setDeletingServer(selectedServer)} />
+      {deletingServer && (
+        <ConfirmModal
+          title="서버 삭제 확인"
+          message={<span>서버 <strong style={{ color: GRAY_90 }}>{deletingServer.name}</strong>을(를) 삭제하시겠습니까?<br /><br />삭제 즉시 서버가 종료되며, 로컬 스토리지(임시)의 모든 데이터가 영구 삭제됩니다. 볼륨 스토리지 및 공유 스토리지는 영향을 받지 않습니다. 이 작업은 되돌릴 수 없습니다.</span>}
+          confirmLabel="삭제"
+          onConfirm={() => { setDeletedServerIds(prev => new Set([...prev, deletingServer.id])); setDeletingServer(null); setView("list"); }}
+          onCancel={() => setDeletingServer(null)}
+        />
+      )}
+    </>
+  );
 
-  const running = servers.filter(s => s.status === "running");
+  const visibleServers = servers.filter(s => !deletedServerIds.has(s.id));
+  const running = visibleServers.filter(s => s.status === "running");
   const totalRate = running.reduce((s, sv) => s + sv.rate, 0);
 
-  const filtered = servers
+  const filtered = visibleServers
     .filter(s => statusFilter === "전체" || s.status === statusFilter)
     .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.image.toLowerCase().includes(search.toLowerCase()));
 
-  const STATUS_LABELS: Record<string, string> = { "전체": "전체", "running": "Running", "stopped": "Stopped", "creating": "Creating" };
+  const STATUS_LABELS = { "전체": "전체", ...Object.fromEntries(Object.entries(SERVER_STATUS).map(([k, v]) => [k, v.label])) };
 
   return (
     <PageContainer
@@ -1324,7 +1388,7 @@ export function ServerPage() {
           <div style={{ position: "relative" }}>
             <Search size={13} color={GRAY_40} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
             <input
-              type="text" placeholder="서버명, 이미지 검색" value={search} onChange={e => setSearch(e.target.value)}
+              type="text" placeholder="검색어를 입력하세요." value={search} onChange={e => setSearch(e.target.value)}
               style={{ paddingLeft: 30, paddingRight: 10, height: 32, borderRadius: 8, border: `1px solid ${GRAY_30}`, fontSize: 12, color: GRAY_90, outline: "none", width: 180 }}
             />
           </div>
@@ -1350,9 +1414,20 @@ export function ServerPage() {
             key={s.id}
             s={s}
             onDetail={() => { setSelectedServer(s); setView("detail"); }}
+            onDeleteRequest={() => setDeletingServer(s)}
           />
         ))}
       </div>
+
+      {deletingServer && (
+        <ConfirmModal
+          title="서버 삭제 확인"
+          message={<span>서버 <strong style={{ color: GRAY_90 }}>{deletingServer.name}</strong>을(를) 삭제하시겠습니까?<br /><br />삭제 즉시 서버가 종료되며, 로컬 스토리지(임시)의 모든 데이터가 영구 삭제됩니다. 볼륨 스토리지 및 공유 스토리지는 영향을 받지 않습니다. 이 작업은 되돌릴 수 없습니다.</span>}
+          confirmLabel="삭제"
+          onConfirm={() => { setDeletedServerIds(prev => new Set([...prev, deletingServer.id])); setDeletingServer(null); }}
+          onCancel={() => setDeletingServer(null)}
+        />
+      )}
 
       <style>{`@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.5); opacity: 0; } }`}</style>
     </PageContainer>

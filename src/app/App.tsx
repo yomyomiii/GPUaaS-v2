@@ -2,7 +2,6 @@ import { useState } from "react";
 import { GNB, UserLNB, AdminLNB, type UserScreen, type AdminScreen } from "./components/ConsoleLayout";
 import { UserDashboard } from "./components/UserDashboard";
 import { WorkspacePage } from "./components/WorkspacePage";
-import { NotificationsPage } from "./components/NotificationsPage";
 import { ServerPage } from "./components/ServerPage";
 import { StoragePage } from "./components/StoragePage";
 import {
@@ -15,8 +14,8 @@ import {
   AdminImageManagement,
   AdminCreditManagement,
   AdminStorageManagement,
-  AdminNotificationManagement,
   AdminSystemSettings,
+  AdminAuditLog,
 } from "./components/AdminConsole";
 import "../styles/fonts.css";
 
@@ -68,11 +67,12 @@ export default function App() {
       <GNB
         isAdmin={mode === "admin"}
         onSwitchMode={() => setMode(m => m === "user" ? "admin" : "user")}
+        onAuditLog={() => handleAdminNav("admin-audit-log")}
       />
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         {mode === "user" ? (
           <>
-            <UserLNB active={lnbActive} onNav={handleUserNav} unreadCount={2} onSwitchMode={() => setMode("admin")} />
+            <UserLNB active={lnbActive} onNav={handleUserNav} onSwitchMode={() => setMode("admin")} />
             <div style={{ flex: 1, overflow: "hidden", display: "flex" }}>
               {userScreen === "dashboard" && (
                 <UserDashboard
@@ -94,7 +94,6 @@ export default function App() {
                   }}
                 />
               )}
-              {userScreen === "notifications" && <NotificationsPage />}
               {(userScreen === "server-list" || userScreen === "server-create" || userScreen === "server-detail") && (
                 <ServerPage />
               )}
@@ -119,7 +118,7 @@ export default function App() {
               )}
               {(adminScreen === "admin-storage" || adminScreen === "admin-storage-pricing" || adminScreen === "admin-storage-policy") && (
                 <AdminStorageManagement
-                  initialTab={adminScreen === "admin-storage-pricing" ? "Storage Pricing" : adminScreen === "admin-storage-policy" ? "Storage Policy" : "Storage"}
+                  initialTab={adminScreen === "admin-storage-pricing" ? "Storage Pricing Policy" : adminScreen === "admin-storage-policy" ? "Storage Settings" : "Storage"}
                 />
               )}
               {(adminScreen === "admin-images" || adminScreen === "admin-categories" || adminScreen === "admin-tiers") && (
@@ -133,24 +132,17 @@ export default function App() {
               )}
               {(adminScreen === "admin-gpu-types" || adminScreen === "admin-gpu-pricing") && (
                 <AdminGPUManagement
-                  initialTab={adminScreen === "admin-gpu-pricing" ? "GPU Type Pricing" : "GPU Type"}
+                  initialTab={adminScreen === "admin-gpu-pricing" ? "GPU Pricing Policy" : "GPU"}
                 />
               )}
               {adminScreen === "admin-credits" && (
                 <AdminCreditManagement />
               )}
-              {adminScreen === "admin-credit-history" && (
-                <AdminCreditManagement initialTab="Credit History" />
-              )}
-
-              {adminScreen === "admin-notif" && (
-                <AdminNotificationManagement />
-              )}
-              {adminScreen === "admin-notif-settings" && (
-                <AdminNotificationManagement initialTab="Notification Settings" />
-              )}
               {adminScreen === "admin-settings-auth" && (
                 <AdminSystemSettings />
+              )}
+              {adminScreen === "admin-audit-log" && (
+                <AdminAuditLog />
               )}
             </div>
           </>

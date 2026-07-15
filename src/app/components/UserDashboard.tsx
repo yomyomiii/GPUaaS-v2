@@ -5,7 +5,7 @@ import {
 import { Server, CreditCard, Plus, ChevronRight, Zap, AlertTriangle, ArrowUpRight, Database, BellRing, LayoutDashboard, Layers, Users } from "lucide-react";
 import {
   PRIMARY, PRIMARY_10, PRIMARY_80, GRAY_5, GRAY_30, GRAY_40, GRAY_60, GRAY_70, GRAY_90,
-  RED, GREEN, BLUE, YELLOW, Badge, StatusDot, Card, PrimaryBtn, MetricCard, PageContainer, SectionCard, ListCard,
+  RED, GREEN, BLUE, YELLOW, ORANGE, ORANGE_10, Badge, StatusDot, Card, PrimaryBtn, MetricCard, PageContainer, SectionCard, ListCard,
 } from "./ConsoleLayout";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -36,9 +36,9 @@ const creditTrend = [
 
 const costBreakdown = [
   { name: "GPU (서버)",      value: 9840, color: PRIMARY },
-  { name: "Volume Storage", value: 780,  color: BLUE },
+  { name: "Volume Storage", value: 780,  color: PRIMARY },
   { name: "Shared Storage", value: 460,  color: GREEN },
-  { name: "Local Storage",  value: 320,  color: YELLOW },
+  { name: "Local Storage",  value: 320,  color: BLUE },
 ];
 
 const storageUsage = [
@@ -119,9 +119,9 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
     >
       {/* ── 크레딧 경고 배너 (잔액 30% 미만 시) ── */}
       {isLow && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: "rgb(255,251,235)", borderRadius: 10, marginBottom: 14 }}>
-          <AlertTriangle size={12} color={YELLOW} />
-          <span style={{ fontSize: 12, color: GRAY_70 }}>크레딧 잔액이 <strong>{creditBalance.toLocaleString()} cr</strong> 남았습니다. 현재 사용 속도로 약 <strong>32일</strong> 사용 가능합니다.</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 10px", backgroundColor: ORANGE_10, borderRadius: 10, marginBottom: 14 }}>
+          <AlertTriangle size={12} color={ORANGE} />
+          <span style={{ fontSize: 12, color: GRAY_70 }}>크레딧 잔액이 <strong>{creditBalance.toLocaleString()} cr</strong> 남았습니다. 현재 가격 기준으로 약 <strong>32일</strong> 사용 가능합니다.</span>
         </div>
       )}
 
@@ -249,13 +249,13 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
 
         {/* 중요 알림 */}
         <SectionCard title="주요 알림" subtitle="미확인 2건" action={
-          <button type="button" onClick={() => onNavigate("notifications")} style={{ fontSize: 11, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
+          <button type="button" onClick={() => onNavigate("workspace-settings")} style={{ fontSize: 11, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 2 }}>
             전체 <ChevronRight size={12} />
           </button>
         }>
           <div style={{ display: "flex", flexDirection: "column" }}>
             {[
-              { time: "18:30", type: "스토리지", msg: "model-checkpoint 볼륨 스토리지 사용량이 99% (198 / 200 GB)에 도달했습니다.", typeColor: PRIMARY, read: false },
+              { time: "18:30", type: "스토리지", msg: "model-checkpoint 공유 스토리지 사용량이 99% (198 / 200 GB)에 도달했습니다.", typeColor: PRIMARY, read: false },
               { time: "11:02", type: "크레딧",   msg: "크레딧 잔액이 설정한 임계값(50,000cr) 미만입니다. 현재 잔액: 45,230cr", typeColor: PRIMARY, read: false },
               { time: "7/12",  type: "GPU",      msg: "llm-finetuning 서버의 GPU 점유율이 95%를 초과했습니다.", typeColor: PRIMARY, read: true },
             ].map((n, i, arr) => (
@@ -312,7 +312,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
         </SectionCard>
 
         <SectionCard title="스토리지 사용 현황" subtitle="유형별 용량 및 사용률" action={
-          <button type="button" onClick={() => onNavigate("storage-overview")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>관리 <ChevronRight size={13} /></button>
+          <button type="button" onClick={() => onNavigate("storage")} style={{ fontSize: 12, color: PRIMARY, background: "none", border: "none", cursor: "pointer", fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}>관리 <ChevronRight size={13} /></button>
         }>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {storageUsage.map(s => {
@@ -365,7 +365,7 @@ export function UserDashboard({ onNavigate }: { onNavigate: (screen: string) => 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[
               { icon: <Server size={18} />,   label: "새 서버 생성",        desc: "GPU 서버 즉시 시작",        screen: "server-create",    color: PRIMARY },
-              { icon: <Database size={18} />, label: "새 공유 스토리지 생성", desc: "멤버와 함께 쓰는 스토리지 만들기", screen: "storage-shared",   color: BLUE },
+              { icon: <Database size={18} />, label: "새 공유 스토리지 생성", desc: "멤버와 함께 쓰는 스토리지 만들기", screen: "storage",          color: BLUE },
               { icon: <Users size={18} />,    label: "멤버 초대",            desc: "멤버를 워크스페이스에 초대하기",   screen: "workspace-members", color: GREEN },
               { icon: <CreditCard size={18} />, label: "크레딧 내역",        desc: "크레딧을 어디에 얼마나 썼는지 확인",      screen: "workspace-credit", color: YELLOW },
             ].map(action => (
