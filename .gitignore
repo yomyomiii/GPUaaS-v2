@@ -10,3 +10,4 @@ src/review/
 ATTRIBUTIONS.md
 postcss.config.mjs
 default_shadcn_theme.css
+.claude/

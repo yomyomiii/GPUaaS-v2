@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Bell, HelpCircle, ChevronDown, LayoutDashboard, Server, FolderOpen,
+  Bell, ChevronDown, LayoutDashboard, Server, FolderOpen,
   Database, Layers, Users, CreditCard, Settings, Activity, Image,
-  Cpu, LogOut, User, ChevronRight, Wallet, BellRing, Package,
+  Cpu, LogOut, User, ChevronRight, Wallet, Package,
   ReceiptText, ShieldCheck, Mail, BarChart3, ArrowLeftRight, ClipboardList
 } from "lucide-react";
 import {
@@ -122,13 +122,8 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
         </div>
       )}
 
-      {/* Audit Log (admin) / Notification bell (user) */}
-      {isAdmin ? (
-        <button onClick={onAuditLog} style={{ background: "none", border: "none", cursor: "pointer", padding: "3px 8px", borderRadius: 6, display: "flex", alignItems: "center", gap: 5 }}>
-          <ClipboardList size={15} color="rgba(255,255,255,0.85)" />
-          <span style={{ color: "rgba(255,255,255,0.85)", fontSize: 12, fontWeight: 500 }}>{t("gnb.adminLnb.auditLog")}</span>
-        </button>
-      ) : (
+      {/* Notification bell (user only) */}
+      {!isAdmin && (
         <button style={{ position: "relative", background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
           <Bell size={18} color="rgba(255,255,255,0.85)" />
           {notifCount > 0 && (
@@ -140,11 +135,6 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
           )}
         </button>
       )}
-
-      {/* Help */}
-      <button style={{ background: "none", border: "none", cursor: "pointer", padding: 4, borderRadius: 6, display: "flex", alignItems: "center" }}>
-        <HelpCircle size={18} color="rgba(255,255,255,0.85)" />
-      </button>
 
       {/* Language */}
       <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -174,33 +164,28 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
         {showUserMenu && (
           <div style={{
             position: "absolute", right: 0, top: "100%", marginTop: 6, backgroundColor: "white", borderRadius: RADIUS_LG,
-            boxShadow: SHADOW_DROPDOWN, minWidth: 200, zIndex: Z_DROPDOWN, overflow: "hidden",
+            boxShadow: SHADOW_DROPDOWN, minWidth: 240, zIndex: Z_DROPDOWN, overflow: "hidden",
             border: `1px solid ${GRAY_10}`,
           }}>
             <div style={{ padding: "10px 14px", borderBottom: `1px solid ${GRAY_10}` }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: GRAY_90 }}>지염염</div>
               <div style={{ fontSize: 12, color: GRAY_60 }}>yeomeyeom.ji@sdt.inc</div>
             </div>
-            {[
-              { icon: <User size={14} />, label: t("gnb.myProfile") },
-              { icon: <BellRing size={14} />, label: t("gnb.notificationSettings") },
-            ].map(item => (
-              <button key={item.label} style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 14px",
-                background: "none", border: "none", cursor: "pointer", fontSize: 13, color: GRAY_90,
-              }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = GRAY_5)}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
-              >
-                <span style={{ color: GRAY_60 }}>{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
+            <button style={{
+              display: "flex", alignItems: "center", justifyContent: "flex-start", textAlign: "left", gap: 10, width: "100%", padding: "9px 14px",
+              background: "none", border: "none", cursor: "pointer", fontSize: 13, color: GRAY_90,
+            }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = GRAY_5)}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <span style={{ color: GRAY_60 }}><User size={14} /></span>
+              {t("gnb.myProfile")}
+            </button>
             {onSwitchMode && (
               <button onClick={onSwitchMode} style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 14px",
+                display: "flex", alignItems: "center", justifyContent: "flex-start", textAlign: "left", gap: 10, width: "100%", padding: "9px 14px",
                 background: "none", border: "none", cursor: "pointer", fontSize: 13, color: PRIMARY,
-                borderTop: `1px solid ${GRAY_10}`,
+                borderTop: `1px solid ${GRAY_10}`, whiteSpace: "nowrap",
               }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = PRIMARY_10)}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
@@ -210,7 +195,7 @@ export function GNB({ isAdmin, workspace = "My Workspace", creditBalance = 45230
               </button>
             )}
             <button style={{
-              display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "9px 14px",
+              display: "flex", alignItems: "center", justifyContent: "flex-start", textAlign: "left", gap: 10, width: "100%", padding: "9px 14px",
               background: "none", border: "none", cursor: "pointer", fontSize: 13, color: RED,
               borderTop: `1px solid ${GRAY_10}`,
             }}
