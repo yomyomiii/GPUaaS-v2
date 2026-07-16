@@ -4080,6 +4080,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
     ],
   });
   const [draft, setDraft] = useState<GpuPrice | null>(null);
+  const [drawerMode, setDrawerMode] = useState<"view" | "edit">("view");
   const [drawerTab, setDrawerTab] = useState<"edit" | "history">("edit");
   const [applyAt, setApplyAt] = useState<string>("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -4094,7 +4095,8 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
     return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
   };
 
-  const openDrawer  = (p: GpuPrice) => { setDraft({ ...p }); setDrawerTab("edit"); setApplyAt(tomorrowDate()); };
+  const openDrawer     = (p: GpuPrice) => { setDraft({ ...p }); setDrawerMode("view"); setDrawerTab("edit"); setApplyAt(tomorrowDate()); };
+  const openEditDrawer = (p: GpuPrice) => { setDraft({ ...p }); setDrawerMode("edit"); setDrawerTab("edit"); setApplyAt(tomorrowDate()); };
   const closeDrawer = () => setDraft(null);
   const saveEdit    = () => {
     if (!draft) return;
@@ -4240,8 +4242,8 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   <div style={{ position: "fixed", top: menuAnchor.top, right: menuAnchor.right, backgroundColor: "white", borderRadius: 10, border: `1px solid ${GRAY_30}`, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 140, padding: "4px 0" }}>
                     {p.enabled && (
                       pendingEntry
-                        ? <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.editVersion')}</button>
-                        : <button type="button" onClick={() => { openDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.newVersion')}</button>
+                        ? <button type="button" onClick={() => { openEditDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.editVersion')}</button>
+                        : <button type="button" onClick={() => { openEditDrawer(p); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: GRAY_90, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = GRAY_5; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('admin.pricing.action.newVersion')}</button>
                     )}
                     {p.enabled && <div style={{ height: 1, backgroundColor: GRAY_10, margin: "4px 0" }} />}
                     <button type="button" onClick={() => { setPrices(ps => ps.filter(x => x.id !== p.id)); setOpenMenuId(null); }} style={{ display: "block", width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: 13, color: RED, fontFamily: "inherit", whiteSpace: "nowrap" }} onMouseEnter={e => { e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.06)"; }} onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}>{t('common.action.delete')}</button>
@@ -4278,21 +4280,23 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
               </div>
             </div>
 
-            {/* Tab switcher */}
-            <div style={{ display: "flex", borderBottom: `1px solid ${GRAY_10}`, paddingLeft: 24 }}>
-              {(["edit", "history"] as const).map(tabKey => {
-                const hasPending = (histories[draft.id] || []).some(h => new Date(h.applyAt.replace(" ", "T")) > new Date());
-                const label = tabKey === "edit" ? (hasPending ? t('admin.pricing.tab.editPending') : t('admin.pricing.tab.editNew')) : t('admin.pricing.tab.history', { count: (histories[draft.id] || []).length });
-                return (
-                  <button key={tabKey} type="button" onClick={() => setDrawerTab(tabKey)} style={{ padding: "10px 14px", fontSize: 13, fontWeight: drawerTab === tabKey ? 600 : 400, color: drawerTab === tabKey ? PRIMARY : GRAY_60, background: "none", border: "none", borderBottom: `2px solid ${drawerTab === tabKey ? PRIMARY : "transparent"}`, cursor: "pointer", marginBottom: -1, fontFamily: "inherit" }}>
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
+            {/* Tab switcher — edit 모드에서만 표시 */}
+            {drawerMode === "edit" && (
+              <div style={{ display: "flex", borderBottom: `1px solid ${GRAY_10}`, paddingLeft: 24 }}>
+                {(["edit", "history"] as const).map(tabKey => {
+                  const hasPending = (histories[draft.id] || []).some(h => new Date(h.applyAt.replace(" ", "T")) > new Date());
+                  const label = tabKey === "edit" ? (hasPending ? t('admin.pricing.tab.editPending') : t('admin.pricing.tab.editNew')) : t('admin.pricing.tab.history', { count: (histories[draft.id] || []).length });
+                  return (
+                    <button key={tabKey} type="button" onClick={() => setDrawerTab(tabKey)} style={{ padding: "10px 14px", fontSize: 13, fontWeight: drawerTab === tabKey ? 600 : 400, color: drawerTab === tabKey ? PRIMARY : GRAY_60, background: "none", border: "none", borderBottom: `2px solid ${drawerTab === tabKey ? PRIMARY : "transparent"}`, cursor: "pointer", marginBottom: -1, fontFamily: "inherit" }}>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-            {/* 변경 이력 탭 */}
-            {drawerTab === "history" && (
+            {/* 변경 이력 탭 — edit 모드에서만 표시 */}
+            {drawerMode === "edit" && drawerTab === "history" && (
               <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
                 {(histories[draft.id] || []).length === 0
                   ? <div style={{ fontSize: 13, color: GRAY_40, textAlign: "center", marginTop: 40 }}>{t('admin.pricing.history.empty')}</div>
@@ -4340,8 +4344,8 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
               </div>
             )}
 
-            {/* 편집 탭 */}
-            {drawerTab === "edit" && <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
+            {/* 편집 탭 — edit 모드에서만 표시 */}
+            {drawerMode === "edit" && drawerTab === "edit" && <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
               {/* 버전명 */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.version')}</div>
@@ -4361,7 +4365,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                     style={{ flex: 1, height: 42, padding: "0 12px", border: "none", fontSize: 15, fontWeight: 700, outline: "none", minWidth: 0 }}
                   />
                   <div style={{ padding: "0 12px", fontSize: 12, color: GRAY_60, backgroundColor: GRAY_5, height: 42, display: "flex", alignItems: "center", borderLeft: `1px solid ${GRAY_10}`, whiteSpace: "nowrap" }}>
-                    cr / GB
+                    cr / GPU
                   </div>
                 </div>
               </div>
