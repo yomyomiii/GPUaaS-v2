@@ -15,6 +15,38 @@ import {
 const PURPLE = "rgb(124, 58, 237)";
 const PURPLE_10 = "rgb(237, 233, 254)";
 
+const GPU_LINE_COLORS = [PRIMARY, ORANGE, GREEN, PURPLE];
+
+function CustomGpuTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ dataKey: string; value: number }>; label?: string }) {
+  if (!active || !payload?.length) return null;
+  const groups: Record<number, { util?: number; vram?: number }> = {};
+  for (const { dataKey, value } of payload) {
+    if (dataKey.startsWith("gpu")) {
+      const i = parseInt(dataKey.slice(3));
+      groups[i] = { ...groups[i], util: value };
+    } else if (dataKey.startsWith("vram")) {
+      const i = parseInt(dataKey.slice(4));
+      groups[i] = { ...groups[i], vram: value };
+    }
+  }
+  return (
+    <div style={{ background: "white", border: `1px solid ${GRAY_10}`, borderRadius: 8, padding: "8px 12px", fontSize: 11, boxShadow: "0 2px 8px rgba(0,0,0,0.10)" }}>
+      <div style={{ color: GRAY_60, marginBottom: 6, fontWeight: 600 }}>{label}</div>
+      {Object.entries(groups).map(([idx, { util, vram }], pos, arr) => {
+        const i = parseInt(idx);
+        const color = GPU_LINE_COLORS[i];
+        return (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: pos < arr.length - 1 ? 4 : 0 }}>
+            <span style={{ width: 38, color, fontWeight: 700 }}>GPU {i}</span>
+            <span style={{ color: GRAY_60 }}>사용률 <strong style={{ color }}>{util}%</strong></span>
+            <span style={{ color: GRAY_60 }}>VRAM <strong style={{ color }}>{vram}%</strong></span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const SERVER_STATUS = {
   running:  { label: "running",  dotColor: GREEN,   msg: null },
   stopped:  { label: "stopped",  dotColor: GRAY_30, msg: null },
@@ -28,7 +60,7 @@ const LOCAL_STORAGE_BUFFER_GB = 5;
 const servers = [
   {
     id: "s1", name: "pytorch-dev-01", status: "running" as const,
-    gpu: "RTX A5000", gpuCnt: 2, vram: "48GB", vramUsedPct: 61,
+    gpu: "RTX A5000", gpuCnt: 2, vram: "48GB", vramUsedPct: 61, ramGB: 128,
     gpuUtil: [78, 72], image: "PyTorch 2.1 + CUDA 12.1",
     uptime: "5h 32m", uptimeSec: 19934, rate: 24, remaining: 1884,
     localStorage: "10GB", sharedStorage: "none", tmpStorage: "20GB",
@@ -38,7 +70,7 @@ const servers = [
   },
   {
     id: "s2", name: "llm-finetuning", status: "running" as const,
-    gpu: "H100 SXM5", gpuCnt: 4, vram: "320GB", vramUsedPct: 83,
+    gpu: "H100 SXM5", gpuCnt: 4, vram: "320GB", vramUsedPct: 83, ramGB: 512,
     gpuUtil: [94, 91, 89, 96], image: "LLaMA Fine-tuning v2",
     uptime: "2h 15m", uptimeSec: 8103, rate: 96, remaining: 471,
     localStorage: "100GB", sharedStorage: "team-shared-01", tmpStorage: "50GB",
@@ -48,7 +80,7 @@ const servers = [
   },
   {
     id: "s3", name: "stable-diffusion", status: "stopped" as const,
-    gpu: "RTX 4090", gpuCnt: 1, vram: "24GB", vramUsedPct: 0,
+    gpu: "RTX 4090", gpuCnt: 1, vram: "24GB", vramUsedPct: 0, ramGB: 64,
     gpuUtil: [0], image: "Stable Diffusion WebUI",
     uptime: "—", uptimeSec: 0, rate: 0, remaining: 0,
     localStorage: "none", sharedStorage: "none", tmpStorage: "30GB",
@@ -57,7 +89,7 @@ const servers = [
   },
   {
     id: "s4", name: "data-preprocess", status: "creating" as const,
-    gpu: "A100 SXM4", gpuCnt: 2, vram: "80GB", vramUsedPct: 0,
+    gpu: "A100 SXM4", gpuCnt: 2, vram: "80GB", vramUsedPct: 0, ramGB: 256,
     gpuUtil: [0, 0], image: "TensorFlow 2.15",
     uptime: "—", uptimeSec: 0, rate: 48, remaining: 943,
     localStorage: "50GB", sharedStorage: "team-shared-01", tmpStorage: "40GB",
@@ -67,12 +99,12 @@ const servers = [
 ];
 
 const gpuHistory = [
-  { t: "5m",  util: 65, mem: 55, ram: 72, cpu: 45 },
-  { t: "10m", util: 72, mem: 58, ram: 68, cpu: 52 },
-  { t: "15m", util: 80, mem: 60, ram: 71, cpu: 58 },
-  { t: "20m", util: 75, mem: 59, ram: 74, cpu: 50 },
-  { t: "25m", util: 90, mem: 62, ram: 70, cpu: 63 },
-  { t: "30m", util: 78, mem: 61, ram: 69, cpu: 55 },
+  { t: "5m",  gpu0: 68, gpu1: 62, gpu2: 65, gpu3: 61, vram0: 55, vram1: 53, vram2: 57, vram3: 52, ram: 72, cpu: 45 },
+  { t: "10m", gpu0: 75, gpu1: 69, gpu2: 72, gpu3: 70, vram0: 58, vram1: 56, vram2: 60, vram3: 55, ram: 68, cpu: 52 },
+  { t: "15m", gpu0: 82, gpu1: 78, gpu2: 80, gpu3: 79, vram0: 60, vram1: 58, vram2: 62, vram3: 57, ram: 71, cpu: 58 },
+  { t: "20m", gpu0: 77, gpu1: 73, gpu2: 74, gpu3: 76, vram0: 59, vram1: 57, vram2: 61, vram3: 56, ram: 74, cpu: 50 },
+  { t: "25m", gpu0: 90, gpu1: 87, gpu2: 85, gpu3: 92, vram0: 62, vram1: 60, vram2: 63, vram3: 59, ram: 70, cpu: 63 },
+  { t: "30m", gpu0: 78, gpu1: 72, gpu2: 75, gpu3: 73, vram0: 61, vram1: 59, vram2: 62, vram3: 58, ram: 69, cpu: 55 },
 ];
 
 // ─── Server Create catalogs ───────────────────────────────────────────────────
@@ -543,6 +575,12 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
   const isRunning = server.status === "running";
   const bc = (p: number) => p >= 90 ? RED : p >= 70 ? YELLOW : GREEN;
   const tmpPct = Math.round(server.tmpUsed / parseInt(server.tmpStorage) * 100);
+  const latest = gpuHistory[gpuHistory.length - 1];
+  const gpuUtilLatest = [latest.gpu0, latest.gpu1, latest.gpu2, latest.gpu3];
+  const vramUtilLatest = [latest.vram0, latest.vram1, latest.vram2, latest.vram3];
+  const vramPerGpu = parseInt(server.vram);
+  const vramUsedGB = vramUtilLatest.map(pct => Math.round(vramPerGpu * pct / 100));
+  const ramUsedGB = Math.round(server.ramGB * latest.ram / 100);
   const localPct = server.localStorage !== "none" ? Math.round(server.localUsed / parseInt(server.localStorage) * 100) : 0;
   const sharedPct = 57;
 
@@ -641,20 +679,33 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                     <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" />
                     <XAxis dataKey="t" tick={{ fontSize: 10, fill: GRAY_60 }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: GRAY_60 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} />
-                    <Tooltip formatter={(v: number, name: string) => [`${v}%`, name === "util" ? t('server.detail.monitoring.gpuUsage') : t('server.detail.monitoring.memoryUsage')]} />
-                    <Line type="monotone" dataKey="util" stroke={PRIMARY} strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="mem" stroke={BLUE} strokeWidth={2} dot={false} strokeDasharray="5 3" />
+                    <Tooltip content={<CustomGpuTooltip />} />
+                    {Array.from({ length: server.gpuCnt }, (_, i) => (
+                      <Line key={`gpu${i}`} type="monotone" dataKey={`gpu${i}`} stroke={GPU_LINE_COLORS[i]} strokeWidth={2} dot={false} />
+                    ))}
+                    {Array.from({ length: server.gpuCnt }, (_, i) => (
+                      <Line key={`vram${i}`} type="monotone" dataKey={`vram${i}`} stroke={GPU_LINE_COLORS[i]} strokeWidth={2} dot={false} strokeDasharray="5 3" />
+                    ))}
                   </ComposedChart>
                 </ResponsiveContainer>
-                <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: GRAY_60 }}>
-                    <div style={{ width: 18, height: 2, backgroundColor: PRIMARY, borderRadius: 1 }} />
-                    {t('server.detail.monitoring.gpuUsage')}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: GRAY_60 }}>
-                    <div style={{ width: 18, height: 2, backgroundColor: BLUE, borderRadius: 1 }} />
-                    {t('server.detail.monitoring.memoryUsage')}
-                  </div>
+                <div style={{ display: "flex", gap: 12, marginTop: 10, overflowX: "auto", paddingBottom: 2 }}>
+                  {Array.from({ length: server.gpuCnt }, (_, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: GRAY_60, flexShrink: 0, whiteSpace: "nowrap" }}>
+                      <div style={{ width: 16, height: 2, backgroundColor: GPU_LINE_COLORS[i], borderRadius: 1, flexShrink: 0 }} />
+                      <span>GPU {i}</span>
+                      <span style={{ fontWeight: 700, color: GPU_LINE_COLORS[i] }}>{gpuUtilLatest[i]}%</span>
+                    </div>
+                  ))}
+                  {Array.from({ length: server.gpuCnt }, (_, i) => (
+                    <div key={`vram-legend-${i}`} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: GRAY_60, flexShrink: 0, whiteSpace: "nowrap" }}>
+                      <svg width="16" height="4" style={{ flexShrink: 0 }}>
+                        <line x1="0" y1="2" x2="16" y2="2" stroke={GPU_LINE_COLORS[i]} strokeWidth="2" strokeDasharray="5 3" />
+                      </svg>
+                      <span>VRAM {i}</span>
+                      <span style={{ fontWeight: 700, color: GPU_LINE_COLORS[i] }}>{vramUtilLatest[i]}%</span>
+                      <span style={{ color: GRAY_60 }}>({vramUsedGB[i]}GB/{vramPerGpu}GB)</span>
+                    </div>
+                  ))}
                 </div>
               </SectionCard>
               <SectionCard title={t('server.detail.monitoring.gpuRam')} subtitle={t('server.detail.monitoring.utilPct')}>
@@ -663,19 +714,22 @@ function ServerDetail({ server, onBack, onDeleteRequest }: { server: typeof serv
                     <CartesianGrid strokeDasharray="3 3" stroke="rgb(242,242,242)" />
                     <XAxis dataKey="t" tick={{ fontSize: 10, fill: GRAY_60 }} axisLine={false} tickLine={false} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: GRAY_60 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} />
-                    <Tooltip formatter={(v: number, name: string) => [`${v}%`, name === "util" ? "GPU" : "RAM"]} />
-                    <Line type="monotone" dataKey="util" stroke={PRIMARY} strokeWidth={2} dot={false} />
+                    <Tooltip formatter={(v: number, name: string) => [`${v}%`, name === "cpu" ? t('server.detail.monitoring.cpuLegend') : t('server.detail.monitoring.ramLegend')]} />
+                    <Line type="monotone" dataKey="cpu" stroke={PRIMARY} strokeWidth={2} dot={false} />
                     <Line type="monotone" dataKey="ram" stroke={GREEN} strokeWidth={2} dot={false} />
                   </ComposedChart>
                 </ResponsiveContainer>
                 <div style={{ display: "flex", gap: 16, marginTop: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: GRAY_60 }}>
                     <div style={{ width: 18, height: 2, backgroundColor: PRIMARY, borderRadius: 1 }} />
-                    {t('server.detail.monitoring.gpuLegend')}
+                    {t('server.detail.monitoring.cpuLegend')}
+                    <span style={{ fontWeight: 700, color: PRIMARY }}>{latest.cpu}%</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: GRAY_60 }}>
                     <div style={{ width: 18, height: 2, backgroundColor: GREEN, borderRadius: 1 }} />
                     {t('server.detail.monitoring.ramLegend')}
+                    <span style={{ fontWeight: 700, color: GREEN }}>{latest.ram}%</span>
+                    <span style={{ color: GRAY_60 }}>({ramUsedGB}GB / {server.ramGB}GB)</span>
                   </div>
                 </div>
               </SectionCard>

@@ -79,7 +79,7 @@ function StorageGauge({ used, total, showText = true }: { used: number; total: n
   );
 }
 
-// ─── Mount Badge ──────────────────────────────────────────────────────────────
+// ─── Attach Badge ─────────────────────────────────────────────────────────────
 function MountBadge({ servers }: { servers: string[] }) {
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
@@ -294,7 +294,7 @@ export function StoragePage({ onTabChange }: { onTabChange?: (tab: string) => vo
                   <TypeTag meta={meta} />
                 </div>
 
-                {/* Name + mount */}
+                {/* Name + attach */}
                 <div style={{ width: 200, flexShrink: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>{item.name}</div>
                   <div>

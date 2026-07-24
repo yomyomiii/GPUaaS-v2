@@ -356,11 +356,11 @@ function WsTooltip({ names }: { names: string[] }) {
 export function AdminUserManagement() {
   const { t } = useTranslation();
   const allUsers = [
-    { name: "지염염", email: "yeomeyeom.ji@sdt.inc", joined: "2026-01-15", workspaces: 2, workspaceNames: ["My Workspace", "ML Research Lab"], servers: 2, status: "active", lastLogin: "오늘 09:42", usedCr: 12450, totalCr: 45230, role: "owner" },
-    { name: "이지현", email: "jihyun.lee@sdt.inc", joined: "2026-02-20", workspaces: 1, workspaceNames: ["Team Alpha"], servers: 5, status: "active", lastLogin: "어제 18:30", usedCr: 28600, totalCr: 120500, role: "admin" },
-    { name: "김태민", email: "taemin.kim@sdt.inc", joined: "2026-03-10", workspaces: 1, workspaceNames: ["ML Research Lab"], servers: 1, status: "active", lastLogin: "2일 전", usedCr: 4200, totalCr: 8200, role: "user" },
-    { name: "최유진", email: "yujin.choi@sdt.inc", joined: "2026-04-05", workspaces: 1, workspaceNames: ["Old Project"], servers: 0, status: "inactive", lastLogin: "14일 전", usedCr: 0, totalCr: 1000, role: "user" },
-    { name: "장민준", email: "minjun.jang@sdt.inc", joined: "2026-05-22", workspaces: 1, workspaceNames: ["My Workspace"], servers: 1, status: "active", lastLogin: "오늘 14:15", usedCr: 3100, totalCr: 9800, role: "user" },
+    { name: "지염염", email: "yeomeyeom.ji@sdt.inc", joined: "2026-01-15 10:30:22", workspaces: 2, workspaceNames: ["My Workspace", "ML Research Lab"], servers: 2, status: "active", lastLogin: "오늘 09:42", usedCr: 12450, totalCr: 45230, role: "owner" },
+    { name: "이지현", email: "jihyun.lee@sdt.inc", joined: "2026-02-20 14:05:47", workspaces: 1, workspaceNames: ["Team Alpha"], servers: 5, status: "active", lastLogin: "어제 18:30", usedCr: 28600, totalCr: 120500, role: "admin" },
+    { name: "김태민", email: "taemin.kim@sdt.inc", joined: "2026-03-10 09:15:30", workspaces: 1, workspaceNames: ["ML Research Lab"], servers: 1, status: "active", lastLogin: "2일 전", usedCr: 4200, totalCr: 8200, role: "user" },
+    { name: "최유진", email: "yujin.choi@sdt.inc", joined: "2026-04-05 16:48:09", workspaces: 1, workspaceNames: ["Old Project"], servers: 0, status: "inactive", lastLogin: "14일 전", usedCr: 0, totalCr: 1000, role: "user" },
+    { name: "장민준", email: "minjun.jang@sdt.inc", joined: "2026-05-22 10:08:45", workspaces: 1, workspaceNames: ["My Workspace"], servers: 1, status: "active", lastLogin: "오늘 14:15", usedCr: 3100, totalCr: 9800, role: "user" },
   ];
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -398,11 +398,11 @@ export function AdminUserManagement() {
 
   const roleTextColor = (role: string) => role === "owner" ? PRIMARY : role === "admin" ? "rgb(180,80,0)" : GRAY_60;
   const roleBgColor   = (role: string) => role === "owner" ? PRIMARY_10 : role === "admin" ? "rgb(255,246,230)" : GRAY_5;
-  const roleLabel = (role: string) => role === "owner" ? "Owner" : role === "admin" ? "Admin" : "User";
+  const roleLabel = (role: string) => role === "owner" ? t('admin.user.role.owner') : role === "admin" ? t('admin.user.role.admin') : t('admin.user.role.user');
 
   return (
     <>
-    <PageContainer title="User Management" subtitle={t('admin.user.subtitle')} actions={<PrimaryBtn size="small"><Plus size={14} /> {t('admin.user.invite')}</PrimaryBtn>}>
+    <PageContainer title={t('admin.user.pageTitle')} subtitle={t('admin.user.subtitle')} actions={<PrimaryBtn size="small"><Plus size={14} /> {t('admin.user.invite')}</PrimaryBtn>}>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 13, color: GRAY_70, fontWeight: 500 }}>
@@ -1039,7 +1039,7 @@ export function AdminServerManagement({ initialTab = "Servers" }: { initialTab?:
               <Badge color={tpl.status === "Public" ? "primary" : "neutral"}>{tpl.status === "Public" ? "Public" : "Private"}</Badge>,
               /* Image */
               <span style={{ fontSize: 12, color: GRAY_70, whiteSpace: "nowrap" }}>{tpl.image}</span>,
-              /* Rec. vRAM */
+              /* Rec. VRAM */
               <span style={{ fontSize: 12, fontWeight: 600, color: GRAY_90, whiteSpace: "nowrap" }}>{tpl.recVram}</span>,
               /* Storage */
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -1979,7 +1979,11 @@ export function AdminImageManagement({ initialTab = "Image" }: { initialTab?: st
         : null
       }
     >
-      <TabBar tabs={["Image", "Category", "Tier"]} active={tab} onChange={setTab} />
+      <TabBar
+        tabs={[t('admin.image.tab.image'), t('admin.image.tab.category'), t('admin.image.tab.tier')]}
+        active={tab === "Image" ? t('admin.image.tab.image') : tab === "Category" ? t('admin.image.tab.category') : t('admin.image.tab.tier')}
+        onChange={newTab => setTab(newTab === t('admin.image.tab.image') ? "Image" : newTab === t('admin.image.tab.category') ? "Category" : "Tier")}
+      />
 
       {/* ── Image ── */}
       {tab === "Image" && (
@@ -2729,7 +2733,7 @@ export function AdminCreditManagement() {
                                         Workspace {wsDrawerSort === "name" ? (wsDrawerSortDir === "asc" ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : <ChevronUp size={10} color={GRAY_40} />}
                                       </button>
                                     </th>
-                                    <th style={{ ...thBase, padding: "8px 0" }}>Owner</th>
+                                    <th style={{ ...thBase, padding: "8px 0" }}>{t('admin.workspace.col.owner')}</th>
                                     <th style={{ ...thBase, padding: "8px 12px 8px 0", textAlign: "right" }}>
                                       <button type="button" onClick={() => handleWsDrawerSort("credits")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, fontWeight: 600, color: wsDrawerSort === "credits" ? PRIMARY : GRAY_60, display: "inline-flex", alignItems: "center", gap: 3 }}>
                                         {wsDrawerSort === "credits" ? (wsDrawerSortDir === "asc" ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : <ChevronUp size={10} color={GRAY_40} />} Credit Balance
@@ -2933,10 +2937,10 @@ export function AdminCreditManagement() {
             <Table spacerGaps
               headers={[
                 <SortableHeader k="ws"     label={t('admin.credit.col.workspace')} sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
-                <SortableHeader k="type"   label="Type"      sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
-                <SortableHeader k="details" label="Details" sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
-                <SortableHeader k="user" label={t('admin.credit.col.user')} sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
-                <SortableHeader k="amount" label="Amount"    sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="type"   label={t('admin.credit.col.type')}    sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="details" label={t('admin.credit.col.details')} sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="user"   label={t('admin.credit.col.user')}    sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
+                <SortableHeader k="amount" label={t('admin.credit.col.amount')}  sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
                 <SortableHeader k="date"   label={t('common.field.date')}      sortKey={histSortKey} sortDir={histSortDir} onSort={handleHistSort} />,
               ]}
               rows={histFiltered.map(r => {
@@ -3049,7 +3053,11 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
   return (
     <PageContainer title={t('admin.storage.pageTitle')} subtitle={tab === "Storage Settings" ? t('admin.storage.settingsSubtitle') : t('admin.storage.subtitle')}
       actions={tab === "Storage Pricing Policy" ? <PrimaryBtn size="small" onClick={() => setShowStorageCreate(true)}><Plus size={14} /> {t('admin.storage.pricing.registerBtn')}</PrimaryBtn> : undefined}>
-      <TabBar tabs={["Storage", "Storage Pricing Policy", "Storage Settings"]} active={tab} onChange={setTab} />
+      <TabBar
+        tabs={[t('admin.storage.tab.storage'), t('admin.storage.tab.pricing'), t('admin.storage.tab.settings')]}
+        active={tab === "Storage" ? t('admin.storage.tab.storage') : tab === "Storage Pricing Policy" ? t('admin.storage.tab.pricing') : t('admin.storage.tab.settings')}
+        onChange={newTab => setTab(newTab === t('admin.storage.tab.storage') ? "Storage" : newTab === t('admin.storage.tab.pricing') ? "Storage Pricing Policy" : "Storage Settings")}
+      />
       {tab === "Storage" && (
         <>
           {/* Toolbar */}
@@ -3093,12 +3101,12 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
             <Table
               spacerGaps
               headers={[
-              <SortableHeader k="name" label="Name" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-              <SortableHeader k="mountedTo" label="Mounted To" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+              <SortableHeader k="name" label={t('admin.storage.col.name')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+              <SortableHeader k="mountedTo" label={t('admin.storage.col.mountedTo')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
               <SortableHeader k="workspace" label={t('admin.storage.col.workspace')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
               <SortableHeader k="owner" label={t('admin.storage.col.user')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-              <SortableHeader k="usedPct" label="Usage" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
-              "Actions",
+              <SortableHeader k="usedPct" label={t('admin.storage.col.usage')} sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />,
+              t('admin.pricing.col.action'),
             ]}
               rows={filtered.map(s => {
                 const pct = Math.round(s.used / s.capacity * 100);
@@ -3117,7 +3125,7 @@ export function AdminStorageManagement({ initialTab = "Storage" }: { initialTab?
                       <span style={{ fontSize: 11, color: GRAY_60, whiteSpace: "nowrap" }}>{s.type}</span>
                     </div>
                   </div>,
-                  /* 마운트 */
+                  /* 연결 */
                   s.mountServer
                     ? <span style={{ fontSize: 13, fontWeight: 500, color: GRAY_90, whiteSpace: "nowrap" }}>{s.mountServer}</span>
                     : <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -3753,7 +3761,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                               </div>
                             )}
                           </div>
-                          {/* 단가 */}
+                          {/* 비용 */}
                           <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 6 }}>
                             {h.ratePerGB} <span style={{ fontSize: 12, fontWeight: 400, color: GRAY_60 }}>cr / GB / {h.unit}</span>
                           </div>
@@ -3786,7 +3794,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 </div>
               </div>
 
-              {/* 가격 */}
+              {/* 비용 */}
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.price')}</div>
                 <div style={{ display: "flex", alignItems: "center", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, overflow: "hidden", transition: "border-color 0.1s" }}
@@ -3802,7 +3810,7 @@ function StoragePricingPolicy({ showCreate, setShowCreate }: { showCreate: boole
                 </div>
               </div>
 
-              {/* 과금 단위 */}
+              {/* 차감 단위 */}
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.billingUnit')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -4323,7 +4331,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                               </div>
                             )}
                           </div>
-                          {/* 단가 */}
+                          {/* 비용 */}
                           <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 6 }}>
                             {h.rate} <span style={{ fontSize: 12, fontWeight: 400, color: GRAY_60 }}>cr / GPU / {unitLabel(h.unit)}</span>
                           </div>
@@ -4354,7 +4362,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                   <span style={{ fontSize: 10, color: GRAY_40, backgroundColor: "white", border: `1px solid ${GRAY_10}`, borderRadius: 4, padding: "1px 6px" }}>{t('admin.pricing.autoGenerate')}</span>
                 </div>
               </div>
-              {/* 가격 */}
+              {/* 비용 */}
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.price')}</div>
                 <div style={{ display: "flex", alignItems: "center", border: `1.5px solid ${GRAY_30}`, borderRadius: 8, overflow: "hidden" }}
@@ -4370,7 +4378,7 @@ function GPUPricingContent({ prices, setPrices, showCreate, setShowCreate }: { p
                 </div>
               </div>
 
-              {/* 과금 단위 */}
+              {/* 차감 단위 */}
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: GRAY_60, marginBottom: 8 }}>{t('admin.pricing.field.billingUnit')}</div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -4651,7 +4659,11 @@ export function AdminGPUManagement({ initialTab = "GPU" }: { initialTab?: string
   return (
     <PageContainer title={t('admin.gpu.pageTitle')} subtitle={t('admin.gpu.subtitle')}
       actions={tab === "GPU Pricing Policy" ? <PrimaryBtn size="small" onClick={() => setShowGpuCreate(true)}><Plus size={14} /> {t('admin.gpu.pricing.registerBtn')}</PrimaryBtn> : undefined}>
-      <TabBar tabs={["GPU", "GPU Pricing Policy"]} active={tab} onChange={setTab} />
+      <TabBar
+        tabs={[t('admin.gpu.tab.gpu'), t('admin.gpu.tab.pricing')]}
+        active={tab === "GPU" ? t('admin.gpu.tab.gpu') : t('admin.gpu.tab.pricing')}
+        onChange={newTab => setTab(newTab === t('admin.gpu.tab.gpu') ? "GPU" : "GPU Pricing Policy")}
+      />
       {tab === "GPU" && <GPUTypesContent prices={prices} />}
       {tab === "GPU Pricing Policy" && <GPUPricingContent prices={prices} setPrices={setPrices} showCreate={showGpuCreate} setShowCreate={setShowGpuCreate} />}
     </PageContainer>

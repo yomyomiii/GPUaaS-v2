@@ -12,11 +12,11 @@ import {
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 const members = [
-  { name: "지염염", email: "yeomeyeom.ji@sdt.inc", role: "workspace.owner", avatar: "지", joined: "2026-01-15", online: true, usedCr: 5200, activeServers: ["pytorch-dev-01", "llm-finetuning"], inactiveServers: ["old-exp-01"], localStorages: ["local-vol-01", "pytorch-data"], sharedStorages: ["shared-team-01"] },
-  { name: "이지현", email: "jihyun.lee@sdt.inc", role: "workspace.admin", avatar: "이", joined: "2026-02-20", online: true, usedCr: 3100, activeServers: ["stable-diffusion"], inactiveServers: ["resnet-test", "bert-finetune"], localStorages: ["local-vol-02"], sharedStorages: ["shared-team-01"] },
-  { name: "김태민", email: "taemin.kim@sdt.inc", role: "workspace.user", avatar: "김", joined: "2026-03-10", online: false, usedCr: 1800, activeServers: [], inactiveServers: ["abuse-server-01"], localStorages: ["local-vol-03"], sharedStorages: [] },
-  { name: "최유진", email: "yujin.choi@sdt.inc", role: "workspace.user", avatar: "최", joined: "2026-04-05", online: true, usedCr: 1620, activeServers: ["data-preprocess"], inactiveServers: [], localStorages: [], sharedStorages: ["shared-team-01"] },
-  { name: "장민준", email: "minjun.jang@sdt.inc", role: "workspace.user", avatar: "장", joined: "2026-05-22", online: false, usedCr: 730, activeServers: [], inactiveServers: ["data-analysis-01"], localStorages: [], sharedStorages: [] },
+  { name: "지염염", email: "yeomeyeom.ji@sdt.inc", role: "workspace.owner", avatar: "지", joined: "2026-01-15 10:30:22", online: true, usedCr: 5200, activeServers: ["pytorch-dev-01", "llm-finetuning"], inactiveServers: ["old-exp-01"], localStorages: ["local-vol-01", "pytorch-data"], sharedStorages: ["shared-team-01"] },
+  { name: "이지현", email: "jihyun.lee@sdt.inc", role: "workspace.admin", avatar: "이", joined: "2026-02-20 14:05:47", online: true, usedCr: 3100, activeServers: ["stable-diffusion"], inactiveServers: ["resnet-test", "bert-finetune"], localStorages: ["local-vol-02"], sharedStorages: ["shared-team-01"] },
+  { name: "김태민", email: "taemin.kim@sdt.inc", role: "workspace.user", avatar: "김", joined: "2026-03-10 09:15:30", online: false, usedCr: 1800, activeServers: [], inactiveServers: ["abuse-server-01"], localStorages: ["local-vol-03"], sharedStorages: [] },
+  { name: "최유진", email: "yujin.choi@sdt.inc", role: "workspace.user", avatar: "최", joined: "2026-04-05 16:48:09", online: true, usedCr: 1620, activeServers: ["data-preprocess"], inactiveServers: [], localStorages: [], sharedStorages: ["shared-team-01"] },
+  { name: "장민준", email: "minjun.jang@sdt.inc", role: "workspace.user", avatar: "장", joined: "2026-05-22 10:08:45", online: false, usedCr: 730, activeServers: [], inactiveServers: ["data-analysis-01"], localStorages: [], sharedStorages: [] },
 ];
 
 type CreditType = "adminGrant" | "adminRevoke" | "creditExpiry" | "serverUsage" | "volumeUsage" | "sharedUsage" | "localUsage";
@@ -48,7 +48,7 @@ const memberHistory = [
   { date: "2026-07-07 14:23:11", name: "장민준", role: "workspace.user", action: "워크스페이스 참여", tag: "신규" as const },
   { date: "2026-05-22 10:08:45", name: "최유진", role: "workspace.user", action: "워크스페이스 참여", tag: "신규" as const },
   { date: "2026-03-10 09:15:30", name: "김태민", role: "workspace.user", action: "워크스페이스 참여", tag: "신규" as const },
-  { date: "2026-02-20 14:05:47", name: "이지현", role: "workspace.admin", action: "Admin 권한 승격", tag: "역할변경" as const },
+  { date: "2026-02-20 14:05:47", name: "이지현", role: "workspace.admin", action: "관리자 권한 승격", tag: "역할변경" as const },
   { date: "2026-01-15 10:30:22", name: "지염염", role: "workspace.owner", action: "워크스페이스 생성", tag: "생성" as const },
 ];
 
@@ -93,10 +93,10 @@ const roleColor: Record<string, "primary" | "warning" | "neutral"> = {
   "workspace.user": "neutral",
 };
 
-function roleLabel(role: string) {
-  if (role === "workspace.owner") return "Owner";
-  if (role === "workspace.admin") return "Admin";
-  return "User";
+function roleLabel(role: string, t: (key: string) => string) {
+  if (role === "workspace.owner") return t('workspace.member.role.owner');
+  if (role === "workspace.admin") return t('workspace.member.role.admin');
+  return t('workspace.member.role.member');
 }
 
 const roleIcon = (role: string) => {
@@ -116,76 +116,64 @@ function MemberCard({ m, isOwner, menuOpen, onMenuToggle, onDetail, onDeleteRequ
 
   return (
     <Card hover style={{ padding: "16px 20px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "208px 90px 120px 60px 60px 90px 1fr auto", gap: 24, alignItems: "center" }}>
 
-        {/* Avatar */}
-        <div style={{ flexShrink: 0 }}>
-          <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 700, color: avatarColor }}>
+        {/* Avatar + Name */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", backgroundColor: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 700, color: avatarColor, flexShrink: 0 }}>
             {m.avatar}
           </div>
-        </div>
-
-        {/* Name */}
-        <div style={{ width: 140, flexShrink: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>{m.name}</div>
-          <div style={{ fontSize: 11, color: GRAY_60 }}>{m.email}</div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: GRAY_90, marginBottom: 4 }}>{m.name}</div>
+            <div style={{ fontSize: 11, color: GRAY_60 }}>{m.email}</div>
+          </div>
         </div>
 
         {/* Role */}
-        <div style={{ width: 90, flexShrink: 0 }}>
+        <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "2px 7px", borderRadius: 999, backgroundColor: roleBg, color: roleTextColor, fontSize: 11, fontWeight: 600 }}>
-            {roleIcon(m.role)} {roleLabel(m.role)}
+            {roleIcon(m.role)} {roleLabel(m.role, t)}
           </div>
         </div>
 
-        {/* Stats — 5-col grid */}
-        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8, alignItems: "center" }}>
-          {/* 활성/비활성 서버 */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-              <Server size={11} color={m.activeServers.length > 0 ? GRAY_70 : GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.activeServers.length > 0 ? GRAY_70 : GRAY_40 }}>{m.activeServers.length}</span>
-              {m.activeServers.length > 0 && <InfoTooltip items={m.activeServers} />}
-              <span style={{ fontSize: 11, color: GRAY_30, margin: "0 1px" }}>/</span>
-              <Server size={11} color={GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.inactiveServers.length > 0 ? GRAY_70 : GRAY_40 }}>{m.inactiveServers.length}</span>
-              {m.inactiveServers.length > 0 && <InfoTooltip items={m.inactiveServers} />}
-            </div>
-          </div>
-          {/* 활성 볼륨 스토리지 */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-              <Database size={11} color={m.localStorages.length > 0 ? GRAY_70 : GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.localStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.localStorages.length}{t('workspace.unit.item')}</span>
-              {m.localStorages.length > 0 && <InfoTooltip items={m.localStorages} />}
-            </div>
-          </div>
-          {/* 활성 공유 스토리지 */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-              <Database size={11} color={m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.sharedStorages.length}{t('workspace.unit.item')}</span>
-              {m.sharedStorages.length > 0 && <InfoTooltip items={m.sharedStorages} />}
-            </div>
-          </div>
-          {/* 이달 크레딧 사용 */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-              <Zap size={11} color={m.usedCr > 0 ? GRAY_70 : GRAY_40} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: m.usedCr > 0 ? GRAY_70 : GRAY_40 }}>{m.usedCr.toLocaleString()} cr</span>
-            </div>
-          </div>
-          {/* 참여일 */}
-          <div style={{ textAlign: "center" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-              <Clock size={11} color={GRAY_60} />
-              <span style={{ fontSize: 12, fontWeight: 500, color: GRAY_70 }}>{m.joined}</span>
-            </div>
-          </div>
+        {/* 활성/비활성 서버 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <Server size={11} color={m.activeServers.length > 0 ? GRAY_70 : GRAY_40} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: m.activeServers.length > 0 ? GRAY_70 : GRAY_40 }}>{m.activeServers.length}</span>
+          {m.activeServers.length > 0 && <InfoTooltip items={m.activeServers} />}
+          <span style={{ fontSize: 11, color: GRAY_30, margin: "0 1px" }}>/</span>
+          <Server size={11} color={GRAY_40} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: m.inactiveServers.length > 0 ? GRAY_70 : GRAY_40 }}>{m.inactiveServers.length}</span>
+          {m.inactiveServers.length > 0 && <InfoTooltip items={m.inactiveServers} />}
+        </div>
+
+        {/* 활성 볼륨 스토리지 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Database size={11} color={m.localStorages.length > 0 ? GRAY_70 : GRAY_40} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: m.localStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.localStorages.length}{t('workspace.unit.item')}</span>
+          {m.localStorages.length > 0 && <InfoTooltip items={m.localStorages} />}
+        </div>
+
+        {/* 활성 공유 스토리지 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Database size={11} color={m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: m.sharedStorages.length > 0 ? GRAY_70 : GRAY_40 }}>{m.sharedStorages.length}{t('workspace.unit.item')}</span>
+          {m.sharedStorages.length > 0 && <InfoTooltip items={m.sharedStorages} />}
+        </div>
+
+        {/* 이달 크레딧 사용 */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <Zap size={11} color={m.usedCr > 0 ? GRAY_70 : GRAY_40} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: m.usedCr > 0 ? GRAY_70 : GRAY_40 }}>{m.usedCr.toLocaleString()} cr</span>
+        </div>
+
+        {/* 참여일 */}
+        <div>
+          <span style={{ fontSize: 12, fontWeight: 500, color: GRAY_70 }}>{m.joined}</span>
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 6, flexShrink: 0, width: 160 }}>
+        <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 6 }}>
           <button type="button" onClick={onDetail}
             style={{ height: 32, padding: "0 12px", fontSize: 12, fontWeight: 600, borderRadius: 8, border: "none", cursor: "pointer", backgroundColor: PRIMARY_10, color: PRIMARY, fontFamily: "inherit", whiteSpace: "nowrap", transition: "background 0.15s" }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = PRIMARY_20; }}
@@ -299,7 +287,7 @@ function MemberDetailDrawer({ m, onClose }: { m: typeof members[0]; onClose: () 
               {[
                 { label: t('workspace.member.drawer.name'), key: "name", value: m.name },
                 { label: t('workspace.member.drawer.email'), key: "email", value: m.email },
-                { label: t('workspace.member.drawer.role'), key: "role", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 9px", borderRadius: 999, backgroundColor: badgeBg, color: badgeColor, fontSize: 11, fontWeight: 600 }}>{roleIcon(m.role)} {roleLabel(m.role)}</span> },
+                { label: t('workspace.member.drawer.role'), key: "role", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 9px", borderRadius: 999, backgroundColor: badgeBg, color: badgeColor, fontSize: 11, fontWeight: 600 }}>{roleIcon(m.role)} {roleLabel(m.role, t)}</span> },
                 { label: t('workspace.member.drawer.status'), key: "status", value: <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: m.online ? GREEN : GRAY_40 }}><span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: m.online ? GREEN : GRAY_40, display: "inline-block", flexShrink: 0 }} />{m.online ? t('common.status.active') : t('common.status.inactive')}</span> },
                 { label: t('workspace.member.drawer.joinedAt'), key: "joined", value: m.joined },
                 { label: t('workspace.member.drawer.monthlyUsage'), key: "monthlyUsage", value: `${m.usedCr.toLocaleString()} cr` },
@@ -599,7 +587,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 0 }}>
                   {[
-                    { key: "owner",   label: "Owner",                      value: "지염염",                              sub: "yeomeyeom.ji@sdt.inc", isCredit: false },
+                    { key: "owner",   label: t('workspace.member.role.owner'), value: "지염염",                              sub: "yeomeyeom.ji@sdt.inc", isCredit: false },
                     { key: "members", label: t('workspace.section.members'), value: `${members.length}${t('workspace.unit.person')}`, sub: undefined, isCredit: false },
                     { key: "created", label: t('workspace.createdAt'),         value: "2026-01-15 10:30:22",                sub: undefined, isCredit: false },
                     { key: "credit",  label: t('workspace.credit.balance'),  value: `${CREDIT_NOW.toLocaleString()} cr`, sub: undefined, isCredit: true },
@@ -724,9 +712,9 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
             {/* [Row 1-3] 멤버 역할 구성 */}
             {(() => {
               const roleDefs = [
-                { key: "workspace.owner", label: "Owner",  color: PRIMARY,          icon: <Crown size={14} color={PRIMARY} />,          bg: PRIMARY_10 },
-                { key: "workspace.admin", label: "Admin",  color: "rgb(255,149,0)", icon: <Shield size={14} color="rgb(255,149,0)" />, bg: "rgba(255,149,0,0.1)" },
-                { key: "workspace.user",  label: "Member", color: GRAY_60,          icon: <User size={14} color={GRAY_60} />,           bg: "rgba(120,120,128,0.1)" },
+                { key: "workspace.owner", label: t('workspace.member.role.owner'),  color: PRIMARY,          icon: <Crown size={14} color={PRIMARY} />,          bg: PRIMARY_10 },
+                { key: "workspace.admin", label: t('workspace.member.role.admin'),  color: "rgb(255,149,0)", icon: <Shield size={14} color="rgb(255,149,0)" />, bg: "rgba(255,149,0,0.1)" },
+                { key: "workspace.user",  label: t('workspace.member.role.member'), color: GRAY_60,          icon: <User size={14} color={GRAY_60} />,           bg: "rgba(120,120,128,0.1)" },
               ];
               return (
                 <SectionCard title={t('workspace.section.members')} headerStyle={{ minHeight: 52 }} bodyStyle={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>
@@ -805,7 +793,7 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
                 {(["all", "Owner", "Admin", "User"] as const).map(f => (
                   <button key={f} type="button" onClick={() => setMemberRoleFilter(f)}
                     style={{ padding: "5px 12px", borderRadius: 7, fontSize: 11, border: "none", cursor: "pointer", fontFamily: "inherit", fontWeight: memberRoleFilter === f ? 600 : 400, backgroundColor: memberRoleFilter === f ? "white" : "transparent", color: memberRoleFilter === f ? GRAY_90 : GRAY_60, boxShadow: memberRoleFilter === f ? "0 1px 3px rgba(0,0,0,0.10)" : "none", transition: "all 0.15s" }}>
-                    {f === "all" ? t('common.status.all') : f}
+                    {f === "all" ? t('common.status.all') : f === "Owner" ? t('workspace.member.role.owner') : f === "Admin" ? t('workspace.member.role.admin') : t('workspace.member.role.member')}
                   </button>
                 ))}
               </div>
@@ -814,26 +802,23 @@ export function WorkspacePage({ initialTab = "Overview", onTabChange, hideTabs, 
           </div>
 
           {/* Column header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 20px", fontSize: 12, fontWeight: 600, color: GRAY_60, backgroundColor: GRAY_10, borderRadius: 10 }}>
-            <div style={{ width: 44, flexShrink: 0 }} />
-            <div style={{ width: 140, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "208px 90px 120px 60px 60px 90px 1fr auto", gap: 24, alignItems: "center", padding: "10px 20px", fontSize: 12, fontWeight: 600, color: GRAY_60, backgroundColor: GRAY_10, borderRadius: 10 }}>
+            <div style={{ paddingLeft: 56 }}>
               {t('admin.user.col.nameEmail')} <SortBtn field="name" />
             </div>
-            <div style={{ width: 90, flexShrink: 0, display: "flex", alignItems: "center", gap: 3 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
               {t('common.field.role')} <SortBtn field="role" />
             </div>
-            <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.active')} <SortBtn field="servers" /></span>
-                <span style={{ color: GRAY_40 }}>/</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.inactive')} <SortBtn field="inactive" /></span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.volume')} <SortBtn field="local" /></div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.shared')} <SortBtn field="shared" /></div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.credits')} <SortBtn field="credits" /></div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>{t('workspace.member.col.joined')} <SortBtn field="joined" /></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.active')} <SortBtn field="servers" /></span>
+              <span style={{ color: GRAY_40 }}>/</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.inactive')} <SortBtn field="inactive" /></span>
             </div>
-            <div style={{ width: 160, flexShrink: 0 }}>{t('workspace.member.col.actions')}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.volume')} <SortBtn field="local" /></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.shared')} <SortBtn field="shared" /></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.credits')} <SortBtn field="credits" /></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 3 }}>{t('workspace.member.col.joined')} <SortBtn field="joined" /></div>
+            <div>{t('workspace.member.col.actions')}</div>
           </div>
 
           {/* Member cards */}

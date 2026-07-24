@@ -49,8 +49,8 @@
       "searchResult": "검색 결과가 없습니다."
     },
     "field": {
-      "createdAt": "생성일",
-      "date": "일시",
+      "createdAt": "생성 일시",
+      "date": "처리 일시",
       "name": "이름",
       "email": "이메일",
       "role": "역할",
@@ -113,7 +113,7 @@
       "serverTemplates": "서버 템플릿",
       "storageManagement": "스토리지 관리",
       "storage": "스토리지",
-      "storagePricing": "스토리지 가격 정책",
+      "storagePricing": "스토리지 요금 정책",
       "storageSettings": "스토리지 설정",
       "imageManagement": "이미지 관리",
       "image": "이미지",
@@ -121,9 +121,9 @@
       "tier": "티어",
       "gpuManagement": "GPU 관리",
       "gpu": "GPU",
-      "gpuPricing": "GPU 가격 정책",
+      "gpuPricing": "GPU 요금 정책",
       "creditHistory": "크레딧 이력",
-      "systemSettings": "시스템 설정",
+      "systemSettings": "서비스 설정",
       "auditLog": "감사 로그"
     }
   },
@@ -203,7 +203,7 @@
       "runwayCritical": "크레딧 소진 임박!",
       "detailBtn": "상세 내역",
       "detailDrawerTitle": "크레딧 상세 내역",
-      "nearestExpiryLabel": "가장 빠른 만료 크레딧",
+      "nearestExpiryLabel": "다음 만료 크레딧",
       "expirySuffix": "만료",
       "lot": {
         "grantAmount": "지급 금액",
@@ -232,9 +232,9 @@
     "member": {
       "invite": "멤버 초대",
       "role": {
-        "owner": "Owner",
-        "admin": "Admin",
-        "member": "Member"
+        "owner": "소유자",
+        "admin": "관리자",
+        "member": "멤버"
       },
       "drawer": {
         "title": "멤버 상세",
@@ -242,7 +242,7 @@
         "email": "이메일",
         "role": "역할",
         "status": "상태",
-        "joinedAt": "가입일",
+        "joinedAt": "가입 일시",
         "lastLogin": "최근 로그인",
         "servers": "서버",
         "storage": "스토리지",
@@ -257,15 +257,15 @@
         "volume": "볼륨",
         "shared": "공유",
         "credits": "크레딧",
-        "joined": "가입일",
-        "actions": "Actions"
+        "joined": "가입 일시",
+        "actions": "작업"
       },
       "remove": "멤버 제거",
       "removeConfirmTitle": "멤버를 제거하시겠습니까?",
       "removeConfirmMsg": "{{name}} ({{email}})님을 워크스페이스에서 제거합니다.",
-      "changeToAdmin": "Admin으로 변경",
-      "changeToOwner": "Owner로 변경",
-      "changeToUser": "Member로 변경"
+      "changeToAdmin": "관리자로 변경",
+      "changeToOwner": "소유자로 변경",
+      "changeToUser": "멤버로 변경"
     },
     "creditType": {
       "all": "전체",
@@ -281,7 +281,7 @@
       "type": "유형",
       "amount": "수량",
       "description": "사유",
-      "date": "일시",
+      "date": "처리 일시",
       "balance": "잔액"
     },
     "creditCol": {
@@ -298,7 +298,7 @@
       "deleteConfirmTitle": "워크스페이스를 삭제하시겠습니까?",
       "deleteConfirmMsg": "이 작업은 되돌릴 수 없습니다. 모든 리소스가 삭제됩니다."
     },
-    "createdAt": "생성일",
+    "createdAt": "생성 일시",
     "unit": {
       "item": "개",
       "person": "명"
@@ -357,20 +357,21 @@
         "status": "상태",
         "gpu": "GPU",
         "vram": "VRAM",
-        "createdAt": "생성일",
-        "costPerHour": "시간당 비용",
+        "createdAt": "생성 일시",
+        "costPerHour": "비용",
         "image": "이미지",
         "serverName": "서버 이름"
       },
       "monitoring": {
         "gpuUsage": "GPU 사용률",
-        "memoryUsage": "메모리 사용량",
+        "memoryUsage": "VRAM 사용률",
         "networkUsage": "네트워크 트래픽",
         "gpuTemp": "GPU 온도",
         "noData": "모니터링 데이터 없음",
-        "gpuRam": "GPU / RAM",
+        "gpuRam": "CPU 사용률 / RAM 사용률",
         "utilPct": "점유율 (%)",
         "gpuLegend": "GPU",
+        "cpuLegend": "CPU",
         "ramLegend": "RAM"
       },
       "storage": {
@@ -379,28 +380,28 @@
         "type": "유형",
         "size": "용량",
         "status": "상태",
-        "mountPath": "마운트 경로",
+        "mountPath": "연결 경로",
         "addVolume": "볼륨 추가",
         "noVolume": "연결된 볼륨 스토리지가 없습니다.",
         "localDesc": "Ephemeral · 중지·삭제 시 데이터 소멸",
         "localCost": "서버 중지 시 데이터 소멸 · {{rate}} cr/GB/h · {{cost}} cr/h",
         "inUse": "GB 사용 중 / ",
-        "volumeDesc": "Persistent PVC · 정지 중에도 데이터 유지 · 정지 중도 과금",
-        "volumeCost": "정지 중도 과금 · {{rate}} cr/GB/h",
+        "volumeDesc": "Persistent PVC · 정지 중에도 데이터 유지 · 정지 중도 차감",
+        "volumeCost": "정지 중도 차감 · {{rate}} cr/GB/h",
         "expandBtn": "용량 상향",
         "expandTitle": "용량 상향 신청 (축소 불가)",
         "currentPrefix": "현재 ",
         "volumeWarning": "서버 정지 중에도 볼륨 스토리지 요금이 발생합니다.",
-        "additionalCost": "추가 과금: {{cost}} cr/h",
+        "additionalCost": "추가 차감: {{cost}} cr/h",
         "autoSet": "이미지 최소 {{min}}GB + 여유 {{buffer}}GB 기준으로 자동 설정되었습니다.",
         "minHint": "GB (최소 {{min}}GB)",
         "optional": "(옵션)",
         "sharedTitle": "공유 스토리지",
         "sharedSubtitle": "Persistent PVC · 워크스페이스 공유",
         "sharedDesc": "Persistent PVC · 멤버 공유 · 서버 삭제 후에도 데이터 유지",
-        "createShared": "+ 새 공유 스토리지 생성 후 마운트",
+        "createShared": "+ 새 공유 스토리지 생성 후 연결",
         "sharedPlaceholder": "예: team-shared-02",
-        "costEstimate": "예상 과금: {{cost}} cr/h (0.15 cr/GB/h · 서버 삭제 후에도 과금 지속)"
+        "costEstimate": "예상 차감: {{cost}} cr/h (0.15 cr/GB/h · 서버 삭제 후에도 차감 지속)"
       },
       "access": {
         "jupyterlab": "JupyterLab",
@@ -443,7 +444,7 @@
       "config": "구성",
       "noImage": "선택 안 됨",
       "noStorage": "없음",
-      "mount": "마운트",
+      "mount": "연결",
       "available": "잔액 {{balance}} cr 기준 약 {{hours}}h 사용 가능",
       "recInfo": "권장 VRAM: {{vram}} · 로컬: {{tmp}}GB"
     },
@@ -493,7 +494,7 @@
       "quantity": "수량",
       "sort": {
         "avail": "여유 순",
-        "price": "가격 순",
+        "price": "비용 순",
         "vram": "VRAM 순"
       }
     },
@@ -531,8 +532,8 @@
       "all": "전체"
     },
     "status": {
-      "mounted": "마운트됨",
-      "unmounted": "미마운트",
+      "mounted": "연결됨",
+      "unmounted": "미연결",
       "active": "활성",
       "inactive": "비활성"
     },
@@ -547,20 +548,20 @@
       "type": "유형",
       "size": "용량",
       "status": "상태",
-      "mountedServer": "마운트된 서버",
-      "createdAt": "생성일",
+      "mountedServer": "연결된 서버",
+      "createdAt": "생성 일시",
       "action": "작업",
       "storageName": "스토리지",
-      "mount": "마운트",
+      "mount": "연결",
       "used": "사용 중",
       "total": "최대",
       "usage": "사용률",
-      "costPerHour": "비용/h",
+      "costPerHour": "비용",
       "actions": "작업"
     },
     "action": {
-      "mount": "마운트",
-      "unmount": "마운트 해제",
+      "mount": "연결",
+      "unmount": "연결 해제",
       "delete": "삭제",
       "expand": "용량 확장",
       "create": "스토리지 생성",
@@ -573,17 +574,17 @@
       "name": "이름",
       "type": "유형",
       "size": "용량",
-      "mountPath": "마운트 경로",
-      "mountedServer": "마운트된 서버",
+      "mountPath": "연결 경로",
+      "mountedServer": "연결된 서버",
       "lastUnmountedAt": "마지막 해제 일시:",
       "cost": "비용",
       "namePlaceholder": "스토리지 이름을 입력하세요",
       "sizePlaceholder": "용량을 입력하세요 (GB)"
     },
     "mount": {
-      "badge": "{{count}}개 서버에 마운트됨",
+      "badge": "{{count}}개 서버에 연결됨",
       "server": "서버",
-      "selectServer": "마운트할 서버를 선택하세요"
+      "selectServer": "연결할 서버를 선택하세요"
     },
     "delete": {
       "title": "스토리지 삭제",
@@ -595,7 +596,7 @@
     "empty": "생성된 스토리지가 없습니다.",
     "costInfo": "비용 안내",
     "warning": {
-      "unmountFirst": "삭제하려면 먼저 마운트를 해제하세요.",
+      "unmountFirst": "삭제하려면 먼저 연결을 해제하세요.",
       "noShrink": "스토리지 용량은 줄일 수 없습니다."
     },
     "subtitle": "스토리지 목록",
@@ -603,7 +604,7 @@
     "currentSize": "현재 용량",
     "newSize": "새 용량",
     "sizeChange": "{{from}}GB → {{to}}GB",
-    "costMonthly": "월 비용: {{amount}} cr",
+    "costMonthly": "비용: {{amount}} cr/월",
     "additionalCost": "추가 비용"
   },
   "admin": {
@@ -715,7 +716,7 @@
         "status": "상태",
         "workspaces": "워크스페이스",
         "creditUsage": "크레딧 사용",
-        "joined": "가입일",
+        "joined": "가입 일시",
         "actions": "작업"
       },
       "drawer": {
@@ -723,9 +724,9 @@
         "email": "이메일",
         "role": "역할",
         "status": "상태",
-        "joinedAt": "가입일",
+        "joinedAt": "가입 일시",
         "lastLogin": "최근 로그인",
-        "workspaces": "소속 워크스페이스",
+        "workspaces": "워크스페이스",
         "servers": "서버",
         "monthlyUsage": "이달 사용 크레딧",
         "creditBalance": "보유 크레딧"
@@ -734,7 +735,13 @@
         "title": "사용자 비활성화 확인",
         "message": "{{name}} ({{email}})님을 비활성화하시겠습니까?",
         "warning": "비활성화 즉시 로그인이 차단되며, 운영 중인 모든 서버가 일시 중지됩니다. 비활성화는 언제든 관리자가 되돌릴 수 있습니다."
-      }
+      },
+      "role": {
+        "owner": "소유자",
+        "admin": "관리자",
+        "user": "멤버"
+      },
+      "pageTitle": "사용자 관리"
     },
     "workspace": {
       "pageTitle": "워크스페이스 관리",
@@ -813,7 +820,7 @@
           "recVram": "권장 VRAM",
           "visibility": "공개 여부",
           "usageCount": "사용 횟수",
-          "createdAt": "생성일"
+          "createdAt": "생성 일시"
         },
         "action": {
           "save": "변경 저장",
@@ -837,7 +844,7 @@
     },
     "gpu": {
       "pageTitle": "GPU 관리",
-      "subtitle": "GPU 유형 및 가격 정책을 통합 관리합니다.",
+      "subtitle": "GPU 유형 및 요금 정책을 통합 관리합니다.",
       "status": {
         "unset": "미설정",
         "nearSaturation": "포화 임박",
@@ -862,7 +869,7 @@
         "occupied": "점유 중",
         "visibility": "가시성",
         "status": "상태",
-        "price": "단가",
+        "price": "비용",
         "capacity": "용량",
         "usageTitle": "GPU 사용 현황",
         "occupiedLabel": "점유",
@@ -876,7 +883,7 @@
         "occupied": "점유 중",
         "visibility": "가시성",
         "status": "상태",
-        "unitPrice": "단가",
+        "unitPrice": "비용",
         "capacity": "용량"
       },
       "usageChart": "GPU 사용 현황",
@@ -893,15 +900,15 @@
         "message": "{{name}}을(를) 비활성화하시겠습니까?"
       },
       "pricing": {
-        "subtitle": "가격 정책 수정",
-        "registerBtn": "가격 정책 등록",
-        "pendingAlert": "현재 적용 예정인 GPU 가격 정책이 {{count}}건 있습니다.",
-        "pendingBanner": "현재 적용 예정인 GPU 가격 정책이 {{count}}건 있습니다.",
+        "subtitle": "요금 정책 수정",
+        "registerBtn": "요금 정책 등록",
+        "pendingAlert": "현재 적용 예정인 GPU 요금 정책이 {{count}}건 있습니다.",
+        "pendingBanner": "현재 적용 예정인 GPU 요금 정책이 {{count}}건 있습니다.",
         "inactiveAt": "비활성 일시: {{date}}",
         "disabledAt": "비활성 일시: {{date}}",
-        "createTitle": "가격 정책 등록",
-        "createSubtitle": "새 GPU 타입 가격 정책을 등록합니다.",
-        "editSubtitle": "가격 정책 수정",
+        "createTitle": "요금 정책 등록",
+        "createSubtitle": "새 GPU 타입 요금 정책을 등록합니다.",
+        "editSubtitle": "요금 정책 수정",
         "gpuSelectLabel": "GPU 선택",
         "versionHint": "GPU를 선택하면 자동 생성됩니다.",
         "preview": "미리보기 · GPU 1대 기준",
@@ -913,8 +920,8 @@
         "drawer": {
           "versionName": "버전명",
           "autoGenerated": "자동 생성",
-          "price": "가격",
-          "billingUnit": "과금 단위",
+          "price": "비용",
+          "billingUnit": "차감 단위",
           "changeApplyDate": "변경 적용일",
           "preview": "미리보기 · GPU 1대 기준",
           "policyName": "정책명",
@@ -948,14 +955,18 @@
           "per30Days": "30일"
         },
         "create": {
-          "title": "가격 정책 등록",
-          "subtitle": "새 GPU 타입 가격 정책을 등록합니다.",
+          "title": "요금 정책 등록",
+          "subtitle": "새 GPU 타입 요금 정책을 등록합니다.",
           "gpuSelect": "GPU 선택",
           "versionAutoHint": "GPU를 선택하면 자동 생성됩니다.",
           "searchPlaceholder": "검색어를 입력하세요.",
           "noResults": "검색 결과가 없습니다.",
           "register": "등록"
         }
+      },
+      "tab": {
+        "gpu": "GPU",
+        "pricing": "요금 정책"
       }
     },
     "image": {
@@ -1085,6 +1096,11 @@
           "title": "티어 삭제",
           "message": "티어 {{name}}을(를) 삭제하시겠습니까?"
         }
+      },
+      "tab": {
+        "image": "이미지",
+        "category": "카테고리",
+        "tier": "티어"
       }
     },
     "credit": {
@@ -1094,6 +1110,7 @@
       "col": {
         "workspace": "워크스페이스",
         "type": "유형",
+        "details": "상세",
         "user": "사용자",
         "amount": "수량"
       },
@@ -1150,6 +1167,7 @@
       "unmountedAt": "마지막 해제 일시:",
       "col": {
         "name": "이름",
+        "mountedTo": "연결된 서버",
         "workspace": "워크스페이스",
         "user": "사용자",
         "usage": "사용 현황"
@@ -1165,7 +1183,7 @@
         "workspace": "워크스페이스",
         "owner": "소유자",
         "email": "이메일",
-        "mountServer": "마운트된 서버",
+        "mountServer": "연결된 서버",
         "status": "상태",
         "usage": "사용 현황"
       },
@@ -1176,29 +1194,34 @@
         "status": "상태",
         "owner": "소유자",
         "workspace": "워크스페이스",
-        "mountedServer": "마운트된 서버",
+        "mountedServer": "연결된 서버",
         "lastUnmountedAt": "마지막 해제 일시:",
-        "createdAt": "생성일"
+        "createdAt": "생성 일시"
       },
       "action": {
         "expand": "용량 상향",
         "delete": "삭제"
       },
       "pricing": {
-        "registerBtn": "가격 정책 등록",
-        "pendingBanner": "현재 적용 예정인 스토리지 가격 정책이 {{count}}건 있습니다.",
-        "createTitle": "가격 정책 등록",
-        "createSubtitle": "새 스토리지 가격 정책을 등록합니다.",
-        "editSubtitle": "가격 정책 수정",
+        "registerBtn": "요금 정책 등록",
+        "pendingBanner": "현재 적용 예정인 스토리지 요금 정책이 {{count}}건 있습니다.",
+        "createTitle": "요금 정책 등록",
+        "createSubtitle": "새 스토리지 요금 정책을 등록합니다.",
+        "editSubtitle": "요금 정책 수정",
         "preview": "미리보기 · 100GB 기준",
         "typeSelectLabel": "스토리지 유형 선택",
         "typeColHeader": "스토리지 유형",
         "versionHint": "스토리지 유형을 선택하면 자동 생성됩니다."
       },
-      "noResults": "검색 결과가 없습니다."
+      "noResults": "검색 결과가 없습니다.",
+      "tab": {
+        "storage": "스토리지",
+        "pricing": "요금 정책",
+        "settings": "설정"
+      }
     },
     "storagePricing": {
-      "subtitle": "스토리지 가격 정책을 관리합니다.",
+      "subtitle": "스토리지 요금 정책을 관리합니다.",
       "column": {
         "policyName": "정책명",
         "status": "상태",
@@ -1208,14 +1231,14 @@
         "action": "액션"
       },
       "statusActive": "활성",
-      "registerBtn": "가격 정책 등록",
-      "pendingAlert": "현재 적용 예정인 스토리지 가격 정책이 {{count}}건 있습니다.",
+      "registerBtn": "요금 정책 등록",
+      "pendingAlert": "현재 적용 예정인 스토리지 요금 정책이 {{count}}건 있습니다.",
       "inactiveAt": "비활성 일시: {{date}}",
       "drawer": {
         "versionName": "버전명",
         "autoGenerated": "자동 생성",
-        "price": "가격",
-        "billingUnit": "과금 단위",
+        "price": "비용",
+        "billingUnit": "차감 단위",
         "changeApplyDate": "변경 적용일",
         "preview": "미리보기 · 100GB 기준",
         "policyName": "정책명",
@@ -1249,8 +1272,8 @@
         "per30Days": "30일"
       },
       "create": {
-        "title": "가격 정책 등록",
-        "subtitle": "새 스토리지 가격 정책을 등록합니다.",
+        "title": "요금 정책 등록",
+        "subtitle": "새 스토리지 요금 정책을 등록합니다.",
         "register": "등록"
       }
     },
@@ -1261,7 +1284,7 @@
       "emptyDetail": "Audit Log 기능의 세부 내용은 현재 기획 검토 중입니다."
     },
     "systemSettings": {
-      "title": "시스템 설정",
+      "title": "서비스 설정",
       "subtitle": "플랫폼 SMTP 및 이미지 레포지토리 연동 설정을 관리합니다.",
       "logo": {
         "main": "메인 로고",
@@ -1279,13 +1302,13 @@
         "target": "대상",
         "content": "정책 내용",
         "applyAt": "적용일",
-        "action": "Actions",
+        "action": "작업",
         "gpu": "GPU"
       },
       "field": {
         "version": "버전명",
-        "price": "가격",
-        "billingUnit": "과금 단위",
+        "price": "비용",
+        "billingUnit": "차감 단위",
         "applyAt": "변경 적용일",
         "applyAtHint": "선택한 날짜 00:00:00부터 자동 적용됩니다. 내일 이후 날짜만 선택 가능합니다."
       },

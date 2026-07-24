@@ -50,7 +50,7 @@
     },
     "field": {
       "createdAt": "Created At",
-      "date": "Date",
+      "date": "Date/Time",
       "name": "Name",
       "email": "Email",
       "role": "Role",
@@ -123,7 +123,7 @@
       "gpu": "GPU",
       "gpuPricing": "GPU Pricing Policy",
       "creditHistory": "Credit History",
-      "systemSettings": "System Settings",
+      "systemSettings": "Service Settings",
       "auditLog": "Audit Log"
     }
   },
@@ -203,7 +203,7 @@
       "runwayCritical": "Credit almost depleted!",
       "detailBtn": "Details",
       "detailDrawerTitle": "Credit Details",
-      "nearestExpiryLabel": "Earliest Expiry Credits",
+      "nearestExpiryLabel": "Next Expiry Credits",
       "expirySuffix": "expiry",
       "lot": {
         "grantAmount": "Granted Amount",
@@ -281,7 +281,7 @@
       "type": "Type",
       "amount": "Amount",
       "description": "Description",
-      "date": "Date",
+      "date": "Date/Time",
       "balance": "Balance"
     },
     "creditCol": {
@@ -358,19 +358,20 @@
         "gpu": "GPU",
         "vram": "VRAM",
         "createdAt": "Created At",
-        "costPerHour": "Cost/Hour",
+        "costPerHour": "Cost",
         "image": "Image",
         "serverName": "Server Name"
       },
       "monitoring": {
         "gpuUsage": "GPU Utilization",
-        "memoryUsage": "Memory Usage",
+        "memoryUsage": "VRAM Utilization",
         "networkUsage": "Network Traffic",
         "gpuTemp": "GPU Temperature",
         "noData": "No monitoring data",
-        "gpuRam": "GPU / RAM",
+        "gpuRam": "CPU Utilization / RAM Utilization",
         "utilPct": "Utilization (%)",
         "gpuLegend": "GPU",
+        "cpuLegend": "CPU",
         "ramLegend": "RAM"
       },
       "storage": {
@@ -379,28 +380,28 @@
         "type": "Type",
         "size": "Size",
         "status": "Status",
-        "mountPath": "Mount Path",
+        "mountPath": "Attach Path",
         "addVolume": "Add Volume",
         "noVolume": "No volume storage attached.",
         "localDesc": "Ephemeral · Data lost on stop/delete",
         "localCost": "Data lost on stop · {{rate}} cr/GB/h · {{cost}} cr/h",
         "inUse": "GB in use / ",
-        "volumeDesc": "Persistent PVC · Data retained when stopped · Billed while stopped",
-        "volumeCost": "Billed while stopped · {{rate}} cr/GB/h",
+        "volumeDesc": "Persistent PVC · Data retained when stopped · Deducted while stopped",
+        "volumeCost": "Deducted while stopped · {{rate}} cr/GB/h",
         "expandBtn": "Expand",
         "expandTitle": "Request Capacity Expansion (cannot shrink)",
         "currentPrefix": "Current ",
-        "volumeWarning": "Volume storage is billed even while the server is stopped.",
-        "additionalCost": "Additional charge: {{cost}} cr/h",
+        "volumeWarning": "Credits are deducted even while the server is stopped.",
+        "additionalCost": "Additional deduction: {{cost}} cr/h",
         "autoSet": "Auto-configured based on image minimum {{min}}GB + buffer {{buffer}}GB.",
         "minHint": "GB (min {{min}}GB)",
         "optional": "(Optional)",
         "sharedTitle": "Shared Storage",
         "sharedSubtitle": "Persistent PVC · Shared across workspace",
         "sharedDesc": "Persistent PVC · Shared with members · Data retained after server deletion",
-        "createShared": "+ Create and mount new shared storage",
+        "createShared": "+ Create and attach new shared storage",
         "sharedPlaceholder": "e.g. team-shared-02",
-        "costEstimate": "Estimated charge: {{cost}} cr/h (0.15 cr/GB/h · billing continues after server deletion)"
+        "costEstimate": "Estimated deduction: {{cost}} cr/h (0.15 cr/GB/h · deduction continues after server deletion)"
       },
       "access": {
         "jupyterlab": "JupyterLab",
@@ -443,7 +444,7 @@
       "config": "Configuration",
       "noImage": "Not selected",
       "noStorage": "None",
-      "mount": "Mount",
+      "mount": "Attach",
       "available": "~{{hours}}h available based on {{balance}} cr balance",
       "recInfo": "Recommended VRAM: {{vram}} · Local: {{tmp}}GB"
     },
@@ -493,7 +494,7 @@
       "quantity": "Quantity",
       "sort": {
         "avail": "By Availability",
-        "price": "By Price",
+        "price": "By Cost",
         "vram": "By VRAM"
       }
     },
@@ -531,8 +532,8 @@
       "all": "All"
     },
     "status": {
-      "mounted": "Mounted",
-      "unmounted": "Unmounted",
+      "mounted": "Attached",
+      "unmounted": "Detached",
       "active": "Active",
       "inactive": "Inactive"
     },
@@ -547,20 +548,20 @@
       "type": "Type",
       "size": "Size",
       "status": "Status",
-      "mountedServer": "Mounted Server",
+      "mountedServer": "Attached Server",
       "createdAt": "Created At",
       "action": "Action",
       "storageName": "Storage",
-      "mount": "Mount",
+      "mount": "Attach",
       "used": "Used",
       "total": "Total",
       "usage": "Usage",
-      "costPerHour": "Cost/h",
+      "costPerHour": "Cost",
       "actions": "Actions"
     },
     "action": {
-      "mount": "Mount",
-      "unmount": "Unmount",
+      "mount": "Attach",
+      "unmount": "Detach",
       "delete": "Delete",
       "expand": "Expand",
       "create": "Create Storage",
@@ -573,17 +574,17 @@
       "name": "Name",
       "type": "Type",
       "size": "Size",
-      "mountPath": "Mount Path",
-      "mountedServer": "Mounted Server",
-      "lastUnmountedAt": "Last Unmounted At:",
+      "mountPath": "Attach Path",
+      "mountedServer": "Attached Server",
+      "lastUnmountedAt": "Last Detached At:",
       "cost": "Cost",
       "namePlaceholder": "Enter storage name",
       "sizePlaceholder": "Enter size (GB)"
     },
     "mount": {
-      "badge": "Mounted on {{count}} server(s)",
+      "badge": "Attached to {{count}} server(s)",
       "server": "Server",
-      "selectServer": "Select server to mount"
+      "selectServer": "Select server to attach"
     },
     "delete": {
       "title": "Delete Storage",
@@ -595,7 +596,7 @@
     "empty": "No storage created.",
     "costInfo": "Cost Information",
     "warning": {
-      "unmountFirst": "Please unmount before deleting.",
+      "unmountFirst": "Please detach before deleting.",
       "noShrink": "Storage size cannot be reduced."
     },
     "subtitle": "Storage List",
@@ -603,7 +604,7 @@
     "currentSize": "Current Size",
     "newSize": "New Size",
     "sizeChange": "{{from}}GB → {{to}}GB",
-    "costMonthly": "Monthly Cost: {{amount}} cr",
+    "costMonthly": "Cost: {{amount}} cr/mo",
     "additionalCost": "Additional Cost"
   },
   "admin": {
@@ -734,7 +735,13 @@
         "title": "Confirm User Deactivation",
         "message": "Are you sure you want to deactivate {{name}} ({{email}})?",
         "warning": "Deactivation will immediately block login and pause all running servers. This can be reversed by an admin at any time."
-      }
+      },
+      "role": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "user": "Member"
+      },
+      "pageTitle": "User Management"
     },
     "workspace": {
       "pageTitle": "Workspace Management",
@@ -783,7 +790,7 @@
         "template": "Template",
         "visibility": "Visibility",
         "image": "Image",
-        "recVram": "Rec. vRAM",
+        "recVram": "Rec. VRAM",
         "recStorage": "Rec. Storage",
         "uses": "Uses",
         "actions": "Actions"
@@ -862,7 +869,7 @@
         "occupied": "Occupied",
         "visibility": "Visibility",
         "status": "Status",
-        "price": "Unit Price",
+        "price": "Cost",
         "capacity": "Capacity",
         "usageTitle": "GPU Usage",
         "occupiedLabel": "Occupied",
@@ -876,7 +883,7 @@
         "occupied": "Occupied",
         "visibility": "Visibility",
         "status": "Status",
-        "unitPrice": "Unit Price",
+        "unitPrice": "Cost",
         "capacity": "Capacity"
       },
       "usageChart": "GPU Usage",
@@ -913,8 +920,8 @@
         "drawer": {
           "versionName": "Version Name",
           "autoGenerated": "Auto-generated",
-          "price": "Price",
-          "billingUnit": "Billing Unit",
+          "price": "Cost",
+          "billingUnit": "Deduction Unit",
           "changeApplyDate": "Apply Date",
           "preview": "Preview · Per 1 GPU",
           "policyName": "Policy Name",
@@ -956,6 +963,10 @@
           "noResults": "No results found.",
           "register": "Register"
         }
+      },
+      "tab": {
+        "gpu": "GPU",
+        "pricing": "Pricing Policy"
       }
     },
     "image": {
@@ -1085,6 +1096,11 @@
           "title": "Delete Tier",
           "message": "Are you sure you want to delete tier {{name}}?"
         }
+      },
+      "tab": {
+        "image": "Image",
+        "category": "Category",
+        "tier": "Tier"
       }
     },
     "credit": {
@@ -1094,6 +1110,7 @@
       "col": {
         "workspace": "Workspace",
         "type": "Type",
+        "details": "Details",
         "user": "User",
         "amount": "Amount"
       },
@@ -1147,9 +1164,10 @@
       "pageTitle": "Storage Management",
       "subtitle": "View and manage all storage.",
       "settingsSubtitle": "Manage storage settings.",
-      "unmountedAt": "Last Unmounted At:",
+      "unmountedAt": "Last Detached At:",
       "col": {
         "name": "Name",
+        "mountedTo": "Attached Server",
         "workspace": "Workspace",
         "user": "User",
         "usage": "Usage"
@@ -1165,7 +1183,7 @@
         "workspace": "Workspace",
         "owner": "Owner",
         "email": "Email",
-        "mountServer": "Mounted Server",
+        "mountServer": "Attached Server",
         "status": "Status",
         "usage": "Usage"
       },
@@ -1176,8 +1194,8 @@
         "status": "Status",
         "owner": "Owner",
         "workspace": "Workspace",
-        "mountedServer": "Mounted Server",
-        "lastUnmountedAt": "Last Unmounted At:",
+        "mountedServer": "Attached Server",
+        "lastUnmountedAt": "Last Detached At:",
         "createdAt": "Created At"
       },
       "action": {
@@ -1195,7 +1213,12 @@
         "typeColHeader": "Storage Type",
         "versionHint": "Auto-generated after storage type selection."
       },
-      "noResults": "No results found."
+      "noResults": "No results found.",
+      "tab": {
+        "storage": "Storage",
+        "pricing": "Pricing Policy",
+        "settings": "Settings"
+      }
     },
     "storagePricing": {
       "subtitle": "Manage storage pricing policies.",
@@ -1214,8 +1237,8 @@
       "drawer": {
         "versionName": "Version Name",
         "autoGenerated": "Auto-generated",
-        "price": "Price",
-        "billingUnit": "Billing Unit",
+        "price": "Cost",
+        "billingUnit": "Deduction Unit",
         "changeApplyDate": "Apply Date",
         "preview": "Preview · Per 100GB",
         "policyName": "Policy Name",
@@ -1261,7 +1284,7 @@
       "emptyDetail": "The details of the Audit Log feature are currently under review."
     },
     "systemSettings": {
-      "title": "System Settings",
+      "title": "Service Settings",
       "subtitle": "Manage platform SMTP and image repository integration settings.",
       "logo": {
         "main": "Main Logo",
@@ -1284,8 +1307,8 @@
       },
       "field": {
         "version": "Version Name",
-        "price": "Price",
-        "billingUnit": "Billing Unit",
+        "price": "Cost",
+        "billingUnit": "Deduction Unit",
         "applyAt": "Apply Date",
         "applyAtHint": "Policy takes effect at 00:00:00 on the selected date. Must be tomorrow or later."
       },
